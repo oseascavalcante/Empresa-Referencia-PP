@@ -1,0 +1,184 @@
+
+{% load form_tags %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Configuração do Contrato</title>
+    
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+        .header {
+            background-color: #483D8B;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .card {
+            padding: 5px;
+        }
+        .card-header {
+            background-color: #483D8B;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        .card-body {
+            padding: 5px;
+        }
+        .form-control {
+            height: 30px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+        .btn-save {
+            padding: 5px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            float: right;
+        }
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+        input[name="escopo_contrato"], input[name="cidade"] {
+            autocomplete: off;
+        }
+
+         /* Adicionando estilo para reduzir o espaçamento entre linhas da tabela */
+        .table tbody tr {
+            line-height: 1; /* Reduz a altura da linha */
+        }
+        .table td, .table th {
+            padding: 0.25rem; /* Reduz o padding das células */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="header" style="padding: 5px; font-size: 1.2rem; border-bottom: 2px solid #ffffff;">Configuração do Contrato</div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Estado</div>
+                        <div class="card-body">{{ form.estado }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Município</div>
+                        <div class="card-body" autocomplete="off">{{ form.municipio }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Escopo do Contrato</div>
+                        <div class="card-body"><input type="text" name="escopo_contrato" class="form-control" autocomplete="off"></div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-3">
+                    <div class="card">
+                      <div class="card-header">Detalhe das Alterações Realizadas</div>
+                      <div class="card-body"><input type="text" name="descricao_alteracao" class="form-control" autocomplete="off"></div>
+                
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Versão de Referência</div>
+                        <div class="card-body">{{ form.versao_base|add_class:"form-control" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Número Nova Versão</div>
+                        <div class="card-body">{{ form.numero_versao }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
+                </div>
+            </div>
+
+            <p class="text-center mt-4" style="font-weight: bold; font-size: 1.2rem; border-bottom: 2px solid #483D8B;">Lista de contratos cadastrados:</p> <!-- Linha adicionada -->
+            
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">Versionamento</div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Estado</th>
+                                        <th>Município</th>
+                                        <th>Escopo</th>
+                                        <th>Versão</th>
+                                        <th>Versão de Referência</th>
+                                        <th>Data Criação</th>
+                                        <th>Data Atualização</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contract in contracts %}
+                                        <tr>
+                                            <td>{{ contract.licitacao }}</td>
+                                            <td>{{ contract.estado }}</td>
+                                            <td>{{ contract.municipio }}</td>
+                                            <td>{{ contract.escopo_contrato }}</td>
+                                            <td>{{ contract.numero_versao }}</td>
+                                            <td>{{ contract.versao_base }}</td>
+                                            <td>{{ contract.created_at|date:"d/m/Y H:i:s" }}</td>
+                                            <td>{{ contract.updated_at|date:"d/m/Y H:i:s" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+        </form>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

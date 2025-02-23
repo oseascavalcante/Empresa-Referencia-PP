@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Contratos</title>
+</head>
+<body>
+    <h1>Lista de Contratos</h1>
+    <ul>
+        {% for contract in contracts %}
+            <li>{{ contract }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'contract_create' %}">Cadastrar nova licitação</a>
+</body>
+</html>

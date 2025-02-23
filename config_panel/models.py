@@ -1,0 +1,48 @@
+from django.db import models
+
+class ContractConfiguration(models.Model):
+    ESTADOS_CHOICES = [
+        ('AC', 'Acre'),
+        ('AL', 'Alagoas'),
+        ('AP', 'Amapá'),
+        ('AM', 'Amazonas'),
+        ('BA', 'Bahia'),
+        ('CE', 'Ceará'),
+        ('DF', 'Distrito Federal'),
+        ('ES', 'Espírito Santo'),
+        ('GO', 'Goiás'),
+        ('MA', 'Maranhão'),
+        ('MT', 'Mato Grosso'),
+        ('MS', 'Mato Grosso do Sul'),
+        ('MG', 'Minas Gerais'),
+        ('PA', 'Pará'),
+        ('PB', 'Paraíba'),
+        ('PR', 'Paraná'),
+        ('PE', 'Pernambuco'),
+        ('PI', 'Piauí'),
+        ('RJ', 'Rio de Janeiro'),
+        ('RN', 'Rio Grande do Norte'),
+        ('RS', 'Rio Grande do Sul'),
+        ('RO', 'Rondônia'),
+        ('RR', 'Roraima'),
+        ('SC', 'Santa Catarina'),
+        ('SP', 'São Paulo'),
+        ('SE', 'Sergipe'),
+        ('TO', 'Tocantins'),
+    ]
+
+    licitacao = models.AutoField(primary_key=True)
+    estado = models.CharField(max_length=2, choices=ESTADOS_CHOICES, default='GO')
+    municipio = models.CharField(max_length=100, default='Goiânia')
+    escopo_contrato = models.CharField(max_length=255)
+    versao_base = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='versoes')
+    numero_versao = models.IntegerField(default=0)
+    descricao_alteracao = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Licitação {self.licitacao} - {self.escopo_contrato}"
