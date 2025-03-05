@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Cadastro de Composição de Equipes</h2>
+
+<!-- Campo oculto para o ID do Contrato -->
+<input type="hidden" id="contrato" value="{{ contrato_id }}">
+
+<!-- Seleção do Tipo de Equipe -->
+<label>Equipe:</label>
+<select id="equipe">
+    {% for equipe in equipes %}
+        <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+    {% endfor %}
+</select>
+
+<!-- Input para Quantidade de Equipes -->
+<label>Quantidade de Equipes:</label>
+<input type="number" id="quantidade_equipes" min="1" value="1">
+
+<!-- Handsontable para inserir dados -->
+<div id="tabela_composicao"></div>
+
+<button id="adicionar">+ Adicionar</button>
+
+<!-- Lista das Equipes Cadastradas -->
+<h3>Equipes Cadastradas</h3>
+<table border="1">
+    <tr>
+        <th>ID Contrato</th>
+        <th>Equipe</th>
+        <th>Quantidade</th>
+        <th>Total Funcionários</th>
+    </tr>
+    {% for composicao in composicoes %}
+    <tr>
+        <td>{{ composicao.contrato.contrato }}</td>
+        <td>{{ composicao.equipe.nome }}</td>
+        <td>{{ composicao.quantidade_equipes }}</td>
+        <td>{{ composicao.quantidade_funcionarios }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Nenhuma composição cadastrada.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Handsontable -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/11.1.0/handsontable.full.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/11.1.0/handsontable.full.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var container = document.getElementById("tabela_composicao");
+
+    var data = [
+        {% for funcao in funcoes %}
+            ["{{ funcao.nome }}", 0, "{{ funcao.salario }}", false, 0, 0, 0, 0, 0, 0],
+        {% endfor %}
+    ];
+
+    var hot = new Handsontable(container, {
+        data: data,
+        colHeaders: [
+            'Função', 'Quantidade', 'Salário', 'Periculosidade', 
+            'Horas Extras 50%', 'Horas Extras 70%', 'Horas Extras 100%', 
+            'Horas Sobreaviso', 'Horas Adicional Noturno', 'Outros Custos'
+        ],
+        columns: [
+            { type: 'text', readOnly: true },  
+            { type: 'numeric' },               
+            { type: 'numeric', readOnly: true }, 
+            { type: 'checkbox' },              
+            { type: 'numeric' },               
+            { type: 'numeric' },               
+            { type: 'numeric' },               
+            { type: 'numeric' },               
+            { type: 'numeric' },               
+            { type: 'numeric' }                
+        ],
+        rowHeaders: true,
+        minSpareRows: 1,
+        contextMenu: true
+    });
+
+    document.getElementById("adicionar").addEventListener("click", function() {
+        var data = {
+            contrato_id: document.getElementById("contrato").value,
+            equipe_id: document.getElementById("equipe").value,
+            quantidade_equipes: document.getElementById("quantidade_equipes").value,
+            dados: hot.getData()
+        };
+
+        fetch("{% url 'composicao_equipe' contrato_id %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Composição salva com sucesso!");
+            window.location.reload();
+        })
+        .catch(error => console.error("Erro ao salvar:", error));
+    });
+});
+</script>
+
+{% endblock %}

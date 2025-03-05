@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ConfigPanelConfig(AppConfig):
+class CadastroEquipeConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "config_panel"
+    name = "cadastro_equipe"

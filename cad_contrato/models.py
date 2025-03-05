@@ -31,7 +31,7 @@ class ContractConfiguration(models.Model):
         ('TO', 'Tocantins'),
     ]
 
-    licitacao = models.AutoField(primary_key=True)
+    contrato = models.AutoField(primary_key=True)
     estado = models.CharField(max_length=2, choices=ESTADOS_CHOICES, default='GO')
     municipio = models.CharField(max_length=100, default='Goiânia')
     escopo_contrato = models.CharField(max_length=255)
@@ -45,4 +45,4 @@ class ContractConfiguration(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Licitação {self.licitacao} - {self.escopo_contrato}"
+        return f"Contrato {self.contrato} - {self.escopo_contrato}"

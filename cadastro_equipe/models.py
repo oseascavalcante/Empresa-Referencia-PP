@@ -1,0 +1,34 @@
+from django.db import models
+from cad_contrato.models import ContractConfiguration  # Importando a model do outro app
+
+class Equipe(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nome
+
+
+class Funcao(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+    salario = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.nome} - R$ {self.salario}"
+
+
+class ComposicaoEquipe(models.Model):
+    contrato = models.ForeignKey(ContractConfiguration, on_delete=models.PROTECT)  # Relacionamento com o contrato
+    equipe = models.ForeignKey(Equipe, on_delete=models.PROTECT)
+    quantidade_equipes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    funcao = models.ForeignKey(Funcao, on_delete=models.PROTECT)
+    quantidade_funcionarios = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    periculosidade = models.BooleanField(default=False)
+    horas_extras_50 = models.PositiveIntegerField(default=0)
+    horas_extras_70 = models.PositiveIntegerField(default=0)
+    horas_extras_100 = models.PositiveIntegerField(default=0)
+    horas_sobreaviso = models.PositiveIntegerField(default=0)
+    horas_adicional_noturno = models.PositiveIntegerField(default=0)
+    outros_custos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.equipe} - {self.funcao} ({self.quantidade_funcionarios})"

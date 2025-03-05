@@ -1,4 +1,6 @@
+{% extends 'base.html' %}
 
+{% block content %}
 {% load form_tags %}
 
 <!DOCTYPE html>
@@ -151,12 +153,13 @@
                                         <th>Versão de Referência</th>
                                         <th>Data Criação</th>
                                         <th>Data Atualização</th>
+                                        <th>Ação</th> <!-- Coluna Ação adicionada -->
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for contract in contracts %}
                                         <tr>
-                                            <td>{{ contract.licitacao }}</td>
+                                            <td>{{ contract.contrato }}</td>
                                             <td>{{ contract.estado }}</td>
                                             <td>{{ contract.municipio }}</td>
                                             <td>{{ contract.escopo_contrato }}</td>
@@ -164,6 +167,9 @@
                                             <td>{{ contract.versao_base }}</td>
                                             <td>{{ contract.created_at|date:"d/m/Y H:i:s" }}</td>
                                             <td>{{ contract.updated_at|date:"d/m/Y H:i:s" }}</td>
+                                            <td>
+                                                <a href="{% url 'composicao_equipe' contract.contrato %}" class="btn btn-info btn-sm"><i class="fas fa-folder-open"></i> Abrir</a>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -182,3 +188,4 @@
 </body>
 </html>
 
+{% endblock %}
