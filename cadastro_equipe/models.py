@@ -1,5 +1,6 @@
 from django.db import models
 from cad_contrato.models import ContractConfiguration  # Importando a model do outro app
+import uuid
 
 class Equipe(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -17,6 +18,7 @@ class Funcao(models.Model):
 
 
 class ComposicaoEquipe(models.Model):
+    composicao_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contrato = models.ForeignKey(ContractConfiguration, on_delete=models.PROTECT)  # Relacionamento com o contrato
     equipe = models.ForeignKey(Equipe, on_delete=models.PROTECT)
     quantidade_equipes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -29,6 +31,7 @@ class ComposicaoEquipe(models.Model):
     horas_sobreaviso = models.PositiveIntegerField(default=0)
     horas_adicional_noturno = models.PositiveIntegerField(default=0)
     outros_custos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    observacao = models.TextField(blank=True, null=True)  # Novo campo de observação
 
     def __str__(self):
         return f"{self.equipe} - {self.funcao} ({self.quantidade_funcionarios})"

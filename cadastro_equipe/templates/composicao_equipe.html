@@ -1,113 +1,171 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Cadastro de Composição de Equipes</h2>
+    <h2>Cadastro de Composição de Equipes</h2>
 
-<!-- Campo oculto para o ID do Contrato -->
-<input type="hidden" id="contrato" value="{{ contrato_id }}">
+    <!-- Campos lado a lado -->
+    <div class="row align-items-end">
+        <div class="col-md-6">
+            <label class="form-label">Equipe:</label>
+            <select id="equipe" class="form-control form-control-sm">
+                {% for equipe in equipes %}
+                    <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Quantidade de Equipes:</label>
+            <input type="number" id="quantidade_equipes" class="form-control form-control-sm" min="1" value="1">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label"><strong>Contrato:</strong></label>
+            <span>{{ contrato_id }} - {{ escopo_contrato }}</span>
+        </div>
+    </div>
 
-<!-- Seleção do Tipo de Equipe -->
-<label>Equipe:</label>
-<select id="equipe">
-    {% for equipe in equipes %}
-        <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
-    {% endfor %}
-</select>
+    <!-- Handsontable para inserir dados -->
+    <div id="tabela_composicao" class="table-responsive mt-3"></div>
+    <button id="adicionar" class="btn btn-primary mt-3">+ Adicionar</button>
 
-<!-- Input para Quantidade de Equipes -->
-<label>Quantidade de Equipes:</label>
-<input type="number" id="quantidade_equipes" min="1" value="1">
+    <!-- Lista de Equipes Cadastradas -->
+    <p class="text-center mt-4 font-weight-bold" style="font-size: 1.2rem; border-bottom: 2px solid #483D8B;">
+        Lista de Equipes cadastradas:
+    </p>
+    
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">Equipes Cadastradas</div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead style="background-color: #483D8B; color: white; height: 35px;">
+                            <tr>
+                                <th>ID - Contrato</th>
+                                <th>Equipe</th>
+                                <th>Quantidade</th>
+                                <th>Total Funcionários</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for composicao in composicoes %}
+                                <tr>
+                                    <td>{{ composicao.contrato_id }} - {{ composicao.contrato.escopo_contrato }}</td>
+                                    <td>{{ composicao.equipe.nome }}</td>
+                                    <td>{{ composicao.quantidade_equipes }}</td>
+                                    <td>{{ composicao.quantidade_funcionarios }}</td>
+                                    <td>{{ composicao.observacao }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhuma composição cadastrada.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Handsontable para inserir dados -->
-<div id="tabela_composicao"></div>
+    <!-- Handsontable -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.js"></script>
 
-<button id="adicionar">+ Adicionar</button>
+    <style>
+        #tabela_composicao {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .htEditable { background-color: #FFF2CC !important; border: 1px solid #ced4da; }
+        .htReadOnly { background-color: #E6E6E6 !important; color: black !important; }
+        .card-header { background-color: #483D8B; color: white; font-weight: bold; font-size: 14px; padding: 5px 10px; }
 
-<!-- Lista das Equipes Cadastradas -->
-<h3>Equipes Cadastradas</h3>
-<table border="1">
-    <tr>
-        <th>ID Contrato</th>
-        <th>Equipe</th>
-        <th>Quantidade</th>
-        <th>Total Funcionários</th>
-    </tr>
-    {% for composicao in composicoes %}
-    <tr>
-        <td>{{ composicao.contrato.contrato }}</td>
-        <td>{{ composicao.equipe.nome }}</td>
-        <td>{{ composicao.quantidade_equipes }}</td>
-        <td>{{ composicao.quantidade_funcionarios }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4">Nenhuma composição cadastrada.</td>
-    </tr>
-    {% endfor %}
-</table>
+        .ht_clone_top thead th {
+            text-align: center;
+            background-color: #483D8B;
+            color: white;
+            height: auto !important; 
+            white-space: nowrap;
+            padding: 2px 3px; /* Ajusta o espaçamento interno */
+            line-height: normal !important; /* Mantém o texto corretamente centralizado */
+        }
+        
+    </style>
 
-<!-- Handsontable -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/11.1.0/handsontable.full.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/11.1.0/handsontable.full.min.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    var container = document.getElementById("tabela_composicao");
-
-    var data = [
-        {% for funcao in funcoes %}
-            ["{{ funcao.nome }}", 0, "{{ funcao.salario }}", false, 0, 0, 0, 0, 0, 0],
-        {% endfor %}
-    ];
-
-    var hot = new Handsontable(container, {
-        data: data,
-        colHeaders: [
-            'Função', 'Quantidade', 'Salário', 'Periculosidade', 
-            'Horas Extras 50%', 'Horas Extras 70%', 'Horas Extras 100%', 
-            'Horas Sobreaviso', 'Horas Adicional Noturno', 'Outros Custos'
-        ],
-        columns: [
-            { type: 'text', readOnly: true },  
-            { type: 'numeric' },               
-            { type: 'numeric', readOnly: true }, 
-            { type: 'checkbox' },              
-            { type: 'numeric' },               
-            { type: 'numeric' },               
-            { type: 'numeric' },               
-            { type: 'numeric' },               
-            { type: 'numeric' },               
-            { type: 'numeric' }                
-        ],
-        rowHeaders: true,
-        minSpareRows: 1,
-        contextMenu: true
-    });
-
-    document.getElementById("adicionar").addEventListener("click", function() {
-        var data = {
-            contrato_id: document.getElementById("contrato").value,
-            equipe_id: document.getElementById("equipe").value,
-            quantidade_equipes: document.getElementById("quantidade_equipes").value,
-            dados: hot.getData()
-        };
-
-        fetch("{% url 'composicao_equipe' contrato_id %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert("Composição salva com sucesso!");
-            window.location.reload();
-        })
-        .catch(error => console.error("Erro ao salvar:", error));
-    });
-});
-</script>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var container = document.getElementById("tabela_composicao");
+            var data = [
+                {% for funcao in funcoes %} 
+                    ["{{ funcao.nome }}", 0, "{{ funcao.salario }}", false, 0, 0, 0, 0, 0, 0, ""], 
+                {% endfor %}
+            ];
+        
+            var hot = new Handsontable(container, {
+                data: data,
+                colHeaders: [
+                    'Função', 'Quantidade', 'Salário', 'Periculosidade', 
+                    'Horas Extras 50%', 'Horas Extras 70%', 'Horas Extras 100%', 
+                    'Horas Sobreaviso', 'Horas Adicional Noturno', 'Outros Custos', 'Observação'
+                ],
+                columns: [
+                    { type: 'text', readOnly: true, className: 'htReadOnly' },  
+                    { type: 'numeric', className: 'htEditable' },                
+                    { type: 'numeric', readOnly: true, className: 'htReadOnly' }, 
+                    { type: 'checkbox', className: 'htEditable' },              
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },
+                    { type: 'text', className: 'htEditable' }  
+                ],
+                rowHeaders: true,
+                minSpareRows: 1,
+                contextMenu: true,
+                copyPaste: true,
+                autoColumnSize: true,
+                stretchH: 'all',
+                licenseKey: 'non-commercial-and-evaluation'
+            });
+        
+            document.getElementById("adicionar").addEventListener("click", function() {
+                var contratoId = "{{ contrato_id }}";
+                var equipeId = document.getElementById("equipe").value;
+                var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
+        
+                var tabelaDados = hot.getData();
+                var dadosFormatados = tabelaDados
+                    .filter(row => row[0] && row[0].trim() !== "")
+                    .map(row => ({
+                        funcao: row[0].trim(),
+                        quantidade: row[1] || 0,
+                        salario: row[2] || 0.00,
+                        periculosidade: row[3] || false,
+                        horas_extras_50: row[4] || 0,
+                        horas_extras_70: row[5] || 0,
+                        horas_extras_100: row[6] || 0,
+                        horas_sobreaviso: row[7] || 0,
+                        horas_adicional_noturno: row[8] || 0,
+                        outros_custos: row[9] || 0.00,
+                        observacao: row[10] || ""
+                    }));
+        
+                fetch("{% url 'composicao_equipe' contrato_id %}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                    body: JSON.stringify({ contrato_id: contratoId, equipe_id: equipeId, quantidade_equipes: quantidadeEquipes, dados: dadosFormatados })
+                })
+                .then(() => { alert("Composição salva com sucesso!"); window.location.reload(); })
+                .catch(error => console.error("Erro ao salvar:", error));
+            });
+        });
+    </script>
 {% endblock %}
