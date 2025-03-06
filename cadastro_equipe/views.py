@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
-from .models import Equipe, Funcao, ComposicaoEquipe
+from .models import Equipe, Funcao, ComposicaoEquipe, FuncaoEquipe
 from .forms import EquipeForm, FuncaoForm
 from django.shortcuts import render
 import json
@@ -27,10 +27,14 @@ class FuncaoCreateView(CreateView):
 
 class ComposicaoEquipeView(View):
     def get(self, request, contrato_id):
-        contrato = get_object_or_404(ContractConfiguration, contrato=contrato_id)       
+        contrato = get_object_or_404(ContractConfiguration, contrato=contrato_id)
         equipes = Equipe.objects.all()
         funcoes = Funcao.objects.all()
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
+
+        # Soma total de funcionários por composição
+        for composicao in composicoes:
+            composicao.total_funcionarios = composicao.funcoes.aggregate(Sum('quantidade_funcionarios'))['quantidade_funcionarios__sum'] or 0
 
         return render(request, 'composicao_equipe.html', {
             'contrato_id': contrato_id,
@@ -46,31 +50,23 @@ class ComposicaoEquipeView(View):
 
             equipe_id = data.get('equipe_id')
             quantidade_equipes = data.get('quantidade_equipes')
+            observacao = data.get('observacao')
             dados = data.get('dados')
-
-            if not contrato_id or not equipe_id or not dados:
-                return JsonResponse({'status': 'error', 'message': 'Campos obrigatórios ausentes'}, status=400)
 
             contrato = get_object_or_404(ContractConfiguration, contrato=contrato_id)
             equipe = get_object_or_404(Equipe, id=equipe_id)
 
+            composicao = ComposicaoEquipe.objects.create(
+                contrato=contrato,
+                equipe=equipe,
+                quantidade_equipes=quantidade_equipes,
+                observacao=observacao
+            )
+
             for row in dados:
-                funcao_nome = row['funcao'].strip()  # Remove espaços em branco
-                
-                # 🛑 Ignora linhas vazias
-                if not funcao_nome:
-                    print("⚠️ Linha ignorada: função vazia")
-                    continue
-
-                try:
-                    funcao = Funcao.objects.get(nome=funcao_nome)
-                except Funcao.DoesNotExist:
-                    return JsonResponse({'status': 'error', 'message': f'Função {funcao_nome} não encontrada'}, status=400)
-
-                ComposicaoEquipe.objects.create(
-                    contrato=contrato,
-                    equipe=equipe,
-                    quantidade_equipes=quantidade_equipes,
+                funcao = get_object_or_404(Funcao, nome=row['funcao'].strip())
+                FuncaoEquipe.objects.create(
+                    composicao=composicao,
                     funcao=funcao,
                     quantidade_funcionarios=row['quantidade'] or 0,
                     periculosidade=row['periculosidade'] if isinstance(row['periculosidade'], bool) else False,
@@ -88,5 +84,4 @@ class ComposicaoEquipeView(View):
             return JsonResponse({'status': 'error', 'message': 'Erro ao decodificar JSON'}, status=400)
 
         except Exception as e:
-            print("❌ Erro inesperado:", str(e))
             return JsonResponse({'status': 'error', 'message': f'Erro interno do servidor: {str(e)}'}, status=500)

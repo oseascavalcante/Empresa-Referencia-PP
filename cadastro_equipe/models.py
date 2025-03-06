@@ -19,9 +19,14 @@ class Funcao(models.Model):
 
 class ComposicaoEquipe(models.Model):
     composicao_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    contrato = models.ForeignKey(ContractConfiguration, on_delete=models.PROTECT)  # Relacionamento com o contrato
+    contrato = models.ForeignKey(ContractConfiguration, on_delete=models.PROTECT)
     equipe = models.ForeignKey(Equipe, on_delete=models.PROTECT)
     quantidade_equipes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    observacao = models.TextField(blank=True, null=True)  # Agora salva uma única vez por composição
+
+
+class FuncaoEquipe(models.Model):
+    composicao = models.ForeignKey(ComposicaoEquipe, on_delete=models.CASCADE, related_name="funcoes")
     funcao = models.ForeignKey(Funcao, on_delete=models.PROTECT)
     quantidade_funcionarios = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     periculosidade = models.BooleanField(default=False)
@@ -31,7 +36,3 @@ class ComposicaoEquipe(models.Model):
     horas_sobreaviso = models.PositiveIntegerField(default=0)
     horas_adicional_noturno = models.PositiveIntegerField(default=0)
     outros_custos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    observacao = models.TextField(blank=True, null=True)  # Novo campo de observação
-
-    def __str__(self):
-        return f"{self.equipe} - {self.funcao} ({self.quantidade_funcionarios})"
