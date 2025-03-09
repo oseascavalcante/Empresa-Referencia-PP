@@ -1,14 +1,14 @@
-{% extends "base.html" %}
+<!-- filepath: /D:/PLANILHA_PRECIFICACAO/Empresa_Referencia_PP/cadastro_equipe/templates/composicao_equipe.html -->
+{% extends 'base.html' %}
 
 {% block content %}
-   
-    <div class="header">Cadastro de Equipes</div>
+    <div class="header">Cadastrar Equipes</div>
 
-    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
     <!-- Campos lado a lado -->
     <div class="row align-items-end">
         <div class="col-md-3">
-            <label class="form-label">Equipe:</label>
+            <label class="form-label">Tipo de Equipe:</label>
             <select id="equipe" class="form-control form-control-sm">
                 {% for equipe in equipes %}
                     <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
@@ -27,7 +27,10 @@
 
     <!-- Handsontable para inserir dados -->
     <div id="tabela_composicao" class="table-responsive mt-3"></div>
-    <button id="adicionar" class="btn btn-primary mt-3">+ Adicionar</button>
+
+    <div class="d-flex justify-content-end">
+        <button id="adicionar" class="btn btn-primary mt-3">+ Adicionar</button>
+    </div>
 
     <div class="small-header"> Equipes Cadastradas </div>
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
@@ -35,7 +38,6 @@
     <div class="row mt-2">
         <div class="col-md-12">
             <div class="card">
-                
                 <div class="card-body">
                     <table class="table table-bordered table-striped">
                         <thead style="background-color: #483D8B; color: white; height: 35px;">
@@ -45,6 +47,7 @@
                                 <th>Quantidade</th>
                                 <th>Total Funcionários</th>
                                 <th>Observação</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,10 +58,21 @@
                                     <td>{{ composicao.quantidade_equipes }}</td>
                                     <td>{{ composicao.total_funcionarios }}</td>
                                     <td>{{ composicao.observacao }}</td>
+                                    <td>
+                                        <a href="{% url 'detalhes_composicao' composicao.pk %}" class="btn btn-info btn-sm ver">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-primary btn-sm editar" data-id="{{ composicao.pk }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm excluir" data-id="{{ composicao.pk }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>  
+                                    </td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center">Nenhuma composição cadastrada.</td>
+                                    <td colspan="6" class="text-center">Nenhuma composição cadastrada.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -73,22 +87,22 @@
     <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.js"></script>
 
     <style>
-        .small-header {
-            background-color:rgb(231, 229, 247);
-            color: #483D8B;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-
         .header {
             background-color:rgb(231, 229, 247);
             color: #483D8B;
             text-align: center;
             padding: 10px;
             font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .small-header {
+            background-color:rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
             font-weight: bold;
             border-radius: 5px;
         }
@@ -152,6 +166,9 @@
                 stretchH: 'all',
                 licenseKey: 'non-commercial-and-evaluation'
             });
+
+            let isEditing = false;
+            let editingId = null;
         
             document.getElementById("adicionar").addEventListener("click", function() {
                 var contratoId = "{{ contrato_id }}";
@@ -173,11 +190,13 @@
                         horas_sobreaviso: row[7] || 0,
                         horas_adicional_noturno: row[8] || 0,
                         outros_custos: row[9] || 0.00
-                        
                     }));
 
-                fetch("{% url 'composicao_equipe' contrato_id %}", {
-                    method: "POST",
+                const url = isEditing ? `/cadastro_equipe/composicao/${editingId}/editar/` : "{% url 'composicao_equipe' contrato_id %}";
+                const method = isEditing ? "PUT" : "POST";
+
+                fetch(url, {
+                    method: method,
                     headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                     body: JSON.stringify({
                         contrato_id: contratoId,
@@ -187,8 +206,98 @@
                         dados: dadosFormatados
                     })
                 })
-                .then(() => { alert("Composição salva com sucesso!"); window.location.reload(); })
+                .then(() => { 
+                    alert("Composição salva com sucesso!"); 
+                    window.location.reload(); 
+                })
                 .catch(error => console.error("Erro ao salvar:", error));
+            });
+
+            // Função para excluir composição
+            document.querySelectorAll(".excluir").forEach(button => {
+                button.addEventListener("click", function() {
+                    const composicaoId = this.getAttribute("data-id");
+                    if (confirm("Tem certeza que deseja excluir esta composição?")) {
+                        fetch(`/cadastro_equipe/composicao/${composicaoId}/excluir/`, {
+                            method: "DELETE",
+                            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert("Composição excluída com sucesso!");
+                                window.location.reload();
+                            } else {
+                                alert("Erro ao excluir composição: " + data.message);
+                            }
+                        })
+                        .catch(error => console.error("Erro ao excluir:", error));
+                    }
+                });
+            });
+
+            // Função para editar composição
+            document.querySelectorAll(".editar").forEach(button => {
+                button.addEventListener("click", function() {
+                    const composicaoId = this.getAttribute("data-id");
+                    isEditing = true;
+                    editingId = composicaoId;
+
+                    // Carregar dados da composição na tabela
+                    fetch(`/cadastro_equipe/composicao/${composicaoId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById("equipe").value = data.equipe_id;
+                            document.getElementById("quantidade_equipes").value = data.quantidade_equipes;
+                            document.getElementById("observacao").value = data.observacao;
+
+                            const tabelaDados = data.dados.map(row => [
+                                row.funcao,
+                                row.quantidade,
+                                row.salario,
+                                row.periculosidade,
+                                row.horas_extras_50,
+                                row.horas_extras_70,
+                                row.horas_extras_100,
+                                row.horas_sobreaviso,
+                                row.horas_adicional_noturno,
+                                row.outros_custos
+                            ]);
+
+                            hot.loadData(tabelaDados);
+
+                            // Habilitar edição na tabela
+                            hot.updateSettings({
+                                cells: function (row, col) {
+                                    const cellProperties = {};
+                                    if (col !== 0 && col !== 2) { // Permitir edição em todas as colunas, exceto Função e Salário
+                                        cellProperties.readOnly = false;
+                                        cellProperties.className = 'htEditable';
+                                    } else {
+                                        cellProperties.readOnly = true;
+                                        cellProperties.className = 'htReadOnly';
+                                    }
+                                    return cellProperties;
+                                }
+                            });
+
+                            alert("Edição habilitada para a composição: " + composicaoId);
+                        })
+                        .catch(error => console.error("Erro ao carregar dados da composição:", error));
+                });
+            });
+
+            // Função para ver detalhes da composição
+            document.querySelectorAll(".ver").forEach(button => {
+                button.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const url = this.getAttribute("href");
+                    const width = 800;
+                    const height = 600;
+                    const left = (screen.width - width) / 2;
+                    const top = (screen.height - height) / 2;
+                    window.open(url, "Detalhes da Composição", `width=${width},height=${height},top=${top},left=${left}`);
+                });
             });
         });
     </script>
