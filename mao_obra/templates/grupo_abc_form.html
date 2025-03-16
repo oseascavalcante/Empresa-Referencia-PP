@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="header">Formulário de Grupos A, B e C</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Grupo A - Encargos</div>
+                    <div class="card-body">
+                        {{ form_a.as_p }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Grupo B - Indenizações</div>
+                    <div class="card-body">
+                        {{ form_b.as_p }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Grupo C - Substituições</div>
+                    <div class="card-body">
+                        {{ form_c.as_p }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

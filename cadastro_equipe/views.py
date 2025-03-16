@@ -7,7 +7,7 @@ import json
 from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import get_object_or_404
-from cad_contrato.models import ContractConfiguration
+from cad_contrato.models import CadastroContrato
 from django.db.models import Sum
 
 class EquipeCreateView(CreateView):
@@ -90,7 +90,7 @@ class ComposicaoEquipeDetailView(DetailView):
 
 class ComposicaoEquipeView(View):
     def get(self, request, contrato_id=None):
-        contrato = get_object_or_404(ContractConfiguration, contrato=contrato_id)
+        contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
         equipes = Equipe.objects.all()
         funcoes = Funcao.objects.all()
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
@@ -116,7 +116,7 @@ class ComposicaoEquipeView(View):
             observacao = data.get('observacao')
             dados = data.get('dados')
 
-            contrato = get_object_or_404(ContractConfiguration, contrato=contrato_id)
+            contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
             equipe = get_object_or_404(Equipe, id=equipe_id)
 
             composicao = ComposicaoEquipe.objects.create(

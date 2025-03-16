@@ -1,7 +1,7 @@
 from django import forms
-from .models import ContractConfiguration
+from .models import CadastroContrato
 
-class ContractConfigurationForm(forms.ModelForm):
+class CadastroContratoForm(forms.ModelForm):
     inicio_vigencia_contrato = forms.DateField(
         widget=forms.TextInput(attrs={'class': 'form-control datepicker', 'autocomplete': 'off'})
     )
@@ -10,5 +10,5 @@ class ContractConfigurationForm(forms.ModelForm):
     )
 
     class Meta:
-        model = ContractConfiguration
+        model = CadastroContrato
         fields = '__all__'

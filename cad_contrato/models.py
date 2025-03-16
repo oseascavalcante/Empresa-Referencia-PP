@@ -1,7 +1,7 @@
 from django.db import models
 
 # Cadastro dos Contratos
-class ContractConfiguration(models.Model):
+class CadastroContrato(models.Model):
     ESTADOS_CHOICES = [
         ('AC', 'Acre'),
         ('AL', 'Alagoas'),

@@ -1,0 +1,56 @@
+{% block content %}
+<div class="container mt-4">
+    <div class="header">Resultados dos Grupos A, B, C, D e E</div>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Grupo A - Encargos</div>
+                <div class="card-body">
+                    <p><strong>Contrato:</strong> {{ grupo_a.contrato }}</p>
+                    <p><strong>Encargos:</strong> {{ calc_grupo_a.encargos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Grupo B - Indenizações</div>
+                <div class="card-body">
+                    <p><strong>Contrato:</strong> {{ grupo_b.contrato }}</p>
+                    <p><strong>Indenizações:</strong> {{ calc_grupo_b.indenizacoes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Grupo C - Substituições</div>
+                <div class="card-body">
+                    <p><strong>Contrato:</strong> {{ grupo_c.contrato }}</p>
+                    <p><strong>Substituições:</strong> {{ calc_grupo_c.substituicoes }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Grupo D</div>
+                <div class="card-body">
+                    <p><strong>Contrato:</strong> {{ calc_grupo_d.contrato }}</p>
+                    <p><strong>Resultado:</strong> {{ calc_grupo_d.resultado }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Grupo E</div>
+                <div class="card-body">
+                    <p><strong>Contrato:</strong> {{ calc_grupo_e.contrato }}</p>
+                    <p><strong>Resultado:</strong> {{ calc_grupo_e.resultado }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

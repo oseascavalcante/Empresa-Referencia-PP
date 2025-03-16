@@ -1,18 +1,18 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from .models import ContractConfiguration
-from .forms import ContractConfigurationForm
+from .models import CadastroContrato
+from .forms import CadastroContratoForm
 
 class ContractCreateView(CreateView):
-    model = ContractConfiguration
-    form_class = ContractConfigurationForm
+    model = CadastroContrato
+    form_class = CadastroContratoForm
     template_name = 'cadastro_contrato.html'
     success_url = reverse_lazy('cadastro_contrato')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['contracts'] = ContractConfiguration.objects.all()
+        context['contracts'] = CadastroContrato.objects.all()
         return context
     
 
