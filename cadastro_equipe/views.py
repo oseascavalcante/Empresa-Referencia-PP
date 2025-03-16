@@ -79,7 +79,7 @@ class ComposicaoEquipeDeleteView(DeleteView):
 
 class ComposicaoEquipeDetailView(DetailView):
     model = ComposicaoEquipe
-    template_name = 'detalhes_composicao.html'
+    template_name = 'detalhes_equipe.html'
     context_object_name = 'composicao'
 
     def get_context_data(self, **kwargs):

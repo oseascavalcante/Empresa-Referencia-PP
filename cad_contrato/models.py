@@ -1,5 +1,6 @@
 from django.db import models
 
+# Cadastro dos Contratos
 class ContractConfiguration(models.Model):
     ESTADOS_CHOICES = [
         ('AC', 'Acre'),
@@ -32,9 +33,12 @@ class ContractConfiguration(models.Model):
     ]
 
     contrato = models.AutoField(primary_key=True)
+    concessionaria = models.CharField(max_length=100, default='Equatorial')
     estado = models.CharField(max_length=2, choices=ESTADOS_CHOICES, default='GO')
     municipio = models.CharField(max_length=100, default='Goiânia')
     escopo_contrato = models.CharField(max_length=255)
+    inicio_vigencia_contrato = models.DateField(default='2025-01-01')
+    fim_vigencia_contrato = models.DateField(default='2029-01-01')
     versao_base = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='versoes')
     numero_versao = models.IntegerField(default=0)
     descricao_alteracao = models.TextField(blank=True)

@@ -67,11 +67,35 @@
                     <td>{{ composicao.quantidade_equipes }}</td>
                 </tr>
                 <tr>
-                    <th>Observação</th>
-                    <td>{{ composicao.observacao }}</td>
+                    <th>Data de Mobilização</th>
+                    <td>{{ composicao.data_mobilizacao|date:"d/m/Y" }}</td>
+                    <th>Data de Desmobilização</th>
+                    <td>{{ composicao.data_desmobilizacao|date:"d/m/Y" }}</td>
                 </tr>
+                <tr>
+                    <th>Data de Criação</th>
+                    <td>{{ composicao.created_at|date:"d/m/Y" }}</td>
+                    <th>Data de Atualização</th>
+                    <td>{{ composicao.updated_at|date:"d/m/Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Prefixo da Equipe</th>
+                    <td colspan="3">{{ composicao.prefixo_equipe }}</td>
+                </tr>
+                              
+                <tr>
+                    <th>Observação</th>
+                    <td colspan="3">{{ composicao.observacao }}</td>
+                </tr>
+                
+
             </table>
-            <h5>Funções</h5>
+
+            <p class="text-center mt-0 font-weight-bold" 
+            style="font-size: 0.8rem; border-bottom: 2px solid #483D8B; margin-bottom: 30px;">
+            </p>
+            <h5>Composição dos custos</h5>
+         
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>

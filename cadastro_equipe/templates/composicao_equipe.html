@@ -2,23 +2,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="header">Cadastrar Equipes</div>
 
+<div class="header">Cadastro de Equipes</div>
+<p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
+
+
+    {% with contrato=composicoes.0.contrato %}
+        <div class="col mt-3">
+            <div class="row">
+                <div class="col-md-6"><strong>ID - Contrato:</strong> {{ contrato }}</div>
+                <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
+            </div>
+            <div class="col-md-3"><strong>Lote:</strong> {{ contrato.municipio }} -  {{ contrato.estado }}</div>
+            <div class="col-md-3"><strong>Vigência:</strong> {{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }} a {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</div>
+            <div class="col-md-3"><strong>Criado em:</strong> {{ contrato.updated_at|date:"d/m/Y" }}</div>
+        </div>
+    {% endwith %}
+    
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
     <!-- Campos lado a lado -->
     <div class="row align-items-end">
         <div class="col-md-3">
-            <label class="form-label">Tipo de Equipe:</label>
-            <select id="equipe" class="form-control form-control-sm">
+            <label class="form-label">Tipo de Equipe*</label>
+            <select id="equipe" class="form-control form-control-sm" required>
+                <option value="">Selecione</option>
                 {% for equipe in equipes %}
                     <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
                 {% endfor %}
             </select>
+            <div class="invalid-feedback">Por favor, selecione o tipo de equipe.</div>
         </div>
         <div class="col-md-3">
-            <label class="form-label">Quantidade de Equipes:</label>
-            <input type="number" id="quantidade_equipes" class="form-control form-control-sm" min="1" value="1">
+            <label class="form-label">Quantidade de Equipes*</label>
+            <input type="number" id="quantidade_equipes" class="form-control form-control-sm" min="1" value="1" required>
+            <div class="invalid-feedback">Por favor, insira a quantidade de equipes.</div>
         </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Data de Mobilização*</label>
+            <input type="text" id="data_mobilizacao" name="data_mobilizacao" class="form-control datepicker" required>
+            <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Data de Desmobilização*</label>
+            <input type="text" id="data_desmobilizacao" name="data_desmobilizacao" class="form-control datepicker" required>
+            <div class="invalid-feedback">Por favor, insira a data de desmobilização.</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Prefixo:</label>
+            <input type="text" id="prefixo_equipe" class="form-control form-control-sm">
+        </div>        
         <div class="col-md-6">
             <label class="form-label">Observação:</label>
             <input type="text" id="observacao" class="form-control form-control-sm">
@@ -45,7 +79,9 @@
                                 <th>ID - Contrato</th>
                                 <th>Equipe</th>
                                 <th>Quantidade</th>
-                                <th>Total Funcionários</th>
+                                <th>Total Func.</th>
+                                <th>Data Mob.</th>
+                                <th>Data Desmob.</th>
                                 <th>Observação</th>
                                 <th>Ações</th>
                             </tr>
@@ -57,9 +93,11 @@
                                     <td>{{ composicao.equipe.nome }}</td>
                                     <td>{{ composicao.quantidade_equipes }}</td>
                                     <td>{{ composicao.total_funcionarios }}</td>
+                                    <td>{{ composicao.data_mobilizacao|date:"d/m/Y" }}</td>
+                                    <td>{{ composicao.data_desmobilizacao|date:"d/m/Y" }}</td>                                    
                                     <td>{{ composicao.observacao }}</td>
                                     <td>
-                                        <a href="{% url 'detalhes_composicao' composicao.pk %}" class="btn btn-info btn-sm ver">
+                                        <a href="{% url 'detalhes_equipe' composicao.pk %}" class="btn btn-info btn-sm ver">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <button class="btn btn-primary btn-sm editar" data-id="{{ composicao.pk }}">
@@ -87,6 +125,37 @@
     <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.js"></script>
 
     <style>
+
+        .datepicker {
+            font-size: 1rem; /* Ajusta o tamanho do texto */
+        }
+        .datepicker-dropdown {
+            background-color: white; /* Fundo branco */
+            border: 1px solid #ccc; /* Borda mais sutil */
+            border-radius: 8px; /* Borda arredondada */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+            padding: 8px;
+            z-index: 1050 !important; /* Ajusta o z-index para garantir que o calendário fique na frente */
+        }
+        .datepicker table {
+            width: 100%;
+        }
+        .datepicker td, .datepicker th {
+            padding: 8px; /* Ajusta o espaçamento */
+            text-align: center;
+        }
+        .datepicker td.today {
+            background-color: #007bff !important; /* Destaca a data atual */
+            color: white !important;
+            border-radius: 50%;
+        }
+        .datepicker td.active {
+            background-color: #28a745 !important; /* Cor verde para a data selecionada */
+            color: white !important;
+            border-radius: 50%;
+        }
+
+
         .header {
             background-color:rgb(231, 229, 247);
             color: #483D8B;
@@ -174,7 +243,15 @@
                 var contratoId = "{{ contrato_id }}";
                 var equipeId = document.getElementById("equipe").value;
                 var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
+                var dataMobilizacao = document.getElementById("data_mobilizacao").value;
+                var dataDesmobilizacao = document.getElementById("data_desmobilizacao").value;
                 var observacao = document.getElementById("observacao").value;
+
+                // Validação dos campos obrigatórios
+                if (!equipeId || !quantidadeEquipes || !dataMobilizacao || !dataDesmobilizacao) {
+                    alert("Por favor, preencha todos os campos obrigatórios.");
+                    return;
+                }
 
                 var tabelaDados = hot.getData();
                 var dadosFormatados = tabelaDados
@@ -202,6 +279,8 @@
                         contrato_id: contratoId,
                         equipe_id: equipeId,
                         quantidade_equipes: quantidadeEquipes,
+                        data_mobilizacao: dataMobilizacao,
+                        data_desmobilizacao: dataDesmobilizacao,
                         observacao: observacao,
                         dados: dadosFormatados
                     })
@@ -249,6 +328,8 @@
                         .then(data => {
                             document.getElementById("equipe").value = data.equipe_id;
                             document.getElementById("quantidade_equipes").value = data.quantidade_equipes;
+                            document.getElementById("data_mobilizacao").value = data.data_mobilizacao;
+                            document.getElementById("data_desmobilizacao").value = data.data_desmobilizacao;
                             document.getElementById("observacao").value = data.observacao;
 
                             const tabelaDados = data.dados.map(row => [
@@ -301,4 +382,28 @@
             });
         });
     </script>
+    <!-- jQuery (Necessário para o Datepicker funcionar) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Bootstrap Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+    <!-- Tradução para português (se necessário) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy', // Define o formato da data
+                todayHighlight: true,
+                autoclose: true,
+                language: "pt-BR" // Define para Português (se necessário)
+            });
+        });
+    </script>
+
+
 {% endblock %}
