@@ -36,3 +36,9 @@ def lista_formularios(request):
 
 def menu_principal(request):
     return render(request, "menu_principal.html")
+
+
+def abrir_contratos(request):
+    # Lógica para exibir a relação de contratos
+    contracts = CadastroContrato.objects.all()  # Substitua pelo modelo correto
+    return render(request, 'abrir_contratos.html', {'contracts': contracts})

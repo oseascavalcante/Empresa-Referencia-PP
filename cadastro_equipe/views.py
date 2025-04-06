@@ -76,7 +76,6 @@ class ComposicaoEquipeDeleteView(DeleteView):
         self.object.delete()
         return JsonResponse({'status': 'success'})
 
-
 class ComposicaoEquipeDetailView(DetailView):
     model = ComposicaoEquipe
     template_name = 'detalhes_equipe.html'
@@ -86,7 +85,6 @@ class ComposicaoEquipeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['funcoes'] = FuncaoEquipe.objects.filter(composicao=self.object)
         return context
-
 
 class ComposicaoEquipeView(View):
     def get(self, request, contrato_id=None):
@@ -105,6 +103,8 @@ class ComposicaoEquipeView(View):
             'escopo_contrato': contrato.escopo_contrato,
             'funcoes': funcoes,
             'composicoes': composicoes,
+            'inicio_vigencia_contrato': contrato.inicio_vigencia_contrato,  # Passa a data no contexto
+            'fim_vigencia_contrato': contrato.fim_vigencia_contrato  # Passa a data no contexto
         })
 
     def post(self, request, contrato_id):
