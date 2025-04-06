@@ -1,39 +1,117 @@
 {% extends 'base.html' %}
+{% load form_tags %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="header">Formulário de Grupos A, B e C</div>
+<div class="container-fluid mt-4">
+    <!-- Título principal -->
+    <div class="header">
+        Demonstrativo de Encargos Sociais - Mensalista 
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <div>
+        <small class="text-muted">
+            <form method="get" class="form-inline">
+                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.2rem;"> Contrato:</label>                
+                <select id="contratoSelect" class="form-select d-inline w-auto mx-2" onchange="if(this.value) window.location.href=this.value">
+                    <option value="#">-- Escolha --</option>
+                    {% for c in contratos %}
+                        <option value="{% url 'grupo_abc_form' contrato_id=c.contrato %}" {% if contrato and contrato.contrato == c.contrato %}selected{% endif %}>
+                            Contrato {{ c.contrato }} - {{ c.escopo_contrato }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </small>
+
+    </div>
+
     <form method="post">
         {% csrf_token %}
-        <div class="row mt-2">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">Grupo A - Encargos</div>
+        <div class="row d-flex justify-content-center align-items-stretch mt-3">
+
+            <!-- GRUPO A -->
+            <div class="col-lg-4 d-flex">
+                <div class="card w-100 h-100">
+                    <div class="card-header">Grupo A - Despesas sobre a folha de pagamento</div>
                     <div class="card-body">
-                        {{ form_a.as_p }}
+                        <!-- Subgrupo A1 -->
+                        <h6 class="text-primary fw-bold">A1 - Recolhimento ao INSS e outras entidades</h6>
+                        {% for field in form_a.visible_fields %}
+                            {% if field.name in "inss incra sebrae senai sesi sal_educacao rat fap fgts" %}
+                            <div class="mb-2 row">
+                                <label class="col-6 col-form-label">{{ field.label }}</label>
+                                <div class="col-6">
+                                    {{ field|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Subgrupo A2 -->
+                        <h6 class="text-primary fw-bold mt-3">A2 - Provisão para 13º</h6>
+                        <div class="mb-2 row">
+                            <label class="col-6 col-form-label">{{ form_a.dec_salario.label }}</label>
+                            <div class="col-6">
+                                {{ form_a.dec_salario|add_class:"form-control" }}
+                            </div>
+                        </div>
+
+                        <!-- Subgrupo A3 -->
+                        <h6 class="text-primary fw-bold mt-3">A3 - Provisão de abono de férias</h6>
+                        <div class="mb-2 row">
+                            <label class="col-6 col-form-label">{{ form_a.abono_ferias.label }}</label>
+                            <div class="col-6">
+                                {{ form_a.abono_ferias|add_class:"form-control" }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">Grupo B - Indenizações</div>
+
+            <!-- GRUPO B -->
+            <div class="col-lg-4 d-flex">
+
+                <div class="card w-100 h-100 d-flex flex-column justify-content-start">
+                    <div class="card-header">Grupo B - Indenizações por demissões sem justa causa</div>
                     <div class="card-body">
-                        {{ form_b.as_p }}
+                        {% for field in form_b.visible_fields %}
+                        <div class="mb-2 row">
+                            <label class="col-6 col-form-label">{{ field.label }}</label>
+                            <div class="col-6">
+                                {{ field|add_class:"form-control" }}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">Grupo C - Substituições</div>
+
+            <!-- GRUPO C -->
+            <div class="col-lg-4 d-flex">
+
+                <div class="card w-100 h-100 d-flex flex-column justify-content-start">
+                    <div class="card-header">Grupo C - Horas não trabalhadas no ano (faltas justificadas)</div>
                     <div class="card-body">
-                        {{ form_c.as_p }}
+                        {% for field in form_c.visible_fields %}
+                        <div class="mb-2 row">
+                            <label class="col-6 col-form-label">{{ field.label }}</label>
+                            <div class="col-6">
+                                {{ field|add_class:"form-control" }}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+
         </div>
+
+        <!-- Botão de submissão -->
         <div class="row mt-3">
             <div class="col-md-12">
-                <button type="submit" class="btn btn-primary">Salvar</button>
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
             </div>
         </div>
     </form>

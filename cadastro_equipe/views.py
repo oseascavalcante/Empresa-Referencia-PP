@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView
 from .models import Equipe, Funcao, ComposicaoEquipe, FuncaoEquipe
 from .forms import EquipeForm, FuncaoForm
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import json
 from django.http import JsonResponse
 from django.views import View
@@ -158,3 +158,4 @@ class ComposicaoEquipeView(View):
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': f'Erro interno do servidor: {str(e)}'}, status=500)
+        

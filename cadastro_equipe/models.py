@@ -1,6 +1,20 @@
 from django.db import models
 from cad_contrato.models import CadastroContrato  # Importando a model do outro app
 import uuid
+"""
+Modelos para gerenciar equipes, funções e suas composições em uma aplicação Django.
+Classes:
+    Equipe:
+        Representa uma equipe com um nome único.
+    Funcao:
+        Representa uma função ou cargo dentro de uma equipe, incluindo seu nome e salário.
+    ComposicaoEquipe:
+        Representa a composição de uma equipe para um contrato específico, incluindo detalhes como
+        quantidade de equipes, datas de mobilização e desmobilização, e observações adicionais.
+    FuncaoEquipe:
+        Representa as funções dentro de uma composição de equipe, incluindo a quantidade de funcionários,
+        custos adicionais e condições de trabalho, como horas extras e turnos noturnos.
+"""
 
 class Equipe(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -29,7 +43,7 @@ class ComposicaoEquipe(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-#Cadastro da função
+#Cadastro das funções dentro da Equipe
 class FuncaoEquipe(models.Model):
     composicao = models.ForeignKey(ComposicaoEquipe, on_delete=models.CASCADE, related_name="funcoes")
     funcao = models.ForeignKey(Funcao, on_delete=models.PROTECT)

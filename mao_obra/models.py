@@ -1,18 +1,39 @@
 from django.db import models
 from decimal import Decimal, InvalidOperation
-from cadastro_equipe.models import FuncaoEquipe
-
+from cadastro_equipe.models import Funcao
+from cad_contrato.models import CadastroContrato  # Importando o modelo de contrato
 
 class GrupoAEncargos(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     inss = models.DecimalField(max_digits=5, decimal_places=2, default=20.00, verbose_name="INSS (%)")
     incra = models.DecimalField(max_digits=5, decimal_places=2, default=0.20, verbose_name="INCRA (%)")
     sebrae = models.DecimalField(max_digits=5, decimal_places=2, default=0.60,  verbose_name="SEBRAE (%)")
     senai = models.DecimalField(max_digits=5, decimal_places=2, default=1.00,  verbose_name="SENAI (%)")
     sesi = models.DecimalField(max_digits=5, decimal_places=2, default=1.50,  verbose_name="SESI (%)")
-    sal_educacao = models.DecimalField(max_digits=10, decimal_places=2, default=2.50,  verbose_name="Salário Educação (%)")
-    rat = models.DecimalField(max_digits=5, decimal_places=2, default=3.00,  verbose_name="RAT (%)")
-    fap = models.DecimalField(max_digits=5, decimal_places=2, default=1.00,  verbose_name="FAP (%)")
+    sal_educacao = models.DecimalField(max_digits=10, decimal_places=2, default=2.50,  verbose_name="Salário Educação (%)")  
+    rat = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        choices=[
+            (1.00, '1,0%'),
+            (2.00, '2,0%'),
+            (3.00, '3,0%'),
+        ],
+        default=3.00,
+        verbose_name="RAT (Riscos Ambientais do Trabalho)"
+    )
+    fap = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        choices=[
+            (0.50, '0,5%'),
+            (1.00, '1,0%'),
+            (1.50, '1,5%'),
+            (2.00, '2,0%'),
+        ],
+        default=1.00,
+        verbose_name="FAP (Fator Acidentário de Prevenção)"
+    )
     fgts = models.DecimalField(max_digits=5, decimal_places=2,  default=8.00, verbose_name="FGTS (%)")
     dec_salario = models.DecimalField(max_digits=5, decimal_places=2, default=8.33,  verbose_name="13 Salário (R$)")
     abono_ferias = models.DecimalField(max_digits=5, decimal_places=2,  default=2.78, verbose_name="Abono de Férias (%)")
@@ -22,16 +43,16 @@ class GrupoAEncargos(models.Model):
         return f"Grupo A Encargos - ID {self.id}"
 
 class GrupoBIndenizacoes(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)
-    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões = ED")
-    meses_emprego = models.IntegerField(default=36, verbose_name="Meses no emprego = ME")
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
+    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões")
+    meses_emprego = models.IntegerField(default=36, verbose_name="Meses no emprego")
     multa_fgts = models.DecimalField(max_digits=5, decimal_places=2, default=40.00, verbose_name="Percentual multa do FGTS")
 
     def __str__(self):
         return f"Grupo B Indenizações - ID {self.id}"
 
 class GrupoCSubstituicoes(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     tipo_reserva_tecnica = models.CharField(
         max_length=3,
         choices=[('sim', 'Sim'), ('nao', 'Não')],
@@ -52,8 +73,7 @@ class GrupoCSubstituicoes(models.Model):
 #PARTE CALCULADA
 
 class CalcGrupoAEncargos(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)
-
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     cpp = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="CPP (Contribuição Previdenciária Patronal)")
     cpp_fgts_sal_abono = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="(CPP + FGTS) x (13 salário + abono de férias)")
     total_grupo_a = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name='Total Grupo A')
@@ -67,7 +87,7 @@ class CalcGrupoAEncargos(models.Model):
 
 
 class CalcGrupoBIndenizacoes(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, default=0, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
 
     ed = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Demissões = ED")
     me = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Meses no emprego = ME")
@@ -85,7 +105,7 @@ class CalcGrupoBIndenizacoes(models.Model):
         return f"CalcGrupoBIndenizacoes ({self.dados_grupo_b})"
 
 class CalcGrupoCSubstituicoes(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
 
     horas_trab_ano = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="Horas trabalhas no ano")
     semanas_ferias = models.DecimalField(default=0, max_digits=10, decimal_places=2, verbose_name="Semanas de férias = 30 ÷ 7")
@@ -105,7 +125,7 @@ class CalcGrupoCSubstituicoes(models.Model):
         
 
 class CalcGrupoD(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, default=0, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     total_grupo_d = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Total Grupo D")
 
     def save(self, *args, **kwargs):
@@ -117,7 +137,7 @@ class CalcGrupoD(models.Model):
 
 
 class CalcGrupoE(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, default=0, on_delete=models.CASCADE)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     total_grupo_e = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Total Grupo E")
 
     def save(self, *args, **kwargs):
@@ -128,7 +148,7 @@ class CalcGrupoE(models.Model):
 
 
 class BeneficiosColaborador(models.Model):
-    composicao = models.OneToOneField(FuncaoEquipe, on_delete=models.CASCADE)  # Relaciona com a licitação
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
     assistencia_medica_odonto = models.DecimalField(
         max_digits=7, decimal_places=2, default=151.00, verbose_name="Assistência médica odontológica"
     )

@@ -196,16 +196,28 @@
                         </div>
                     </div>
                 </div>
-                
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Status do Contrato</div>
+                        <div class="card-body">{{ form.status_contrato }}</div>
+                    </div>
+                </div>                
 
 
                 <div class="col-md-3">
                     <div class="card">
-                      <div class="card-header">Detalhe das Alterações Realizadas</div>
-                      <div class="card-body"><input type="text" name="descricao_alteracao" class="form-control" autocomplete="off"></div>
-                
+                        <div class="card-header">Valor Inicial do Contrato R$</div>
+                        <div class="card-body">
+                            <input type="number" id="valor_inicial" name="valor_inicial" class="form-control" value="{{ form.valor_inicial.value }}" step="0.01" min="0">
+                        </div>
                     </div>
                 </div>
+
+
+
+            </div>
+
+            <div class="row mt-2">
 
                 <div class="col-md-3">
                     <div class="card">
@@ -219,7 +231,20 @@
                         <div class="card-body">{{ form.numero_versao }}</div>
                     </div>
                 </div>
-            </div>
+
+                <div class="col-md-3">
+                    <div class="card">
+                      <div class="card-header">Detalhe das Alterações Realizadas</div>
+                      <div class="card-body"><input type="text" name="descricao_alteracao" class="form-control" autocomplete="off"></div>
+                
+                    </div>
+                </div>
+
+
+            </div>   
+            
+            
+
 
             <div class="row mt-3">
                 <div class="col-md-12">
@@ -281,6 +306,7 @@
     <!-- jQuery (Necessário para o Datepicker funcionar) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -289,6 +315,7 @@
 
     <!-- Tradução para português (se necessário) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+
 
     <script>
         $(document).ready(function(){

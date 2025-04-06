@@ -25,13 +25,24 @@
             <li class="nav-item">
                 <a href="#" class="nav-link"><i class="fa-solid fa-person-digging"></i> Mão de Obra</a>
                 <ul class="submenu">
-                    <li><a href="#" class="nav-link">Encargos Sociais</a></li>
+                    <li>
+                        {% if contrato %}
+                          <a href="{% url 'grupo_abc_form' contrato_id=contrato.contrato %}" class="nav-link">
+                            Encargos Sociais
+                          </a>
+                        {% else %}
+                          <a href="#" class="nav-link disabled" title="Contrato não selecionado">
+                            Encargos Sociais
+                          </a>
+                        {% endif %}
+                    </li>
                     <li><a href="#" class="nav-link">Salários</a></li>
                     <li><a href="#" class="nav-link">Adicionais</a></li>
                     <li><a href="#" class="nav-link">Benefícios</a></li>
                     <li><a href="#" class="nav-link">Fardamentos e EPI's</a></li>
                 </ul>
             </li>
+            
 
             <li class="nav-item">
                 <a href="#" class="nav-link"><i class="fas fa-database"></i> Banco de Preços</a>

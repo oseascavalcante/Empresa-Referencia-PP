@@ -31,6 +31,13 @@ class CadastroContrato(models.Model):
         ('SE', 'Sergipe'),
         ('TO', 'Tocantins'),
     ]
+    
+    STATUS_CHOICES = [
+        ('EM_LICITACAO', 'Em Licitação'),
+        ('EM_RENOVACAO', 'Em Renovação'),
+        ('ATIVO', 'Ativo'),
+        ('ENCERRADO', 'Encerrado'),
+    ]
 
     contrato = models.AutoField(primary_key=True)
     concessionaria = models.CharField(max_length=100, default='Equatorial')
@@ -42,6 +49,8 @@ class CadastroContrato(models.Model):
     versao_base = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='versoes')
     numero_versao = models.IntegerField(default=0)
     descricao_alteracao = models.TextField(blank=True)
+    status_contrato = models.CharField(max_length=15, choices=STATUS_CHOICES, default='EM_LICITACAO', verbose_name="Status do Contrato")
+    valor_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, verbose_name="Valor Inicial do Contrato")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
