@@ -40,13 +40,13 @@
 
         <div class="col-md-3">
             <label class="form-label">Data de Mobilização*</label>
-            <input type="text" id="data_mobilizacao" name="data_mobilizacao" class="form-control datepicker" required>
+            <input type="text" id="data_mobilizacao" name="data_mobilizacao" class="form-control datepicker" required value="{{ inicio_vigencia_contrato|date:'d/m/Y' }}">
             <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
         </div>
 
         <div class="col-md-3">
             <label class="form-label">Data de Desmobilização*</label>
-            <input type="text" id="data_desmobilizacao" name="data_desmobilizacao" class="form-control datepicker" required>
+            <input type="text" id="data_desmobilizacao" name="data_desmobilizacao" class="form-control datepicker" required value="{{ fim_vigencia_contrato|date:'d/m/Y' }}">
             <div class="invalid-feedback">Por favor, insira a data de desmobilização.</div>
         </div>
         <div class="col-md-6">
@@ -68,7 +68,6 @@
 
     <div class="small-header"> Equipes Cadastradas </div>
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
-    
     <div class="row mt-2">
         <div class="col-md-12">
             <div class="card">
@@ -100,7 +99,7 @@
                                         <a href="{% url 'detalhes_equipe' composicao.pk %}" class="btn btn-info btn-sm ver">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <button class="btn btn-primary btn-sm editar" data-id="{{ composicao.pk }}">
+                                        <button class="btn btn-primary btn-sm editar" data-id="{{ composicao.pk }}" onclick="if (confirm('Tem certeza de que deseja editar esta equipe?')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return true; } else { return false; }">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-danger btn-sm excluir" data-id="{{ composicao.pk }}">
@@ -110,7 +109,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="6" class="text-center">Nenhuma composição cadastrada.</td>
+                                    <td colspan="6" class="text-center">Nenhuma equipe cadastrada.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -239,7 +238,11 @@
             let isEditing = false;
             let editingId = null;
         
-            document.getElementById("adicionar").addEventListener("click", function() {
+            document.getElementById("adicionar").addEventListener("click", function (event) {
+                if (!confirm("Tem certeza de que deseja adicionar equipe(s)?")) {
+                    event.preventDefault(); // Impede a execução se o usuário cancelar
+                    return;
+                }
                 var contratoId = "{{ contrato_id }}";
                 var equipeId = document.getElementById("equipe").value;
                 var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
@@ -286,7 +289,7 @@
                     })
                 })
                 .then(() => { 
-                    alert("Composição salva com sucesso!"); 
+                    alert("Salvo com sucesso!"); 
                     window.location.reload(); 
                 })
                 .catch(error => console.error("Erro ao salvar:", error));
@@ -296,7 +299,7 @@
             document.querySelectorAll(".excluir").forEach(button => {
                 button.addEventListener("click", function() {
                     const composicaoId = this.getAttribute("data-id");
-                    if (confirm("Tem certeza que deseja excluir esta composição?")) {
+                    if (confirm("Tem certeza que deseja excluir esta(s) equipe(s)?")) {
                         fetch(`/cadastro_equipe/composicao/${composicaoId}/excluir/`, {
                             method: "DELETE",
                             headers: { "X-CSRFToken": "{{ csrf_token }}" }
@@ -304,10 +307,10 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === "success") {
-                                alert("Composição excluída com sucesso!");
+                                alert("Equipe excluída com sucesso!");
                                 window.location.reload();
                             } else {
-                                alert("Erro ao excluir composição: " + data.message);
+                                alert("Erro ao excluir equipe(s): " + data.message);
                             }
                         })
                         .catch(error => console.error("Erro ao excluir:", error));
@@ -362,9 +365,9 @@
                                 }
                             });
 
-                            alert("Edição habilitada para a composição: " + composicaoId);
+                            alert("Edição habilitada para a equipe: " + composicaoId);
                         })
-                        .catch(error => console.error("Erro ao carregar dados da composição:", error));
+                        .catch(error => console.error("Erro ao carregar dados da equipe:", error));
                 });
             });
 
@@ -377,7 +380,7 @@
                     const height = 600;
                     const left = (screen.width - width) / 2;
                     const top = (screen.height - height) / 2;
-                    window.open(url, "Detalhes da Composição", `width=${width},height=${height},top=${top},left=${left}`);
+                    window.open(url, "Detalhes da Equipe", `width=${width},height=${height},top=${top},left=${left}`);
                 });
             });
         });
@@ -405,5 +408,15 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dataMobilizacaoField = document.getElementById('data_mobilizacao');
+            const inicioVigenciaContrato = "{{ inicio_vigencia_contrato|date:'d/m/Y' }}";
+
+            if (!dataMobilizacaoField.value) {
+                dataMobilizacaoField.value = inicioVigenciaContrato;
+            }
+        });
+    </script>
 
 {% endblock %}

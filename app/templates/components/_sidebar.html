@@ -1,11 +1,15 @@
    <div> 
     <nav class="sidebar d-flex flex-column">
         <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link"><i class="fa-solid fa-house-user"></i> Início</a>
+            </li>
 
             <li class="nav-item">
                 <a href="#" class="nav-link"><i class="fa-solid fa-file-contract"></i> Contratos</a>
                 <ul class="submenu">
-                    <li><a href="{% url 'cadastro_contrato' %}" class="nav-link">Cadastrar Contrato</a></li>
+                    <li><a href="{% url 'abrir_contratos' %}" class="nav-link">Abrir</a></li>
+                    <li><a href="{% url 'cadastro_contrato' %}" class="nav-link">Cadastrar</a></li>
                 </ul>
             </li>
 
@@ -19,7 +23,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-people-group"></i> Mão de Obra</a>
+                <a href="#" class="nav-link"><i class="fa-solid fa-person-digging"></i> Mão de Obra</a>
                 <ul class="submenu">
                     <li><a href="#" class="nav-link">Encargos Sociais</a></li>
                     <li><a href="#" class="nav-link">Salários</a></li>

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+        .card {
+            
+            border-radius: 5px;
+        }
+        .small-header {
+            background-color:rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+</style>
+
+<div class="container mt-4">
+    <div class="small-header"> Contratos Cadastrados </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Concessionária</th>
+                                <th>Estado</th>
+                                <th>Município</th>
+                                <th>Escopo</th>
+                                <th>Versão</th>
+                                <th>Versão de Referência</th>
+                                <th>Data Início Vigência</th>
+                                <th>Data Atualização</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contract in contracts %}
+                                <tr>
+                                    <td>{{ contract.contrato }}</td>
+                                    <td>{{ contract.concessionaria }}</td>
+                                    <td>{{ contract.estado }}</td>
+                                    <td>{{ contract.municipio }}</td>
+                                    <td>{{ contract.escopo_contrato }}</td>
+                                    <td>{{ contract.numero_versao }}</td>
+                                    <td>{{ contract.versao_base }}</td>
+                                    <td>{{ contract.inicio_vigencia_contrato|date:"d/m/Y" }}</td>
+                                    <td>{{ contract.updated_at|date:"d/m/Y H:i:s" }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-info btn-sm" style="background-color: #add8e6; color: black;"><i class="fas fa-folder-open"></i> Abrir</a>
+                                        <a href="{% url 'composicao_equipe' contract.contrato %}" class="btn btn-info btn-sm"><i class="fa-solid fa-file-pen"></i> Editar</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

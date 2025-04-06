@@ -227,7 +227,7 @@
                 </div>
             </div>
 
-            <div class="small-header"> Relação de Contratos </div>
+            <div class="small-header"> Contratos Cadastrados </div>
             <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
 
             <div class="row mt-2">
@@ -263,7 +263,8 @@
                                             <td>{{ contract.inicio_vigencia_contrato|date:"d/m/Y" }}</td>
                                             <td>{{ contract.updated_at|date:"d/m/Y H:i:s" }}</td>
                                             <td>
-                                                <a href="{% url 'composicao_equipe' contract.contrato %}" class="btn btn-info btn-sm"><i class="fas fa-folder-open"></i> Abrir</a>
+                                                <a href="#" class="btn btn-info btn-sm" style="background-color: #add8e6; color: black;"><i class="fas fa-folder-open"></i> Abrir</a>
+                                                <a href="{% url 'composicao_equipe' contract.contrato %}" class="btn btn-info btn-sm"><i class="fa-solid fa-file-pen"></i> Editar</a>
                                             </td>
                                         </tr>
                                     {% endfor %}
