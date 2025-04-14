@@ -1,0 +1,66 @@
+[33mcommit 609aa3aba409bbed6101d1b2662e6156f3c5c6e7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/encargos-sociais[m[33m)[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sun Apr 6 18:58:11 2025 -0300
+
+    Inserido Encargos sociais
+
+[33mcommit aac8426db95ccdf4093cb89602eebeb14ead7c2e[m
+Merge: 1270148 c4e6878
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sat Apr 5 22:38:33 2025 -0300
+
+    Merge branch 'main' of https://github.com/oseascavalcante/Empresa-Referencia-PP
+
+[33mcommit c4e6878d9d07f1ae1d8b31a105bd583b0490e589[m
+Author: OSEAS CAVALCANTE DOS SANTOS ENCARNACAO <oseas.encarnacao@equatorialenergia.com.br>
+Date:   Sat Apr 5 22:37:00 2025 -0300
+
+    Inserido tela de abrir contratos
+
+[33mcommit 1270148a6bcd3ea5192f149e07d1e35f2ecf6b27[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sat Apr 5 22:25:40 2025 -0300
+
+    Adiciona arquivo requirements.txt
+
+[33mcommit 201d68072248b6b93a6c8335f727d63f3aaab7bb[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sun Mar 16 09:46:09 2025 -0300
+
+    Iserido Encargos Sociais
+
+[33mcommit 4ff8bd14b90182d5c420ad92c7fa612c295fab7d[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sat Mar 15 22:39:57 2025 -0300
+
+    Atualiza modelo ContractConfiguration e template cadastro_contrato para incluir campos obrigatórios
+
+[33mcommit 23ae8c72cc29b68ad7f8644f282baa8023bc710f[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sun Mar 9 02:52:20 2025 -0300
+
+    Edição, visualização e exclusão de equipes
+
+[33mcommit 44db13f36f413bec194f03daa47b51472d8fb3ee[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Wed Mar 5 22:09:56 2025 -0300
+
+    Ajuste para agrupar composições das Equipes
+
+[33mcommit df96bcb4fb963c710be0e3df0ac5a6cba40591a9[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Wed Mar 5 21:19:27 2025 -0300
+
+    Ajuste para agrupar composições por composicao_id e somar quantidade de funcionários, adicionando campo de observação
+
+[33mcommit bd08181070bfaec179614d0867ecbf209d0283f9[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Wed Mar 5 01:59:30 2025 -0300
+
+    Versão com painel de editar contrato
+
+[33mcommit 4376a77d883f8326dccbc8f51152e3e66f905614[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Oseas <o.seasc@gmail.com>
+Date:   Sun Feb 23 00:10:10 2025 -0300
+
+    Painel de Configuração
