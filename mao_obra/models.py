@@ -44,9 +44,9 @@ class GrupoAEncargos(models.Model):
 
 class GrupoBIndenizacoes(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
-    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões")
+    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões (%)")
     meses_emprego = models.IntegerField(default=36, verbose_name="Meses no emprego")
-    multa_fgts = models.DecimalField(max_digits=5, decimal_places=2, default=40.00, verbose_name="Percentual multa do FGTS")
+    multa_fgts = models.DecimalField(max_digits=5, decimal_places=2, default=40.00, verbose_name="Multa do FGTS (%)")
 
     def __str__(self):
         return f"Grupo B Indenizações - ID {self.id}"
@@ -88,10 +88,6 @@ class CalcGrupoAEncargos(models.Model):
 
 class CalcGrupoBIndenizacoes(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
-
-    ed = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Demissões = ED")
-    me = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Meses no emprego = ME")
-    percentual_multa_fgts = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Percentual multa do FGTS")
 
     multa_fgts = models.DecimalField(default=0, max_digits=100, decimal_places=2, verbose_name="Multa do FGTS")
     aviso_previo_indenizado = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Aviso prévio indenizado")

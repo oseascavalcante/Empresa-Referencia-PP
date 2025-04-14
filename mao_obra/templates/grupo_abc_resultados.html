@@ -1,53 +1,129 @@
+{% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <div class="header">Resultados dos Grupos A, B, C, D e E</div>
-    <div class="row mt-2">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Grupo A - Encargos</div>
+<div class="container-fluid mt-4">
+    <div class="header text-center mb-2">
+        <h2 class="text-primary">Encargos Sociais da mão de obra conforme legislação previdenciária e trabalhista</h2>
+        <p class="text-muted">Contrato selecionado: <strong>{{ contrato.contrato }}</strong></p>
+        <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+    </div>
+
+    <div class="row d-flex justify-content-center align-items-stretch mt-3">
+        <!-- GRUPO A -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-primary text-white">Grupo A – Encargos Sociais Básicos</div>
                 <div class="card-body">
-                    <p><strong>Contrato:</strong> {{ grupo_a.contrato }}</p>
-                    <p><strong>Encargos:</strong> {{ calc_grupo_a.encargos }}</p>
+                    {% if calc_grupo_a %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>CPP (Contribuição Previdenciária Patronal) (%):</span>
+                            <strong>{{ calc_grupo_a.cpp }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>(CPP + FGTS) x (13º salário + abono de férias) (%):</span>
+                            <strong>{{ calc_grupo_a.cpp_fgts_sal_abono }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo A:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_a.total_grupo_a }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Grupo B - Indenizações</div>
+
+        <!-- GRUPO B -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-secondary text-white">Grupo B – indenizações nas demissões sem justa causa</div>
                 <div class="card-body">
-                    <p><strong>Contrato:</strong> {{ grupo_b.contrato }}</p>
-                    <p><strong>Indenizações:</strong> {{ calc_grupo_b.indenizacoes }}</p>
+                    {% if calc_grupo_b %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Aviso prévio indenizado:</span>
+                            <strong>{{ calc_grupo_b.aviso_previo_indenizado }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo B:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_b.total_grupo_b }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- GRUPO C -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-success text-white">Grupo C – substituições nas férias e faltas justificadas – Reserva técnica</div>
+                <div class="card-body">
+                    {% if calc_grupo_c %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas no ano:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Dias de faltas no ano:</span>
+                            <strong>{{ calc_grupo_c.dias_faltas_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas/semana:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_semana }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas/dia:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_dia }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas de faltas justificadas:</span>
+                            <strong>{{ calc_grupo_c.horas_faltas_justificadas_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo C:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_c.total_grupo_c }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    <div class="row mt-2">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Grupo C - Substituições</div>
+
+    <!-- GRUPOS D e E -->
+    <div class="row d-flex justify-content-center align-items-stretch mt-3">
+        <!-- GRUPO D -->
+        <div class="col-lg-6 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-warning text-dark">Grupo D - colaboradores substitutos -- incidência do grupo C sobre os grupos A e B</div>
                 <div class="card-body">
-                    <p><strong>Contrato:</strong> {{ grupo_c.contrato }}</p>
-                    <p><strong>Substituições:</strong> {{ calc_grupo_c.substituicoes }}</p>
+                    {% if calc_grupo_d %}
+                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total:</strong></span>
+                            <strong class="text-dark">{{ calc_grupo_d.total_grupo_d }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Grupo D</div>
+
+        <!-- GRUPO E -->
+        <div class="col-lg-6 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-danger text-white">Grupo E</div>
                 <div class="card-body">
-                    <p><strong>Contrato:</strong> {{ calc_grupo_d.contrato }}</p>
-                    <p><strong>Resultado:</strong> {{ calc_grupo_d.resultado }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-2">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Grupo E</div>
-                <div class="card-body">
-                    <p><strong>Contrato:</strong> {{ calc_grupo_e.contrato }}</p>
-                    <p><strong>Resultado:</strong> {{ calc_grupo_e.resultado }}</p>
+                    {% if calc_grupo_e %}
+                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total:</strong></span>
+                            <strong class="text-dark">{{ calc_grupo_e.total_grupo_e }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
