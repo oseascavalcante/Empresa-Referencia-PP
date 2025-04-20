@@ -35,7 +35,7 @@ class GrupoAEncargos(models.Model):
         verbose_name="FAP (Fator Acidentário de Prevenção)"
     )
     fgts = models.DecimalField(max_digits=5, decimal_places=2,  default=8.00, verbose_name="FGTS (%)")
-    dec_salario = models.DecimalField(max_digits=5, decimal_places=2, default=8.33,  verbose_name="13 Salário (R$)")
+    dec_salario = models.DecimalField(max_digits=5, decimal_places=2, default=8.33,  verbose_name="13 Salário (%)")
     abono_ferias = models.DecimalField(max_digits=5, decimal_places=2,  default=2.78, verbose_name="Abono de Férias (%)")
 
 

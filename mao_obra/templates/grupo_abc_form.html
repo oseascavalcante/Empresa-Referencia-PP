@@ -11,7 +11,7 @@
     <div>
         <small class="text-muted">
             <form method="get" class="form-inline">
-                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.2rem;"> Contrato:</label>                
+                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;"> Contrato:</label>                
                 <select id="contratoSelect" class="form-select d-inline w-auto mx-2" onchange="if(this.value) window.location.href=this.value">
                     <option value="#">-- Escolha --</option>
                     {% for c in contratos %}
@@ -35,7 +35,7 @@
                     <div class="card-header bg-primary text-white">Grupo A - Despesas sobre a folha de pagamento</div>
                     <div class="card-body">
                         <!-- Subgrupo A1 -->
-                        <h6 class="text-primary fw-bold">A1 - Recolhimento ao INSS e outras entidades</h6>
+                        <h6 class="fw-bold" style="color: #483D8B" >A1 - Recolhimento ao INSS e outras entidades</h6>
                         {% for field in form_a.visible_fields %}
                             {% if field.name in "inss incra sebrae senai sesi sal_educacao rat fap fgts" %}
                             <div class="mb-2 row">
@@ -48,7 +48,7 @@
                         {% endfor %}
 
                         <!-- Subgrupo A2 -->
-                        <h6 class="text-primary fw-bold mt-3">A2 - Provisão para 13º</h6>
+                        <h6 class="fw-bold" style="color: #483D8B">A2 - Provisão para 13º</h6>
                         <div class="mb-2 row">
                             <label class="col-6 col-form-label">{{ form_a.dec_salario.label }}</label>
                             <div class="col-6">
@@ -57,7 +57,7 @@
                         </div>
 
                         <!-- Subgrupo A3 -->
-                        <h6 class="text-primary fw-bold mt-3">A3 - Provisão de abono de férias</h6>
+                        <h6 class="fw-bold" style="color: #483D8B">A3 - Provisão de abono de férias</h6>
                         <div class="mb-2 row">
                             <label class="col-6 col-form-label">{{ form_a.abono_ferias.label }}</label>
                             <div class="col-6">
@@ -116,4 +116,56 @@
         </div>
     </form>
 </div>
+
+<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
+
+<div class="container mt-4">
+    <h5 class="fw-bold" style="color: #483D8B">Informações complementares:</h5>
+    <div class="mb-3">
+        <h6 class="fw-bold text-decoration-underline">Grupo A</h6>
+
+        <p>
+            <strong>RAT</strong> (Riscos Ambientais do Trabalho) = 1%, ou 2% ou 3%<br>
+            <strong>FAP</strong> (Fator Acidentário de Prevenção) = 0,50 ou 1,00 ou 1,50 ou 2,00
+        </p>
+        <p>Informações sobre RAT e FAT:</p>
+        <ul>
+            <li>1 – O Anexo V do decreto 6.957 de 09/09/09, publica a lista dos CNAEs – Classificação Nacional das Atividades Econômicas e o seu respectivo percentual de RAT relativo a cada atividade.</li>
+            <li>2 – O Ministério da Previdência Social publicará anualmente, sempre no mesmo mês, os índices do FAP por atividade econômica, e disponibilizará, na Internet.</li>
+        </ul>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-bold text-decoration-underline">Grupo B</h6>
+        <p>
+            Representa a rotatividade (turnover) dos colaboradores na empresa. Demissões (ED %) e Meses no Emprego (ME), indicam um custo para a empresa, onde ED% dos colaboradores são demitidos em média após ME meses de trabalho.
+        </p>
+        <p>
+            <strong>ME ÷ 120</strong> deve ser no máximo igual a 1.
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-bold text-decoration-underline">Grupo C</h6>
+        <p>
+            Nas férias e nas faltas justificadas por enfermidades, licença paternidade, casamento, falecimento de parentes e outras, a empresa deve substituir o colaborador que falta. Não substituindo, afeta na produção. O custo da substituição é calculado em função das horas que o faltoso deixa de trabalhar.
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-bold text-decoration-underline">Grupo D</h6>
+        <p>
+            Representa os custos dos grupos A e B com os colaboradores que vão substituir aqueles nas férias e nas faltas justificadas.
+        </p>
+    </div>
+
+    <div class="mb-3">
+        <h6 class="fw-bold text-decoration-underline">Informações sobre aviso prévio</h6>
+        <ul>
+            <li>1 – Com o advento da Constituição Federal a duração do aviso prévio era, até outubro/2011, de 30 (trinta) dias, independentemente do tempo de serviço do empregado na empresa. Com a publicação da Lei 12.506/2011, a partir de 13/10/2011 a duração passou a ser considerada de acordo com o tempo de serviço do empregado, podendo chegar até a 90 (noventa) dias.</li>
+            <li>2 – Com a LEI 12.506/2011, o aviso prévio é de 30 (trinta) dias, mais 3 (três) dias por cada ano trabalhado, com o máximo de 90 (noventa) dias. Assim o valor do aviso prévio indenizado é de um salário mais um salário a cada 10 (dez) anos, com o máximo de 3 (três) salários em 20 (vinte) anos ou mais de trabalho.</li>
+        </ul>
+    </div>
+</div>
+
 {% endblock %}

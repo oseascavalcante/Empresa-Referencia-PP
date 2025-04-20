@@ -35,8 +35,10 @@ class GrupoCalculationsService:
                 (Decimal(grupo_a.dec_salario) + Decimal(grupo_a.abono_ferias)) / Decimal(100)
             )
             calc_grupo_a.total_grupo_a = (
-                calc_grupo_a.cpp + Decimal(grupo_a.fgts) +
-                Decimal(grupo_a.dec_salario) + Decimal(grupo_a.abono_ferias) +
+                calc_grupo_a.cpp + 
+                Decimal(grupo_a.fgts) +
+                Decimal(grupo_a.dec_salario) + 
+                Decimal(grupo_a.abono_ferias) +
                 calc_grupo_a.cpp_fgts_sal_abono
             )
             calc_grupo_a.save()
@@ -74,18 +76,18 @@ class GrupoCalculationsService:
                 return
 
             # Cálculos
-            calc_grupo_b.multa_fgts = (
+            calc_grupo_b.multa_fgts = 100 * (
                 percentual_multa_fgts * (
                     fgts + fgts * (dec_terc_salario + abono_ferias)
                 ) * ed
             )
+            
+            calc_grupo_b.aviso_previo_indenizado = 100 * ed * (1 + (2 if me / 120 > 2 else me / 120)) / me
+            calc_grupo_b.fgts_sobre_aviso_previo = fgts * calc_grupo_b.aviso_previo_indenizado
 
-            calc_grupo_b.aviso_previo_indenizado = ed * (1 + (2 if me / 120 > 2 else me / 120)) / me
-            calc_grupo_b.multa_fgts_indenizacao = fgts * calc_grupo_b.aviso_previo_indenizado
-
-            calc_grupo_b.total_grupo_b = 100*(
+            calc_grupo_b.total_grupo_b = (
                 calc_grupo_b.multa_fgts +
-                calc_grupo_b.multa_fgts_indenizacao +
+                calc_grupo_b.fgts_sobre_aviso_previo +
                 calc_grupo_b.aviso_previo_indenizado
             )
 

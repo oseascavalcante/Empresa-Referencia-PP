@@ -88,6 +88,8 @@ class GrupoResultadosView(DetailView):
 
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
         context['contrato'] = contrato
+        context['grupo_a'] = GrupoAEncargos.objects.filter(contrato=contrato).first()
+        context['calc_grupo_a'] = CalcGrupoAEncargos.objects.filter(contrato=contrato).first()
         context['calc_grupo_b'] = CalcGrupoBIndenizacoes.objects.filter(contrato=contrato).first()
         context['calc_grupo_c'] = CalcGrupoCSubstituicoes.objects.filter(contrato=contrato).first()
         context['calc_grupo_d'] = CalcGrupoD.objects.filter(contrato=contrato).first()
