@@ -11,7 +11,7 @@
     <div>
         <small class="text-muted">
             <form method="get" class="form-inline">
-                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.2rem;"> Contrato:</label>                
+                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;"> Contrato:</label>                
                 <select id="contratoSelect" class="form-select d-inline w-auto mx-2" onchange="if(this.value) window.location.href=this.value">
                     <option value="#">-- Escolha --</option>
                     {% for c in contratos %}
@@ -28,27 +28,60 @@
     <form method="post">
         {% csrf_token %}
         <div class="row d-flex justify-content-center align-items-stretch mt-3">
-
             <!-- GRUPO A -->
             <div class="col-lg-4 d-flex">
                 <div class="card w-100 h-100">
-                    <div class="card-header">Grupo A - Despesas sobre a folha de pagamento</div>
+                    <div class="card-header bg-primary text-white">Grupo A - Despesas sobre a folha de pagamento</div>
+                    <div class="card-body">
+                        <!-- Subgrupo A0 - Forma de Tributação -->
+                        <h6 class="fw-bold" style="color: #483D8B">A0 - Forma de Tributação</h6>
+                        <div class="mb-2 row">
+                            <label class="col-6 col-form-label">{{ form_a.forma_tributacao.label }}</label>
+                            <div class="col-6">
+                                {{ form_a.forma_tributacao|add_class:"form-select" }}
+                            </div>
+                        </div>
+                        <div class="mb-2 row">
+                            
+                            <div class="mb-2 row">
+                                <label class="col-6 col-form-label d-flex align-items-center">
+                                  {{ form_a.percentual_cprb.label }}
+                                  <i class="fas fa-question-circle ms-1 text-primary"
+                                     tabindex="0"
+                                     data-bs-toggle="popover"
+                                     data-bs-trigger="hover focus"
+                                     title="Campo CPRB (%)"
+                                     data-bs-content="Este campo é desabilitado automaticamente ao selecionar a opção CPP, pois a empresa utiliza contribuição sobre a folha de pagamento.">
+                                  </i>
+                                </label>
+                                <div class="col-6">
+                                  <input type="number" name="{{ form_a.percentual_cprb.html_name }}" value="{{ form_a.percentual_cprb.value }}"
+                                         class="form-control" id="id_percentual_cprb" step="0.01">
+                                </div>
+                            </div>
+                              
+                        </div>
+                    </div>                   
                     <div class="card-body">
                         <!-- Subgrupo A1 -->
-                        <h6 class="text-primary fw-bold">A1 - Recolhimento ao INSS e outras entidades</h6>
+                        <h6 class="fw-bold" style="color: #483D8B" >A1 - Recolhimento ao INSS e outras entidades</h6>
                         {% for field in form_a.visible_fields %}
                             {% if field.name in "inss incra sebrae senai sesi sal_educacao rat fap fgts" %}
                             <div class="mb-2 row">
                                 <label class="col-6 col-form-label">{{ field.label }}</label>
                                 <div class="col-6">
-                                    {{ field|add_class:"form-control" }}
+                                    {% if field.name == "inss" %}
+                                    <input type="number" name="{{ field.html_name }}" value="{{ field.value }}" class="form-control" id="{{ field.id_for_label }}">
+                                    {% else %}
+                                        {{ field|add_class:"form-control" }}
+                                    {% endif %}                                 
                                 </div>
                             </div>
                             {% endif %}
                         {% endfor %}
 
                         <!-- Subgrupo A2 -->
-                        <h6 class="text-primary fw-bold mt-3">A2 - Provisão para 13º</h6>
+                        <h6 class="fw-bold" style="color: #483D8B">A2 - Provisão para 13º</h6>
                         <div class="mb-2 row">
                             <label class="col-6 col-form-label">{{ form_a.dec_salario.label }}</label>
                             <div class="col-6">
@@ -57,7 +90,7 @@
                         </div>
 
                         <!-- Subgrupo A3 -->
-                        <h6 class="text-primary fw-bold mt-3">A3 - Provisão de abono de férias</h6>
+                        <h6 class="fw-bold" style="color: #483D8B">A3 - Provisão de abono de férias</h6>
                         <div class="mb-2 row">
                             <label class="col-6 col-form-label">{{ form_a.abono_ferias.label }}</label>
                             <div class="col-6">
@@ -72,7 +105,7 @@
             <div class="col-lg-4 d-flex">
 
                 <div class="card w-100 h-100 d-flex flex-column justify-content-start">
-                    <div class="card-header">Grupo B - Indenizações por demissões sem justa causa</div>
+                    <div class="card-header bg-secondary text-white">Grupo B - Indenizações por demissões sem justa causa</div>
                     <div class="card-body">
                         {% for field in form_b.visible_fields %}
                         <div class="mb-2 row">
@@ -90,7 +123,7 @@
             <div class="col-lg-4 d-flex">
 
                 <div class="card w-100 h-100 d-flex flex-column justify-content-start">
-                    <div class="card-header">Grupo C - Horas não trabalhadas no ano (faltas justificadas)</div>
+                    <div class="card-header bg-success text-white">Grupo C - Horas não trabalhadas no ano (faltas justificadas)</div>
                     <div class="card-body">
                         {% for field in form_c.visible_fields %}
                         <div class="mb-2 row">
@@ -116,4 +149,119 @@
         </div>
     </form>
 </div>
+
+<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
+
+<div class="container mt-4">
+    <h5 class="fw-bold" style="color: #483D8B">Informações complementares:</h5>
+
+    <div class="container mt-4">
+        <!-- Grupo A -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-decoration-underline">Grupo A – Encargos sobre a folha de pagamento</h6>
+          <p>
+            Refere-se aos encargos legais pagos mensalmente pela empresa com base nos salários dos colaboradores.
+            Inclui contribuições como INSS, FGTS, SEBRAE, SESI, SENAI, salário educação, RAT e FAP.
+          </p>
+          <p>
+            A escolha da <strong>forma de tributação</strong> (CPP ou CPRB) afeta diretamente o campo <strong>INSS (%)</strong>. 
+            Empresas desoneradas devem utilizar a CPRB (percentual sobre a receita bruta) em vez da contribuição patronal de 20%.
+          </p>
+        </div>
+      
+        <!-- Grupo B -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-decoration-underline">Grupo B – Indenizações por demissões sem justa causa</h6>
+          <p>
+            Refere-se aos custos com colaboradores desligados ao final do contrato. Calcula-se com base no percentual de empregados demitidos (ED) 
+            e no tempo médio de permanência na empresa (ME).
+          </p>
+          <p>
+            Utilize dados reais ou estimativas confiáveis de turnover (ED) e tempo médio no emprego (ME) para uma projeção precisa.
+          </p>
+        </div>
+      
+        <!-- Grupo C -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-decoration-underline">Grupo C – Faltas justificadas e férias</h6>
+          <p>
+            Considera o custo de substituição dos empregados ausentes por motivos legais (férias, doenças, luto, casamento, maternidade, etc.).
+            O cálculo baseia-se na média de horas não trabalhadas ao longo do ano.
+          </p>
+          <p>
+            Importante: não inclua faltas por feriados — elas já estão compensadas nas horas anuais de trabalho.
+          </p>
+        </div>
+      
+        <!-- Grupo D -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-decoration-underline">Grupo D – Custos com substituição de ausentes</h6>
+          <p>
+            Representa os encargos dos Grupos A e B que incidem sobre os funcionários que substituem colaboradores ausentes do Grupo C.
+          </p>
+          <p>
+            Esse cálculo garante que o custo de encargos sobre o substituto também seja considerado, evitando distorções nos custos reais.
+          </p>
+        </div>
+      
+        <!-- Fatores que impactam os encargos -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-decoration-underline">Observações relevantes</h6>
+          <ul>
+            <li>Regiões com alto índice de chuvas tendem a aumentar o número de faltas (Grupo C).</li>
+            <li>Serviços de curta duração e pequeno porte aumentam a chance de demissões (Grupo B).</li>
+            <li>Mercados aquecidos tendem a ter menos demissões, reduzindo os encargos de B.</li>
+          </ul>
+        </div>
+      </div>
+      
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const selectForma = document.getElementById("id_forma_tributacao");
+      const inssField = document.getElementById("id_inss");
+      const cprbField = document.getElementById("id_percentual_cprb");
+  
+      function toggleFormaTributacao() {
+        if (!selectForma || !inssField || !cprbField) return;
+  
+        if (selectForma.value === "cprb") {
+          // CPRB: desabilita INSS, habilita CPRB
+          inssField.setAttribute("readonly", true);
+          inssField.classList.add("bg-light");
+          inssField.value = "0.00";
+  
+          cprbField.removeAttribute("readonly");
+          cprbField.classList.remove("bg-light");
+          if (!cprbField.value || cprbField.value === "0.00") {
+            cprbField.value = "4.50";
+          }
+        } else if (selectForma.value === "cpp") {
+          // CPP: habilita INSS, desabilita CPRB
+          inssField.removeAttribute("readonly");
+          inssField.classList.remove("bg-light");
+          inssField.value = "20.00";
+  
+          cprbField.setAttribute("readonly", true);
+          cprbField.classList.add("bg-light");
+          cprbField.value = "0.00";
+        }
+      }
+  
+      toggleFormaTributacao(); // Executa ao carregar a página
+      selectForma.addEventListener("change", toggleFormaTributacao);
+    });
+  </script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      popoverTriggerList.forEach(function (popoverTriggerEl) {
+        new bootstrap.Popover(popoverTriggerEl);
+      });
+    });
+  </script>
+  
+  
 {% endblock %}

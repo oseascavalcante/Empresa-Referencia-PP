@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, FormView
 from .models import CadastroContrato
 from .forms import CadastroContratoForm
+from django import forms
 
 class ContractCreateView(CreateView):
     model = CadastroContrato
@@ -42,3 +43,24 @@ def abrir_contratos(request):
     # Lógica para exibir a relação de contratos
     contracts = CadastroContrato.objects.all()  # Substitua pelo modelo correto
     return render(request, 'abrir_contratos.html', {'contracts': contracts})
+
+
+class SelecionarContratoForm(forms.Form):
+    contrato_id = forms.ModelChoiceField(
+        queryset=CadastroContrato.objects.all(),
+        label="Contrato",
+        widget=forms.Select(attrs={"class": "form-control"}),
+        empty_label="Selecione um contrato"
+    )
+
+
+class SelecionarContratoView(FormView):
+    template_name = "selecionar_contrato.html"
+    form_class = SelecionarContratoForm
+
+    def form_valid(self, form):
+        contrato = form.cleaned_data["contrato_id"]
+        self.request.session["contrato_id"] = contrato.contrato
+
+        next_url = self.request.GET.get("next") or "/"
+        return redirect(next_url)

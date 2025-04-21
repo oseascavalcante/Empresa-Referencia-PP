@@ -3,8 +3,26 @@ from decimal import Decimal, InvalidOperation
 from cadastro_equipe.models import Funcao
 from cad_contrato.models import CadastroContrato  # Importando o modelo de contrato
 
+
 class GrupoAEncargos(models.Model):
+    FORMA_TRIBUTACAO_CHOICES = [
+    ('cpp', 'CPP - 20% sobre a folha (Contribuição Patronal)'),
+    ('cprb', 'CPRB - % sobre a receita bruta (Desoneração da Folha)'),
+    ]
+    # Definindo os campos do modelo   
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
+    forma_tributacao = models.CharField(
+    max_length=5,
+    choices=FORMA_TRIBUTACAO_CHOICES,
+    default='cpp',
+    verbose_name='Forma de Tributação (CPP ou CPRB)'
+    )
+    percentual_cprb = models.DecimalField(
+    max_digits=5,
+    decimal_places=2,
+    default=4.50,
+    verbose_name="CPRB (%) sobre receita bruta"
+    )
     inss = models.DecimalField(max_digits=5, decimal_places=2, default=20.00, verbose_name="INSS (%)")
     incra = models.DecimalField(max_digits=5, decimal_places=2, default=0.20, verbose_name="INCRA (%)")
     sebrae = models.DecimalField(max_digits=5, decimal_places=2, default=0.60,  verbose_name="SEBRAE (%)")
@@ -26,16 +44,16 @@ class GrupoAEncargos(models.Model):
         max_digits=5,
         decimal_places=2,
         choices=[
-            (0.50, '0,5%'),
-            (1.00, '1,0%'),
-            (1.50, '1,5%'),
-            (2.00, '2,0%'),
+            (0.50, '0,5'),
+            (1.00, '1,0'),
+            (1.50, '1,5'),
+            (2.00, '2,0'),
         ],
         default=1.00,
         verbose_name="FAP (Fator Acidentário de Prevenção)"
     )
     fgts = models.DecimalField(max_digits=5, decimal_places=2,  default=8.00, verbose_name="FGTS (%)")
-    dec_salario = models.DecimalField(max_digits=5, decimal_places=2, default=8.33,  verbose_name="13 Salário (R$)")
+    dec_salario = models.DecimalField(max_digits=5, decimal_places=2, default=8.33,  verbose_name="13 Salário (%)")
     abono_ferias = models.DecimalField(max_digits=5, decimal_places=2,  default=2.78, verbose_name="Abono de Férias (%)")
 
 
@@ -44,9 +62,9 @@ class GrupoAEncargos(models.Model):
 
 class GrupoBIndenizacoes(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
-    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões")
+    demissoes = models.DecimalField(max_digits=5, decimal_places=2,   default=100.00, verbose_name="Demissões (%)")
     meses_emprego = models.IntegerField(default=36, verbose_name="Meses no emprego")
-    multa_fgts = models.DecimalField(max_digits=5, decimal_places=2, default=40.00, verbose_name="Percentual multa do FGTS")
+    multa_fgts = models.DecimalField(max_digits=5, decimal_places=2, default=40.00, verbose_name="Multa do FGTS (%)")
 
     def __str__(self):
         return f"Grupo B Indenizações - ID {self.id}"
@@ -88,10 +106,6 @@ class CalcGrupoAEncargos(models.Model):
 
 class CalcGrupoBIndenizacoes(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
-
-    ed = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Demissões = ED")
-    me = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name="Meses no emprego = ME")
-    percentual_multa_fgts = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Percentual multa do FGTS")
 
     multa_fgts = models.DecimalField(default=0, max_digits=100, decimal_places=2, verbose_name="Multa do FGTS")
     aviso_previo_indenizado = models.DecimalField(default=0, max_digits=5, decimal_places=2, verbose_name="Aviso prévio indenizado")

@@ -209,6 +209,11 @@
                         <div class="card-header">Valor Inicial do Contrato R$</div>
                         <div class="card-body">
                             <input type="number" id="valor_inicial" name="valor_inicial" class="form-control" value="{{ form.valor_inicial.value }}" step="0.01" min="0">
+                            {% if form.valor_inicial.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.valor_inicial.errors }}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

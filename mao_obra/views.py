@@ -7,10 +7,14 @@ from .models import CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubsti
 from cadastro_equipe.models import Funcao
 from cad_contrato.models import CadastroContrato
 from django import forms
+from .services import GrupoCalculationsService
+from cad_contrato.utils import contrato_obrigatorio
+from django.utils.decorators import method_decorator
 
+@method_decorator(contrato_obrigatorio, name='dispatch')
 class GrupoABCFormView(FormView):
     template_name = 'grupo_abc_form.html'
-    success_url = '/'
+    success_url = 'grupo_abc_resultados'
     form_class = GrupoAEncargosForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -58,8 +62,11 @@ class GrupoABCFormView(FormView):
             obj_a.save()
             obj_b.save()
             obj_c.save()
-
-            return redirect(self.success_url)
+            # Chamar o serviço de cálculo
+            GrupoCalculationsService.calcular_todos_grupos(self.contrato)
+            
+            # Redirecionar para a URL com o contrato_id
+            return redirect('grupo_abc_resultados', contrato_id=self.contrato.contrato)
 
         # Se algum formulário não for válido
         context = self.get_context_data()
@@ -84,6 +91,8 @@ class GrupoResultadosView(DetailView):
 
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
         context['contrato'] = contrato
+        context['grupo_a'] = GrupoAEncargos.objects.filter(contrato=contrato).first()
+        context['calc_grupo_a'] = CalcGrupoAEncargos.objects.filter(contrato=contrato).first()
         context['calc_grupo_b'] = CalcGrupoBIndenizacoes.objects.filter(contrato=contrato).first()
         context['calc_grupo_c'] = CalcGrupoCSubstituicoes.objects.filter(contrato=contrato).first()
         context['calc_grupo_d'] = CalcGrupoD.objects.filter(contrato=contrato).first()

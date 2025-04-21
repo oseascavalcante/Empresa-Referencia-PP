@@ -5,7 +5,25 @@ from .models import GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes, Ben
 class GrupoAEncargosForm(forms.ModelForm):
     class Meta:
         model = GrupoAEncargos
-        fields = ['inss', 'incra', 'sebrae', 'senai', 'sesi', 'sal_educacao', 'rat','fap', 'fgts', 'dec_salario', 'abono_ferias']
+        fields = [
+            'forma_tributacao',
+            'percentual_cprb',
+            'inss', 'incra', 'sebrae', 'senai', 'sesi', 'sal_educacao',
+            'rat', 'fap', 'fgts', 'dec_salario', 'abono_ferias'
+        ]
+        widgets = {
+            'percentual_cprb': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        forma = cleaned_data.get("forma_tributacao")
+
+        if forma == "cprb":
+            # Zera o INSS se estiver em regime de desoneração
+            cleaned_data["inss"] = 0.00
+
+        return cleaned_data
 
 class GrupoBIndenizacoesForm(forms.ModelForm):
     class Meta:

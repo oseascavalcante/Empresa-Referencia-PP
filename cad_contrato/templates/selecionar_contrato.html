@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="header">
+      <h5 class="mb-0">Selecione um contrato para continuar</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_contrato_id"><strong>Contrato:</strong></label>
+          {{ form.contrato_id }}
+          {% if form.contrato_id.errors %}
+            <div class="text-danger mt-1">
+              {{ form.contrato_id.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Acessar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

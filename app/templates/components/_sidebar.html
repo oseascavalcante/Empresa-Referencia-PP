@@ -15,7 +15,7 @@
 
             
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Configuração</a>
+                <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Controle</a>
                 <ul class="submenu">
                     <li><a href="{% url 'adicionar_equipe' %}" class="nav-link">Cadastrar Equipes</a></li>
                     <li><a href="{% url 'adicionar_funcao' %}" class="nav-link">Cadastrar Funções</a></li>
@@ -31,11 +31,12 @@
                             Encargos Sociais
                           </a>
                         {% else %}
-                          <a href="#" class="nav-link disabled" title="Contrato não selecionado">
+                          <a href="{% url 'selecionar_contrato' %}?next={% url 'grupo_abc_form' contrato_id=1 %}" class="nav-link">
                             Encargos Sociais
                           </a>
                         {% endif %}
                     </li>
+                      
                     <li><a href="#" class="nav-link">Salários</a></li>
                     <li><a href="#" class="nav-link">Adicionais</a></li>
                     <li><a href="#" class="nav-link">Benefícios</a></li>
