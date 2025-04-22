@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .titulo-grupo {
+        color: #483D8B;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .linha-abaixo-titulo {
+        border-bottom: 2px solid #483D8B;
+        margin-bottom: 0.5rem;
+    }
+    .botao-subgrupo {
+        width: 30ch;
+        background-color:rgb(204, 198, 240);
+        color:rgb(0, 0, 0);
+        text-align: left;
+    }
+    .linha-subgrupo {
+        border-bottom: 1px solid #b0b0b0;
+        margin-bottom: 0.25rem;
+    }
+    .total-grupo {
+        background-color: #e9ecef;
+        font-weight: bold;
+        color: #212529;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        border-radius: 0.25rem;
+        text-align: right;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <!-- Cabeçalho -->
+    <div class="header text-center">
+        Informações do Contrato
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <p class="form-label fw-bold" style="color:rgb(0, 0, 0); font-size: 1.1rem;">
+        Contrato: {{ contrato.contrato }} - {{ contrato.escopo_contrato }}
+    </p>
+    <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <!-- Dados do contrato -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Dados Contratuais</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+                {% if contrato %}
+                <a href="{% url 'composicao_equipe' contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                    Dados do Contrato
+                  </a>
+                {% else %}
+                <a href="{% url 'composicao_equipe' %}?next={% url 'composicao_equipe' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
+                    Dados do Contrato
+                  </a>
+                {% endif %}
+        </div>
+        <h5 class="titulo-grupo">Cadastros</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+                {% if contrato %}
+                    <a href="{% url 'composicao_equipe' contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                    Cadastro de Equipes
+                    </a>
+                {% else %}
+                    <a href="{% url 'composicao_equipe' %}?next={% url 'composicao_equipe' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
+                    Cadastro de Equipes
+                    </a>
+                {% endif %}
+            <span>Qtd Equipes</span>
+        </div>
+
+    </div>
+
+    <div class="header text-center">
+        Composição dos custos
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <!-- GRUPO: Mão de Obra -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Mão de Obra</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+                
+                {% if contrato %}
+                  <a href="{% url 'grupo_abc_form' contrato_id=contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                    Encargos Sociais
+                  </a>
+                {% else %}
+                  <a href="{% url 'selecionar_contrato' %}?next={% url 'grupo_abc_form' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
+                    Encargos Sociais
+                  </a>
+                {% endif %}
+
+            <span>R$ 3.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Salários</a>
+            <span>R$ 2.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Benefícios</a>
+            <span>R$ 1.000,00</span>
+        </div>
+                <div class="total-grupo d-flex justify-content-between">
+                    <span>Total:</span>
+                    <span>R$ 6.000,00</span>
+                </div>
+    </div>
+
+    <!-- Apoio Compartilhado -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Apoio Compartilhado</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Backoffice</a>
+            <span>R$ 3.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Outros</a>
+            <span>R$ 3.000,00</span>
+        </div>
+        <div class="total-grupo">R$ 6.000,00</div>
+    </div>
+
+    <!-- Veículos -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Veículos</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Locação/Financiamento</a>
+            <span>R$ 4.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Manutenção</a>
+            <span>R$ 5.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Implementos</a>
+            <span>R$ 5.000,00</span>
+        </div>
+        <div class="total-grupo">R$ 15.000,00</div>
+    </div>
+
+    <!-- Equipamentos -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Equipamentos</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">EPI</a>
+            <span>R$ 4.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">EPC</a>
+            <span>R$ 5.000,00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Ferramentas</a>
+            <span>R$ 4.000,00</span>
+        </div>
+        <div class="total-grupo">R$ 13.000,00</div>
+    </div>
+
+    <!-- Tecnologia e Comunicação -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Tecnologia e Comunicação</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Desp. com tecnologia</a>
+            <span>R$ 4.000,00</span>
+        </div>
+        <div class="total-grupo">R$ 4.000,00</div>
+    </div>
+
+    <!-- Materiais de Consumo -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Materiais de Consumo</h5>
+        <div class="linha-abaixo-titulo"></div>
+
+        <div class="d-flex justify-content-between align-items-center linha-subgrupo">
+            <a href="#" class="btn btn-sm botao-subgrupo">Despesa</a>
+            <span>R$ 4.000,00</span>
+        </div>
+        <div class="total-grupo">R$ 4.000,00</div>
+    </div>
+
+    <!-- Total geral -->
+    <hr class="my-3">
+    <div class="text-end fs-5 fw-bold text-primary">R$ 70.000,00</div>
+</div>
+{% endblock %}

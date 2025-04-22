@@ -212,7 +212,7 @@
                 data: data,
                 colHeaders: [
                     'Função', 'Quantidade', 'Salário', 'Periculosidade', 
-                    'Horas Extras 50%', 'Horas Extras 70%', 'Horas Extras 100%', 
+                    'Horas Extras 50%', 'Horas Prontidão', 'Horas Extras 100%', 
                     'Horas Sobreaviso', 'Horas Adicional Noturno', 'Outros Custos'
                 ],
                 columns: [
@@ -265,7 +265,7 @@
                         salario: row[2] || 0.00,
                         periculosidade: row[3] || false,
                         horas_extras_50: row[4] || 0,
-                        horas_extras_70: row[5] || 0,
+                        horas_prontidao: row[5] || 0,
                         horas_extras_100: row[6] || 0,
                         horas_sobreaviso: row[7] || 0,
                         horas_adicional_noturno: row[8] || 0,
@@ -341,7 +341,7 @@
                                 row.salario,
                                 row.periculosidade,
                                 row.horas_extras_50,
-                                row.horas_extras_70,
+                                row.horas_prontidao,
                                 row.horas_extras_100,
                                 row.horas_sobreaviso,
                                 row.horas_adicional_noturno,

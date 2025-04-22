@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView
+from django.views.generic import CreateView, FormView, TemplateView
 from .models import CadastroContrato
 from .forms import CadastroContratoForm
 from django import forms
@@ -64,3 +64,21 @@ class SelecionarContratoView(FormView):
 
         next_url = self.request.GET.get("next") or "/"
         return redirect(next_url)
+    
+
+class MenuDespesasView(TemplateView):
+    template_name = 'menu_despesas.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contrato_id = self.kwargs.get('contrato_id')  # Obtém o ID do contrato da URL
+        contrato = CadastroContrato.objects.filter(contrato=contrato_id).first()  # Busca o contrato no banco de dados
+
+        if contrato:
+            context['contrato'] = contrato
+            context['total_geral'] = contrato.valor_inicial  # Exemplo: usa o valor inicial do contrato
+        else:
+            context['contrato'] = None
+            context['total_geral'] = 0.00  # Valor padrão caso o contrato não seja encontrado
+
+        return context

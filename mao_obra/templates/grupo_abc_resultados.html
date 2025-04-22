@@ -154,18 +154,73 @@
 
 <hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
 
-<div class="container mt-4">
-    <h5 class="fw-bold" style="color: #483D8B">Dicas</h5>
-    <div class="mb-3">
-        <h6 class="fw-bold text-decoration-underline">Grupo A</h6>
 
-        <p>
-            <strong>Dica 1</strong> # <br>
-        </p>
+<div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
+    <h5 class="fw-bold mb-3" style="color: #483D8B;">
+        💡 Dica
+    </h5>
+    <p>
+         Estimativa de tributação sem desoneração da folha de pagamento.<br>
+    </p>
+  
+    <table class="table table-bordered table-sm mt-3 bg-white">
+        <thead class="table-light text-center">
+            <tr>
+                <th>Grupo</th>
+                <th>Descrição</th>
+                <th>Mínimo</th>
+                <th>Médio</th>
+                <th>Máximo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>A</strong></td>
+                <td>Encargos sobre folha (INSS, FGTS, 13º, férias, etc.)</td>
+                <td>45%</td>
+                <td>50%</td>
+                <td>55%</td>
+            </tr>
+            <tr>
+                <td><strong>B</strong></td>
+                <td>Indenizações por demissão sem justa causa</td>
+                <td>2%</td>
+                <td>3,5%</td>
+                <td>5%</td>
+            </tr>
+            <tr>
+                <td><strong>C</strong></td>
+                <td>Ausências justificadas (feriados, licenças)</td>
+                <td>5%</td>
+                <td>7,5%</td>
+                <td>10%</td>
+            </tr>
+            <tr>
+                <td><strong>D</strong></td>
+                <td>Substituição de colaboradores ausentes</td>
+                <td>3%</td>
+                <td>4%</td>
+                <td>6%</td>
+            </tr>
+            <tr class="table-light text-left">
+                <td><strong>E</strong></td>
+                <td><strong>Total estimado (A + B + C + D)</strong></td>
+                <td><strong>55%</strong></td>
+                <td><strong>65%</strong></td>
+                <td><strong>76%</strong></td>
+            </tr>
+        </tbody>
+    </table>
 
-    </div>
-
-    
+    <p class="mt-3 text-muted" style="font-size: 0.85rem;">
+        
+        🔹 Valores abaixo do mínimo podem indicar omissões nos encargos.<br>
+        ⚖️ Faixa média representa a prática de mercado em contratos estruturados.<br>
+        🔺 Valores acima do máximo são comuns em empresas com alta rotatividade ou operação ininterrupta.
+    </p>
 </div>
+
+
+
 
 {% endblock %}
