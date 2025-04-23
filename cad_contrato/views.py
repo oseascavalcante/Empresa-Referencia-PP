@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, TemplateView
+from django.views.generic import CreateView, FormView, TemplateView, DetailView, UpdateView
 from .models import CadastroContrato
 from .forms import CadastroContratoForm
 from django import forms
@@ -82,3 +82,28 @@ class MenuDespesasView(TemplateView):
             context['total_geral'] = 0.00  # Valor padrão caso o contrato não seja encontrado
 
         return context
+
+
+class DetailContratosView(DetailView):
+    model = CadastroContrato
+    template_name = 'detalhes_contrato.html'
+    context_object_name = 'contrato'
+
+    def get_object(self, queryset=None):
+        contrato_id = self.kwargs.get('pk')  # 'pk' é o padrão usado pelo DetailView
+        return CadastroContrato.objects.get(contrato=contrato_id)
+    
+
+class UpdateContratoView(UpdateView):
+    model = CadastroContrato
+    template_name = 'cadastro_contrato.html'
+    fields = [
+        'concessionaria', 'estado', 'municipio', 'escopo_contrato',
+        'inicio_vigencia_contrato', 'fim_vigencia_contrato',
+        'status_contrato', 'valor_inicial', 'descricao_alteracao', 'versao_base', 'numero_versao',
+    ]
+    context_object_name = 'contrato'
+
+    def get_success_url(self):
+        # Redireciona para o template `menu_despesas` após o update
+        return reverse_lazy('menu_despesas', kwargs={'contrato_id': self.object.contrato})

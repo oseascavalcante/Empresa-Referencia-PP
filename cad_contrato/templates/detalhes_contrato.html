@@ -1,0 +1,23 @@
+<!-- filepath: d:\PLANILHA_PRECIFICACAO\Empresa_Referencia_PP\cad_contrato\templates\detalhes_contrato.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Detalhes do Contrato</h1>
+    <div class="card">
+        <div class="card-header">
+            <strong>Contrato ID:</strong> {{ contrato.contrato }}
+        </div>
+        <div class="card-body">
+            <p><strong>Concessionária:</strong> {{ contrato.concessionaria }}</p>
+            <p><strong>Estado:</strong> {{ contrato.estado }}</p>
+            <p><strong>Município:</strong> {{ contrato.municipio }}</p>
+            <p><strong>Escopo do Contrato:</strong> {{ contrato.escopo_contrato }}</p>
+            <p><strong>Início da Vigência:</strong> {{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }}</p>
+            <p><strong>Fim da Vigência:</strong> {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</p>
+            <p><strong>Status:</strong> {{ contrato.get_status_contrato_display }}</p>
+            <p><strong>Valor Inicial:</strong> R$ {{ contrato.valor_inicial|floatformat:2 }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

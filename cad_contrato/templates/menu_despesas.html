@@ -49,15 +49,11 @@
         <div class="linha-abaixo-titulo"></div>
 
         <div class="d-flex justify-content-between align-items-center linha-subgrupo">
-                {% if contrato %}
-                <a href="{% url 'composicao_equipe' contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                <a href="{% url 'editar_contrato' contrato.contrato %}" 
+                   class="btn btn-sm botao-subgrupo" 
+                   onclick="return confirm('Tem certeza de que deseja editar as informações deste contrato?');">
                     Dados do Contrato
-                  </a>
-                {% else %}
-                <a href="{% url 'composicao_equipe' %}?next={% url 'composicao_equipe' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
-                    Dados do Contrato
-                  </a>
-                {% endif %}
+                </a>
         </div>
         <h5 class="titulo-grupo">Cadastros</h5>
         <div class="linha-abaixo-titulo"></div>

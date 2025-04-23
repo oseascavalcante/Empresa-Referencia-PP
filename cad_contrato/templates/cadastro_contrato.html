@@ -10,47 +10,39 @@
     
     <div class="header">Cadastrar Contratos</div>
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
-   
+    
     <!-- Bootstrap & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
-
-
-       
-            .datepicker {
-                font-size: 1rem; /* Ajusta o tamanho do texto */
-            }
-            .datepicker-dropdown {
-                background-color: white; /* Fundo branco */
-                border: 1px solid #ccc; /* Borda mais sutil */
-                border-radius: 8px; /* Borda arredondada */
-                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
-                padding: 8px;
-            }
-            .datepicker table {
-                width: 100%;
-            }
-            .datepicker td, .datepicker th {
-                padding: 8px; /* Ajusta o espaçamento */
-                text-align: center;
-            }
-            .datepicker td.today {
-                background-color: #007bff !important; /* Destaca a data atual */
-                color: white !important;
-                border-radius: 50%;
-            }
-            .datepicker td.active {
-                background-color: #28a745 !important; /* Cor verde para a data selecionada */
-                color: white !important;
-                border-radius: 50%;
-            }
-       
-        
-
-
-
+        .datepicker {
+            font-size: 1rem;
+        }
+        .datepicker-dropdown {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+        }
+        .datepicker table {
+            width: 100%;
+        }
+        .datepicker td, .datepicker th {
+            padding: 8px;
+            text-align: center;
+        }
+        .datepicker td.today {
+            background-color: #007bff !important;
+            color: white !important;
+            border-radius: 50%;
+        }
+        .datepicker td.active {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-radius: 50%;
+        }
         body {
             background-color: #f4f6f9;
             font-family: Arial, sans-serif;
@@ -60,7 +52,7 @@
             margin: auto;
         }
         .header {
-            background-color:rgb(231, 229, 247);
+            background-color: rgb(231, 229, 247);
             color: #483D8B;
             text-align: center;
             padding: 10px;
@@ -68,9 +60,8 @@
             font-weight: bold;
             border-radius: 5px;
         }
-
         .small-header {
-            background-color:rgb(231, 229, 247);
+            background-color: rgb(231, 229, 247);
             color: #483D8B;
             text-align: center;
             padding: 10px;
@@ -112,23 +103,16 @@
         input[name="escopo_contrato"], input[name="cidade"] {
             autocomplete: off;
         }
-
-         /* Adicionando estilo para reduzir o espaçamento entre linhas da tabela */
         .table tbody tr {
-            line-height: 1; /* Reduz a altura da linha */
+            line-height: 1;
         }
         .table td, .table th {
-            padding: 0.25rem; /* Reduz o padding das células */
+            padding: 0.25rem;
         }
-
     </style>
 </head>
 <body>
     <div class="container mt-4">
-
-        <div class="small-header"> Informações Gerais </div>
-        <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
-
         <form method="post">
             {% csrf_token %}
             <div class="row mt-2">
@@ -147,53 +131,28 @@
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Município</div>
-                        <div class="card-body" autocomplete="off">{{ form.municipio }}</div>
+                        <div class="card-body">{{ form.municipio }}</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Escopo do Contrato</div>
-                        <div class="card-body">
-                            {{ form.escopo_contrato }}
-                            {% if form.escopo_contrato.errors %}
-                                <div class="alert alert-danger mt-2">
-                                    {{ form.escopo_contrato.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
+                        <div class="card-body">{{ form.escopo_contrato }}</div>
                     </div>
                 </div>
-
             </div>
             
             <div class="row mt-2">
-            
-
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Início da Vigência do Contrato</div>
-                        <div class="card-body">
-                            <input type="text" id="inicio_vigencia_contrato" name="inicio_vigencia_contrato" class="form-control datepicker">
-                            {% if form.inicio_vigencia_contrato.errors %}
-                                <div class="alert alert-danger mt-2">
-                                    {{ form.inicio_vigencia_contrato.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
+                        <div class="card-body">{{ form.inicio_vigencia_contrato }}</div>
                     </div>
                 </div>
-                
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Fim da Vigência do Contrato</div>
-                        <div class="card-body">
-                            <input type="text" id="fim_vigencia_contrato" name="fim_vigencia_contrato" class="form-control datepicker">
-                            {% if form.fim_vigencia_contrato.errors %}
-                                <div class="alert alert-danger mt-2">
-                                    {{ form.fim_vigencia_contrato.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
+                        <div class="card-body">{{ form.fim_vigencia_contrato }}</div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -201,33 +160,20 @@
                         <div class="card-header">Status do Contrato</div>
                         <div class="card-body">{{ form.status_contrato }}</div>
                     </div>
-                </div>                
-
-
+                </div>
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Valor Inicial do Contrato R$</div>
-                        <div class="card-body">
-                            <input type="number" id="valor_inicial" name="valor_inicial" class="form-control" value="{{ form.valor_inicial.value }}" step="0.01" min="0">
-                            {% if form.valor_inicial.errors %}
-                            <div class="alert alert-danger mt-2">
-                                {{ form.valor_inicial.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
+                        <div class="card-body">{{ form.valor_inicial }}</div>
                     </div>
                 </div>
-
-
-
             </div>
 
             <div class="row mt-2">
-
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-header">Versão de Referência</div>
-                        <div class="card-body">{{ form.versao_base|add_class:"form-control" }}</div>
+                        <div class="card-body">{{ form.versao_base }}</div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -237,102 +183,46 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="card">
-                      <div class="card-header">Detalhe das Alterações Realizadas</div>
-                      <div class="card-body"><input type="text" name="descricao_alteracao" class="form-control" autocomplete="off"></div>
-                
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">Detalhe das Alterações Realizadas</div>
+                            <div class="card-body">
+                                {{ form.descricao_alteracao }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
 
             </div>   
             
-            
-
-
             <div class="row mt-3">
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
                 </div>
             </div>
-
-            <div class="small-header"> Contratos Cadastrados </div>
-            <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
-
-            <div class="row mt-2">
-                <div class="col-md-12">
-                    <div class="card">
-                        
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Concessionária</th>
-                                        <th>Estado</th>
-                                        <th>Município</th>
-                                        <th>Escopo</th>
-                                        <th>Versão</th>
-                                        <th>Versão de Referência</th>
-                                        <th>Data Início Vigência</th>
-                                        <th>Data Atualização</th>
-                                        <th>Ação</th> <!-- Coluna Ação adicionada -->
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for contract in contracts %}
-                                        <tr>
-                                            <td>{{ contract.contrato }}</td>
-                                            <td>{{ contract.concessionaria }}</td>
-                                            <td>{{ contract.estado }}</td>
-                                            <td>{{ contract.municipio }}</td>
-                                            <td>{{ contract.escopo_contrato }}</td>
-                                            <td>{{ contract.numero_versao }}</td>
-                                            <td>{{ contract.versao_base }}</td>
-                                            <td>{{ contract.inicio_vigencia_contrato|date:"d/m/Y" }}</td>
-                                            <td>{{ contract.updated_at|date:"d/m/Y H:i:s" }}</td>
-                                            <td>
-                                                <a href="#" class="btn btn-info btn-sm"><i class="fas fa-folder-open"></i> Abrir</a>
-                                                <a href="{% url 'menu_despesas' contract.contrato %}" class="btn btn-info btn-sm" style="background-color: #add8e6; color: black;"><i class="fa-solid fa-file-pen"></i> Editar</a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-
         </form>
     </div>
-    <!-- jQuery (Necessário para o Datepicker funcionar) -->
+
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- Bootstrap Datepicker JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-
-    <!-- Tradução para português (se necessário) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
-
-
     <script>
         $(document).ready(function(){
             $('.datepicker').datepicker({
-                format: 'dd/mm/yyyy', // Define o formato da data
+                format: 'dd/mm/yyyy',
                 todayHighlight: true,
                 autoclose: true,
-                language: "pt-BR" // Define para Português (se necessário)
+                language: "pt-BR"
             });
         });
     </script>
-
 </body>
 </html>
 
