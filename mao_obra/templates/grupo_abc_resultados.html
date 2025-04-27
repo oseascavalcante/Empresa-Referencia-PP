@@ -219,8 +219,16 @@
         🔺 Valores acima do máximo são comuns em empresas com alta rotatividade ou operação ininterrupta.
     </p>
 </div>
-
-
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary" onclick="window.history.back();">
+            ← Voltar
+        </button>
+        <a href="{% url 'menu_despesas' contrato.contrato %}" class="btn btn-primary">
+            Avançar →
+        </a>
+    </div>
+</div>
 
 
 {% endblock %}

@@ -158,4 +158,34 @@ class ComposicaoEquipeView(View):
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': f'Erro interno do servidor: {str(e)}'}, status=500)
+
+
+class ComposicaoEquipeJSONView(View):
+    def get(self, request, pk):
+        composicao = get_object_or_404(ComposicaoEquipe, pk=pk)
+        funcoes = FuncaoEquipe.objects.filter(composicao=composicao)
         
+        dados = []
+        for funcao in funcoes:
+            dados.append({
+                'funcao': funcao.funcao.nome,
+                'quantidade': funcao.quantidade_funcionarios,
+                'salario': funcao.funcao.salario,
+                'periculosidade': funcao.periculosidade,
+                'horas_extras_50': funcao.horas_extras_50,
+                'horas_prontidao': funcao.horas_prontidao,
+                'horas_extras_100': funcao.horas_extras_100,
+                'horas_sobreaviso': funcao.horas_sobreaviso,
+                'horas_adicional_noturno': funcao.horas_adicional_noturno,
+                'outros_custos': funcao.outros_custos,
+            })
+        
+        response_data = {
+            'equipe_id': composicao.equipe.id,
+            'quantidade_equipes': composicao.quantidade_equipes,
+            'data_mobilizacao': composicao.data_mobilizacao.strftime('%d/%m/%Y') if composicao.data_mobilizacao else '',
+            'data_desmobilizacao': composicao.data_desmobilizacao.strftime('%d/%m/%Y') if composicao.data_desmobilizacao else '',
+            'observacao': composicao.observacao,
+            'dados': dados
+        }
+        return JsonResponse(response_data)
