@@ -1,15 +1,21 @@
 from urllib import request
-from django.views.generic import FormView, DetailView
-from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import FormView, DetailView, View
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db import models  # Importação adicionada
 from .models import GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes
 from .forms import GrupoAEncargosForm, GrupoBIndenizacoesForm, GrupoCSubstituicoesForm
 from .models import CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes, CalcGrupoD, CalcGrupoE
-from cadastro_equipe.models import Funcao
+from cadastro_equipe.models import FuncaoEquipe, Funcao, ComposicaoEquipe
 from cad_contrato.models import CadastroContrato
 from django import forms
 from .services import GrupoCalculationsService
 from cad_contrato.utils import contrato_obrigatorio
 from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+import json
+
+
+
 
 @method_decorator(contrato_obrigatorio, name='dispatch')
 class GrupoABCFormView(FormView):
@@ -99,3 +105,4 @@ class GrupoResultadosView(DetailView):
         context['calc_grupo_e'] = CalcGrupoE.objects.filter(contrato=contrato).first()
 
         return context
+    

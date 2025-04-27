@@ -51,7 +51,7 @@
         <div class="d-flex justify-content-between align-items-center linha-subgrupo">
                 <a href="{% url 'editar_contrato' contrato.contrato %}" 
                    class="btn btn-sm botao-subgrupo" 
-                   onclick="return confirm('Tem certeza de que deseja editar as informações deste contrato?');">
+                   onclick="return confirm('Deseja editar as informações deste contrato?');">
                     Dados do Contrato
                 </a>
         </div>
@@ -97,7 +97,17 @@
             <span>R$ 3.000,00</span>
         </div>
         <div class="d-flex justify-content-between align-items-center linha-subgrupo">
-            <a href="#" class="btn btn-sm botao-subgrupo">Salários</a>
+            
+            {% if contrato %}
+                <a href="{% url 'editar_salarios' contrato_id=contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                    Salários
+                </a>
+            {% else %}
+                <a href="{% url 'selecionar_contrato' %}?next={% url 'editar_salarios' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
+                    Encargos Sociais
+                </a>
+            {% endif %}
+
             <span>R$ 2.000,00</span>
         </div>
         <div class="d-flex justify-content-between align-items-center linha-subgrupo">

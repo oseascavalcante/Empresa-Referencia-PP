@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Título principal -->
+    <div class="header">
+        Editar Salários
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <p class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;">Contrato: {{ contrato.contrato }} - {{ contrato.escopo_contrato }}</p>
+    <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <form id="salariosForm" method="post">
+        {% csrf_token %}
+        <div class="row d-flex justify-content-center align-items-stretch mt-3">
+            <!-- Mão de Obra Direta (MOD) -->
+            <div class="col-lg-8">
+                <div class="card w-100 h-100">
+                    <div class="card-header bg-primary text-white">
+                        Mão de Obra Direta (MOD)
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr class="text-center">
+                                        <th>Função</th>
+                                        <th>Salário (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for funcao in funcoes %}
+                                    <tr>
+                                        <td class="align-middle">{{ funcao.nome }}</td>
+                                        <td>
+                                            <input type="number" name="salario_mod_{{ funcao.id }}" class="form-control salario-input-mod" data-id="{{ funcao.id }}" value="{{ funcao.salario_atual }}" step="0.01" min="0">
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mão de Obra Indireta (MOI) -->
+            <div class="col-lg-8 mt-4">
+                <div class="card w-100 h-100">
+                    <div class="card-header bg-secondary text-white">
+                        Mão de Obra Indireta (MOI)
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr class="text-center">
+                                        <th>Função</th>
+                                        <th>Salário (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% comment %} Preencher aqui no futuro com funcoes_moi {% endcomment %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="row mt-3">
+            <div class="col-md-12 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                    ← Voltar
+                </button>
+                <button type="button" id="salvar" class="btn btn-save">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('salvar').addEventListener('click', function () {
+            if (!confirm('Deseja salvar as alterações?')) {
+                return;
+            }
+
+            const funcoes_mod = [];
+            document.querySelectorAll('.salario-input-mod').forEach(input => {
+                funcoes_mod.push({
+                    id: input.dataset.id,
+                    salario: parseFloat(input.value)
+                });
+            });
+
+            const funcoes_moi = [];
+            document.querySelectorAll('.salario-input-moi').forEach(input => {
+                funcoes_moi.push({
+                    id: input.dataset.id,
+                    salario: parseFloat(input.value)
+                });
+            });
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ funcoes: funcoes_mod })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Erro ao salvar os dados: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+    });
+</script>
+
+<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
+
+<div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
+    <h5 class="fw-bold mb-3" style="color: #483D8B;">Instruções</h5>
+    <p>
+        Atualize os salários conforme necessidade, separando a Mão de Obra Direta (MOD) e Mão de Obra Indireta (MOI).
+        Utilize valores em reais com duas casas decimais.
+        Após alterar os valores desejados, clique em <strong>Salvar</strong>.
+    </p>
+    <p>
+        Caso deseje retornar sem salvar, utilize o botão <strong>Voltar</strong>.
+    </p>
+</div>
+{% endblock %}

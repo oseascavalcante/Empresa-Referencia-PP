@@ -113,7 +113,7 @@
 </head>
 <body>
     <div class="container mt-4">
-        <form method="post">
+        <form method="post" onsubmit="return confirm('Deseja salvar este contrato?');">
             {% csrf_token %}
             <div class="row mt-2">
                 <div class="col-md-3">

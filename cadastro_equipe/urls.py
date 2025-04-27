@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import EquipeCreateView, FuncaoCreateView, ComposicaoEquipeView, ComposicaoEquipeDeleteView, ComposicaoEquipeUpdateView, ComposicaoEquipeDetailView, ComposicaoEquipeJSONView 
+from .views import EquipeCreateView, FuncaoCreateView, ComposicaoEquipeView, ComposicaoEquipeDeleteView, ComposicaoEquipeUpdateView, ComposicaoEquipeDetailView, ComposicaoEquipeJSONView, EditarSalariosView 
 
 urlpatterns = [
     path('adicionar-equipe/', EquipeCreateView.as_view(), name='adicionar_equipe'),
@@ -9,5 +9,6 @@ urlpatterns = [
     path('composicao/<uuid:pk>/editar/', ComposicaoEquipeUpdateView.as_view(), name='editar_composicao'),
     path('composicao/<uuid:pk>/detalhes/', ComposicaoEquipeDetailView.as_view(), name='detalhes_equipe'),  # Nova rota
     path('composicao/<uuid:pk>/json/', ComposicaoEquipeJSONView.as_view(), name='composicao_equipe_json'),
+    path('editar-salarios/<int:contrato_id>/', EditarSalariosView.as_view(), name='editar_salarios'),
     
 ]
