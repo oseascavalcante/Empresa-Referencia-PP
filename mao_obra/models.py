@@ -172,27 +172,52 @@ class BeneficiosColaborador(models.Model):
     refeicao = models.DecimalField(
         max_digits=7, decimal_places=2, default=398.00, verbose_name="Refeição"
     )
+    cesta_basica = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.00, verbose_name="Cesta básica"
+    )
+
+    alojamento = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.00, verbose_name="Alojamento"
+    )
+
+    seguro_vida = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.00, verbose_name="Seguro de vida"
+    )
+    previdencia_privada = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.00, verbose_name="Plano de previdência privada"
+    )
     transporte = models.DecimalField(
         max_digits=7, decimal_places=2, default=278.00, verbose_name="Transporte"
     )
-    outros_custos = models.DecimalField(max_digits=7, decimal_places=2, default=0.00, verbose_name='Outros Custos')
-    
+    percentual_participacao_transporte = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=6.00,
+        verbose_name="Participação do trabalhador no VT (%)"
+    )
+    dias_trabalhados_mes = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=21.00,
+        verbose_name="Dias médios trabalhados no mês"
+    )       
+    outros_custos = models.DecimalField(max_digits=7, decimal_places=2, default=0.00, verbose_name='Outros Custos')       
     total = models.DecimalField(
         max_digits=7, decimal_places=2, default=0, verbose_name="Total"
     )
-    
-    
     def save(self, *args, **kwargs):
         self.total = (
             self.assistencia_medica_odonto +
             self.exames_periodicos +
             self.refeicao +
-            self.transporte +  
-            self.outros_custos
+            self.transporte +
+            self.outros_custos +
+            self.alojamento +
+            self.cesta_basica +
+            self.seguro_vida +
+            self.previdencia_privada
         )
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"Benefícios por colaborador - Total: {self.total}"
 
 

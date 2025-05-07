@@ -1,20 +1,30 @@
-from urllib import request
-from django.views.generic import FormView, DetailView, View
+
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db import models  # Importação adicionada
-from .models import GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes
-from .forms import GrupoAEncargosForm, GrupoBIndenizacoesForm, GrupoCSubstituicoesForm
-from .models import CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes, CalcGrupoD, CalcGrupoE
-from cadastro_equipe.models import FuncaoEquipe, Funcao, ComposicaoEquipe
-from cad_contrato.models import CadastroContrato
-from django import forms
-from .services import GrupoCalculationsService
-from cad_contrato.utils import contrato_obrigatorio
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.http import JsonResponse
-import json
-
-
+from django.views import View
+from django.views.generic import FormView, DetailView
+from django.views.generic.edit import UpdateView
+from .models import (
+    GrupoAEncargos,
+    GrupoBIndenizacoes,
+    GrupoCSubstituicoes,
+    CalcGrupoAEncargos,
+    CalcGrupoBIndenizacoes,
+    CalcGrupoCSubstituicoes,
+    CalcGrupoD,
+    CalcGrupoE,
+    BeneficiosColaborador,
+)
+from .forms import (
+    GrupoAEncargosForm,
+    GrupoBIndenizacoesForm,
+    GrupoCSubstituicoesForm,
+    BeneficiosColaboradorForm,
+)
+from .services import GrupoCalculationsService
+from cad_contrato.models import CadastroContrato
+from cad_contrato.utils import contrato_obrigatorio
 
 
 @method_decorator(contrato_obrigatorio, name='dispatch')
@@ -105,4 +115,26 @@ class GrupoResultadosView(DetailView):
         context['calc_grupo_e'] = CalcGrupoE.objects.filter(contrato=contrato).first()
 
         return context
-    
+
+
+class BeneficiosColaboradorUpdateView(View):
+    template_name = 'editar_beneficios.html'
+
+    def get(self, request, contrato_id):
+        contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
+        beneficio, _ = BeneficiosColaborador.objects.get_or_create(contrato=contrato)
+        form = BeneficiosColaboradorForm(instance=beneficio)
+        return render(request, self.template_name, {'form': form, 'contrato': contrato})
+
+    def post(self, request, contrato_id):
+        contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
+        beneficio = get_object_or_404(BeneficiosColaborador, contrato=contrato)
+        form = BeneficiosColaboradorForm(request.POST, instance=beneficio)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.contrato = contrato  # Força vínculo
+            obj.save()
+            return redirect(reverse('menu_despesas', kwargs={'contrato_id': contrato_id}))
+
+        return render(request, self.template_name, {'form': form, 'contrato': contrato})

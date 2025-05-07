@@ -9,7 +9,7 @@ class ContractCreateView(CreateView):
     model = CadastroContrato
     form_class = CadastroContratoForm
     template_name = 'cadastro_contrato.html'
-    success_url = reverse_lazy('cadastro_contrato')
+    success_url = reverse_lazy('home')  # Redireciona para a página inicial após o cadastro
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

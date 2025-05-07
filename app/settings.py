@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "cad_contrato",
     'cadastro_equipe',
-    'mao_obra'
+    'mao_obra',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

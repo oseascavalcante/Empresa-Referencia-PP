@@ -104,14 +104,23 @@
                 </a>
             {% else %}
                 <a href="{% url 'selecionar_contrato' %}?next={% url 'editar_salarios' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
-                    Encargos Sociais
+                    Salários
                 </a>
             {% endif %}
 
             <span>R$ 2.000,00</span>
         </div>
         <div class="d-flex justify-content-between align-items-center linha-subgrupo">
-            <a href="#" class="btn btn-sm botao-subgrupo">Benefícios</a>
+
+            {% if contrato %}
+            <a href="{% url 'editar_beneficios' contrato_id=contrato.contrato %}" class="btn btn-sm botao-subgrupo">
+                Benefícios
+            </a>
+            {% else %}
+                <a href="{% url 'selecionar_contrato' %}?next={% url 'editar_beneficios' contrato_id=1 %}" class="btn btn-sm botao-subgrupo">
+                    Benefícios
+                </a>
+            {% endif %}
             <span>R$ 1.000,00</span>
         </div>
                 <div class="total-grupo d-flex justify-content-between">

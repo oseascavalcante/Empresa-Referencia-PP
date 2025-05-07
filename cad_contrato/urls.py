@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import ContractCreateView, lista_formularios, menu_principal, abrir_contratos, DetailContratosView
 from .views import SelecionarContratoView, UpdateContratoView
 from .views import MenuDespesasView

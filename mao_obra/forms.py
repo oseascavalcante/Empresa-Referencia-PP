@@ -1,6 +1,7 @@
 from django import forms
+from django.db import models  # Importa os campos do Django corretamente
+from cad_contrato import models as cad_contrato_models
 from .models import GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes, BeneficiosColaborador
-
 
 class GrupoAEncargosForm(forms.ModelForm):
     class Meta:
@@ -39,18 +40,10 @@ class GrupoCSubstituicoesForm(forms.ModelForm):
 class BeneficiosColaboradorForm(forms.ModelForm):
     class Meta:
         model = BeneficiosColaborador
-        fields = ['assistencia_medica_odonto', 'exames_periodicos', 'refeicao', 'transporte', 'outros_custos']
+        exclude = ['total', 'contrato']  # Exclui campo de chave estrangeira
         widgets = {
-            'assistencia_medica_odonto': forms.NumberInput(attrs={'class': 'form-control'}),
-            'exames_periodicos': forms.NumberInput(attrs={'class': 'form-control'}),
-            'refeicao': forms.NumberInput(attrs={'class': 'form-control'}),
-            'transporte': forms.NumberInput(attrs={'class': 'form-control'}),
-            'outros_custos': forms.NumberInput(attrs={'class': 'form-control'}),
+            field.name: forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
+            for field in model._meta.fields
+            if isinstance(field, (models.DecimalField, models.IntegerField)) and field.name not in ['total', 'contrato']
         }
-        labels = {
-            'assistencia_medica_odonto': 'Assistência Médica Odontológica',
-            'exames_periodicos': 'Exames Periódicos (um por ano)',
-            'refeicao': 'Refeição',
-            'transporte': 'Transporte',
-            'outros_custos': 'Outros Custos',
-        }
+
