@@ -9,5 +9,6 @@ urlpatterns = [
     path('cad_contrato/', include('cad_contrato.urls')),
     path('cadastro_equipe/', include('cadastro_equipe.urls')),
     path('mao_obra/', include('mao_obra.urls')),
+    path('custo_direto/', include('custo_direto.urls')),
 ]
 

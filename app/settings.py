@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'cadastro_equipe',
     'mao_obra',
     'django_extensions',
+    'custo_direto',
 ]
 
 MIDDLEWARE = [

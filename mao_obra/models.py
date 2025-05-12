@@ -160,6 +160,27 @@ class CalcGrupoE(models.Model):
     def __str__(self):
         return f"CalcGrupoD - Licitação {self.composicao.id}"
 
+#Gera uma tabela com os totais consolidados de cada grupo de encargos sociais
+# e benefícios, para facilitar a visualização e o cálculo do custo total do contrato.
+class EncargosSociaisCentralizados(models.Model):
+    contrato = models.OneToOneField(CadastroContrato, on_delete=models.CASCADE, related_name="encargos_centralizados")
+    total_grupo_a = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Total Grupo A")
+    total_grupo_b = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Total Grupo B")
+    total_grupo_c = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Total Grupo C")
+    total_grupo_d = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Total Grupo D")
+    total_grupo_e = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Total Grupo E")
+
+    def atualizar_totais(self):
+        """
+        Atualiza os valores consolidados com base nos cálculos existentes.
+        """
+        self.total_grupo_a = CalcGrupoAEncargos.objects.filter(contrato=self.contrato).first().total_grupo_a or 0.00
+        self.total_grupo_b = CalcGrupoBIndenizacoes.objects.filter(contrato=self.contrato).first().total_grupo_b or 0.00
+        self.total_grupo_c = CalcGrupoCSubstituicoes.objects.filter(contrato=self.contrato).first().total_grupo_c or 0.00
+        self.total_grupo_d = CalcGrupoD.objects.filter(contrato=self.contrato).first().total_grupo_d or 0.00
+        self.total_grupo_e = CalcGrupoE.objects.filter(contrato=self.contrato).first().total_grupo_e or 0.00
+        self.save()
+
 
 class BeneficiosColaborador(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
