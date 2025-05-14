@@ -1,6 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes, CalcGrupoD, CalcGrupoE, EncargosSociaisCentralizados, GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes
+from .models import (
+    CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes,
+    CalcGrupoD, CalcGrupoE, EncargosSociaisCentralizados,
+    GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes
+)
 from .services import GrupoCalculationsService
 
 @receiver(post_save, sender=GrupoAEncargos)
@@ -11,9 +15,9 @@ def calcular_grupos(sender, instance, **kwargs):
     Dispara os cálculos sempre que um objeto de GrupoAEncargos, GrupoBIndenizacoes
     ou GrupoCSubstituicoes for salvo.
     """
-    contrato = instance.contrato  # Obtém o contrato relacionado ao objeto salvo
-    GrupoCalculationsService.calcular_todos_grupos(contrato)
-    
+    contrato_id = instance.contrato.pk  # Passa apenas o ID
+    GrupoCalculationsService.calcular_todos_grupos(contrato_id)
+
 @receiver(post_save, sender=CalcGrupoAEncargos)
 @receiver(post_save, sender=CalcGrupoBIndenizacoes)
 @receiver(post_save, sender=CalcGrupoCSubstituicoes)

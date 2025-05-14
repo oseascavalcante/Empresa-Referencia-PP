@@ -1,5 +1,7 @@
 from decimal import Decimal
 import decimal
+
+from cad_contrato.models import CadastroContrato
 from .models import (
     GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes,
     CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes,
@@ -8,43 +10,96 @@ from .models import (
 
 class GrupoCalculationsService:
     @staticmethod
-    def calcular_grupo_a(contrato):
+    def calcular_grupo_a(contrato_id):
         try:
+            print("\n==== INÍCIO calcular_grupo_a ====")
+            
+            contrato = CadastroContrato.objects.get(pk=contrato_id)  # Busca segura
+            print(f"Contrato encontrado: {contrato.pk}")
+
             grupo_a = GrupoAEncargos.objects.filter(contrato=contrato).first()
             if not grupo_a:
-                print(f"GA -- Instância de Grupo A não encontrada para o contrato {contrato.id}.")
+                print(f"⚠️ Nenhum GrupoAEncargos encontrado para o contrato {contrato.pk}.")
                 return
 
-            calc_grupo_a, _ = CalcGrupoAEncargos.objects.update_or_create(
-                contrato=contrato,
-                defaults={}
-            )
+            print(f"Grupo A encontrado: {grupo_a}")
 
-            soma_seis_primeiros = (
-                Decimal(grupo_a.inss) +
-                Decimal(grupo_a.incra) +
-                Decimal(grupo_a.sebrae) +
-                Decimal(grupo_a.senai) +
-                Decimal(grupo_a.sesi) +
-                Decimal(grupo_a.sal_educacao)
-            )
+            # Primeiro busca se já existe cálculo para esse contrato
+            calc_grupo_a = CalcGrupoAEncargos.objects.filter(contrato=contrato).first()
 
-            calc_grupo_a.cpp = soma_seis_primeiros + (Decimal(grupo_a.rat) * Decimal(grupo_a.fap))
-            calc_grupo_a.cpp_fgts_sal_abono = (
-                (calc_grupo_a.cpp + Decimal(grupo_a.fgts)) *
-                (Decimal(grupo_a.dec_salario) + Decimal(grupo_a.abono_ferias)) / Decimal(100)
-            )
+            if calc_grupo_a:
+                print(f"🛠 Corrigindo campos de cálculo existentes para contrato {contrato.pk}")
+                calc_grupo_a.cpp = Decimal(str(calc_grupo_a.cpp or '0'))
+                calc_grupo_a.cpp_fgts_sal_abono = Decimal(str(calc_grupo_a.cpp_fgts_sal_abono or '0'))
+                calc_grupo_a.total_grupo_a = Decimal(str(calc_grupo_a.total_grupo_a or '0'))
+                calc_grupo_a.save()
+            else:
+                print(f"🆕 Criando novo CalcGrupoAEncargos para contrato {contrato_id}")
+                calc_grupo_a = CalcGrupoAEncargos.objects.create(
+                    contrato_id=contrato_id,  # ✅ Usa contrato_id
+                    cpp=Decimal('0'),
+                    cpp_fgts_sal_abono=Decimal('0'),
+                    total_grupo_a=Decimal('0'),
+                )
+
+
+                print(f"🆕 Criado novo registro de cálculo para contrato {contrato.pk}")
+
+            # Função para conversão segura
+            def safe_decimal(value, field_name):
+                try:
+                    val = Decimal(str(value)) if value is not None else Decimal('0')
+                    print(f"Campo {field_name}: {val}")
+                    return val
+                except Exception as e:
+                    print(f"Erro ao converter {field_name}: {e}")
+                    return Decimal('0')
+
+            print(f"[DEBUG] Tipo calc_grupo_a.cpp: {type(calc_grupo_a.cpp)}")
+            print(f"[DEBUG] Tipo fgts: {type(fgts)}")
+            print(f"[DEBUG] Tipo dec_salario: {type(dec_salario)}")
+            print(f"[DEBUG] Tipo abono_ferias: {type(abono_ferias)}")
+
+            
+            # Conversão de todos campos
+            inss = safe_decimal(grupo_a.inss, "INSS")
+            incra = safe_decimal(grupo_a.incra, "INCRA")
+            sebrae = safe_decimal(grupo_a.sebrae, "SEBRAE")
+            senai = safe_decimal(grupo_a.senai, "SENAI")
+            sesi = safe_decimal(grupo_a.sesi, "SESI")
+            sal_educacao = safe_decimal(grupo_a.sal_educacao, "Salário Educação")
+            rat = safe_decimal(grupo_a.rat, "RAT")
+            fap = safe_decimal(grupo_a.fap, "FAP")
+            fgts = safe_decimal(grupo_a.fgts, "FGTS")
+            dec_salario = safe_decimal(grupo_a.dec_salario, "13º Salário")
+            abono_ferias = safe_decimal(grupo_a.abono_ferias, "Abono de Férias")
+
+            print(f"[DEBUG] Valores para cálculo:")
+            print(f"cpp: {calc_grupo_a.cpp}, fgts: {fgts}, dec_salario: {dec_salario}, abono_ferias: {abono_ferias}")
+
+            # Cálculos
+            soma_seis_primeiros = inss + incra + sebrae + senai + sesi + sal_educacao
+            calc_grupo_a.cpp = soma_seis_primeiros + (rat * fap)
+
+            resultado_tmp = (calc_grupo_a.cpp + fgts) * (dec_salario + abono_ferias)
+
+            calc_grupo_a.cpp_fgts_sal_abono = resultado_tmp / Decimal('100')
+
             calc_grupo_a.total_grupo_a = (
-                calc_grupo_a.cpp + 
-                Decimal(grupo_a.fgts) +
-                Decimal(grupo_a.dec_salario) + 
-                Decimal(grupo_a.abono_ferias) +
+                calc_grupo_a.cpp +
+                fgts +
+                dec_salario +
+                abono_ferias +
                 calc_grupo_a.cpp_fgts_sal_abono
             )
-            calc_grupo_a.save()
-        except Exception as e:
-            print(f"GA -- Erro inesperado ao calcular CalcGrupoAEncargos: {e}")
 
+            calc_grupo_a.save()
+            print(f"✅ FIM calcular_grupo_a para contrato {contrato.pk}\n")
+
+        except Exception as e:
+            print(f"❌ GA -- Erro inesperado ao calcular CalcGrupoAEncargos: {e}")
+
+    
     @staticmethod
     def calcular_grupo_b(contrato):
         try:

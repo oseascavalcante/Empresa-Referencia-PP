@@ -20,8 +20,10 @@
                     <select class="form-select" name="contrato" onchange="this.form.submit()">
                         <option value="">Todos os Contratos</option>
                         {% for contrato in contratos %}
-                            <option value="{{ contrato.id }}" {% if contrato.id == contrato_selecionado %}selected{% endif %}>                                {{ contrato.nome }}
-                            </option>
+                        <option value="{{ contrato.pk }}" {% if contrato.pk|stringformat:"s" == contrato_selecionado %}selected{% endif %}>
+                            {{ contrato.nome|default:contrato.pk }}
+                        </option>
+                        
                         {% endfor %}
                     </select>
                     <button type="submit" class="btn btn-primary">Filtrar</button>
@@ -46,8 +48,8 @@
         <tbody>
             {% for custo in custos_funcoes %}
             <tr>
-                <td>{{ custo.contrato.nome }}</td>
-                <td>{{ custo.funcao_equipe.nome }}</td>
+                <td>{{ custo.contrato.nome|default:"(Sem nome)" }}</td>
+                <td>{{ custo.funcao_equipe.nome|default:"(Sem nome)" }}</td>
                 <td>{{ custo.quantidade_funcionarios }}</td>
                 <td>{{ custo.salario_base|floatformat:2 }}</td>
                 <td>{{ custo.beneficios|floatformat:2 }}</td>
@@ -64,14 +66,25 @@
     </table>
 
     <canvas id="graficoCustos" class="mt-5"></canvas>
+
+            <!-- Botões de ação -->
+            <div class="row mt-3">
+                <div class="col-md-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                        ← Voltar
+                    </button>
+                </div>
+            </div>
 </div>
+
+
 
 <script>
     const ctx = document.getElementById('graficoCustos').getContext('2d');
     const grafico = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [{% for custo in custos_funcoes %}'{{ custo.funcao_equipe.nome }}',{% endfor %}],
+            labels: [{% for custo in custos_funcoes %}'{{ custo.funcao_equipe.nome|default:"(Sem nome)" }}',{% endfor %}],
             datasets: [{
                 label: 'Custo Total (R$)',
                 data: [{% for custo in custos_funcoes %}{{ custo.custo_total }},{% endfor %}],

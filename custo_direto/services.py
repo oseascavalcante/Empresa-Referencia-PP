@@ -1,4 +1,4 @@
-from decimal import Decimal
+from cadastro_equipe.models import FuncaoEquipe
 from .models import CustoDiretoFuncao, CustoDireto
 from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
 from decimal import Decimal
@@ -38,13 +38,12 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos, beneficios):
     return custo_funcao
 
 
+
 def recalcular_custo_contrato(contrato):
-    from .models import CustoDiretoFuncao, CustoDireto
-    from cadastro_equipe.models import FuncaoEquipe
-    from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
-
-    from decimal import Decimal
-
+    """
+    Serviço que recalcula custos de todas as funções de um contrato
+    de forma segura, mesmo que encargos ou benefícios estejam ausentes.
+    """
     try:
         encargos = contrato.encargos_centralizados
     except EncargosSociaisCentralizados.DoesNotExist:
@@ -65,11 +64,11 @@ def recalcular_custo_contrato(contrato):
             }
         )
 
-        salario_base = funcao.salario
-        quantidade_funcionarios = funcao.quantidade_funcionarios
+        salario_base = funcao.salario or Decimal('0.00')
+        quantidade_funcionarios = funcao.quantidade_funcionarios or 0
 
         adicional_periculosidade = salario_base * Decimal('0.30') if funcao.periculosidade else Decimal('0')
-        salario_hora = salario_base / Decimal('220')
+        salario_hora = salario_base / Decimal('220') if salario_base else Decimal('0')
 
         valor_horas_extras_50 = salario_hora * Decimal('1.5') * funcao.horas_extras_50
         valor_horas_extras_100 = salario_hora * Decimal('2.0') * funcao.horas_extras_100
@@ -93,6 +92,12 @@ def recalcular_custo_contrato(contrato):
             custo_funcao.percentual_grupo_c = encargos.total_grupo_c
             custo_funcao.percentual_grupo_d = encargos.total_grupo_d
             custo_funcao.percentual_grupo_e = encargos.total_grupo_e
+        else:
+            custo_funcao.percentual_grupo_a = 0
+            custo_funcao.percentual_grupo_b = 0
+            custo_funcao.percentual_grupo_c = 0
+            custo_funcao.percentual_grupo_d = 0
+            custo_funcao.percentual_grupo_e = 0
 
         custo_funcao.calcular_custo_total()
         custo_funcao.save()
@@ -101,4 +106,3 @@ def recalcular_custo_contrato(contrato):
     custo_contrato.calcular_custo_total()
     custo_contrato.save()
     return custo_contrato
-
