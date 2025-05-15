@@ -1,21 +1,36 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView, DetailView, UpdateView
+
+from mao_obra.services import GrupoCalculationsService
 from .models import CadastroContrato
 from .forms import CadastroContratoForm
 from django import forms
+
+from .services import CadastroContratoService  # ✅ importa a service
 
 class ContractCreateView(CreateView):
     model = CadastroContrato
     form_class = CadastroContratoForm
     template_name = 'cadastro_contrato.html'
-    success_url = reverse_lazy('home')  # Redireciona para a página inicial após o cadastro
+    success_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['contracts'] = CadastroContrato.objects.all()
         return context
-    
+
+    def form_valid(self, form):
+        # Primeiro salva o contrato no banco
+        response = super().form_valid(form)
+
+        CadastroContratoService.inicializar_contrato(self.object)
+        GrupoCalculationsService.calcular_todos_grupos(self.object.pk)
+
+        # Retorna normalmente
+        return response
+
+
 
 def lista_formularios(request):
     # Simulando dados - substituir pela query real ao banco de dados

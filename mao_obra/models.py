@@ -172,14 +172,22 @@ class EncargosSociaisCentralizados(models.Model):
 
     def atualizar_totais(self):
         """
-        Atualiza os valores consolidados com base nos cálculos existentes.
+        Atualiza o total geral somando os grupos A, B, C, D e E, 
+        tratando possíveis valores None de forma segura.
         """
-        self.total_grupo_a = CalcGrupoAEncargos.objects.filter(contrato=self.contrato).first().total_grupo_a or 0.00
-        self.total_grupo_b = CalcGrupoBIndenizacoes.objects.filter(contrato=self.contrato).first().total_grupo_b or 0.00
-        self.total_grupo_c = CalcGrupoCSubstituicoes.objects.filter(contrato=self.contrato).first().total_grupo_c or 0.00
-        self.total_grupo_d = CalcGrupoD.objects.filter(contrato=self.contrato).first().total_grupo_d or 0.00
-        self.total_grupo_e = CalcGrupoE.objects.filter(contrato=self.contrato).first().total_grupo_e or 0.00
+        # Garante que todos os valores são Decimal e não None
+        total_a = self.total_grupo_a if self.total_grupo_a is not None else Decimal('0.00')
+        total_b = self.total_grupo_b if self.total_grupo_b is not None else Decimal('0.00')
+        total_c = self.total_grupo_c if self.total_grupo_c is not None else Decimal('0.00')
+        total_d = self.total_grupo_d if self.total_grupo_d is not None else Decimal('0.00')
+        total_e = self.total_grupo_e if self.total_grupo_e is not None else Decimal('0.00')
+
+        # Agora pode somar com segurança
+        self.total_geral = total_a + total_b + total_c + total_d + total_e
+
         self.save()
+
+
 
 
 class BeneficiosColaborador(models.Model):

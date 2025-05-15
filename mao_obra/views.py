@@ -99,7 +99,7 @@ class GrupoResultadosView(DetailView):
     def get_object(self):
         contrato_id = self.kwargs.get('contrato_id')
         self.contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
-        return get_object_or_404(CalcGrupoAEncargos, contrato=self.contrato)
+        return get_object_or_404(CalcGrupoAEncargos, contrato_id=self.contrato.pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -115,6 +115,7 @@ class GrupoResultadosView(DetailView):
         context['calc_grupo_e'] = CalcGrupoE.objects.filter(contrato=contrato).first()
 
         return context
+
 
 
 class BeneficiosColaboradorUpdateView(View):
