@@ -14,7 +14,6 @@ class GrupoCalculationsService:
         Calcula o Grupo A de Encargos para o contrato informado.
         """
         try:
-            print(f"==== INÍCIO calcular_grupo_a para contrato {contrato.pk} ====")
 
             grupo_a = GrupoAEncargos.objects.filter(contrato=contrato).first()
             if not grupo_a:
@@ -67,7 +66,6 @@ class GrupoCalculationsService:
             )
 
             calc_grupo_a.save()
-            print(f"✅ FIM calcular_grupo_a para contrato {contrato.pk}")
 
         except Exception as e:
             print(f"❌ GA -- Erro inesperado ao calcular CalcGrupoAEncargos: {e}")
@@ -79,7 +77,6 @@ class GrupoCalculationsService:
         Calcula o Grupo B de Indenizações para o contrato informado.
         """
         try:
-            print(f"==== INÍCIO calcular_grupo_b ====")
 
             grupo_a = GrupoAEncargos.objects.filter(contrato=contrato).first()
             grupo_b = GrupoBIndenizacoes.objects.filter(contrato=contrato).first()
@@ -138,7 +135,6 @@ class GrupoCalculationsService:
 
             # Salva o cálculo
             calc_grupo_b.save()
-            print(f"✅ FIM calcular_grupo_b para contrato {contrato.pk}")
 
         except decimal.InvalidOperation as e:
             print(f"❌ GB -- Erro de operação inválida ao calcular CalcGrupoBIndenizacoes: {e}")
@@ -152,7 +148,6 @@ class GrupoCalculationsService:
         Calcula o Grupo C de Substituições para o contrato informado.
         """
         try:
-            print(f"==== INÍCIO calcular_grupo_c para contrato {contrato.pk} ====")
 
             grupo_c = GrupoCSubstituicoes.objects.filter(contrato=contrato).first()
             if not grupo_c:
@@ -214,7 +209,6 @@ class GrupoCalculationsService:
                 calc_grupo_c.total_grupo_c = Decimal('0.00')
 
             calc_grupo_c.save()
-            print(f"✅ FIM calcular_grupo_c para contrato {contrato.pk}")
 
         except Exception as e:
             print(f"❌ GC -- Erro ao calcular CalcGrupoCSubstituicoes: {e}")
@@ -226,7 +220,6 @@ class GrupoCalculationsService:
         Calcula o Grupo D consolidando os Grupos A, B e C para o contrato informado.
         """
         try:
-            print(f"==== INÍCIO calcular_grupo_d para contrato {contrato.pk} ====")
 
             calc_grupo_a = CalcGrupoAEncargos.objects.filter(contrato=contrato).first()
             calc_grupo_b = CalcGrupoBIndenizacoes.objects.filter(contrato=contrato).first()
@@ -259,7 +252,6 @@ class GrupoCalculationsService:
             )
 
             calc_grupo_d.save()
-            print(f"✅ FIM calcular_grupo_d para contrato {contrato.pk}")
 
         except Exception as e:
             print(f"❌ GD -- Erro ao calcular CalcGrupoD: {e}")
@@ -271,7 +263,6 @@ class GrupoCalculationsService:
         Calcula o Grupo E consolidando os Grupos A, B, C e D para o contrato informado.
         """
         try:
-            print(f"==== INÍCIO calcular_grupo_e para contrato {contrato.pk} ====")
 
             calc_a = CalcGrupoAEncargos.objects.filter(contrato=contrato).first()
             calc_b = CalcGrupoBIndenizacoes.objects.filter(contrato=contrato).first()
@@ -309,7 +300,6 @@ class GrupoCalculationsService:
             )
 
             calc_grupo_e.save()
-            print(f"✅ FIM calcular_grupo_e para contrato {contrato.pk}")
 
         except Exception as e:
             print(f"❌ GE -- Erro ao calcular CalcGrupoE: {e}")
@@ -322,8 +312,12 @@ class GrupoCalculationsService:
         Calcula todos os grupos (A, B, C, D, E) para um contrato existente.
         """
         try:
-            contrato = CadastroContrato.objects.get(pk=contrato_id)
-            print(f"✅ Contrato carregado para cálculos: {contrato.pk}")
+            # Verifica se o parâmetro é um ID ou um objeto CadastroContrato
+            if isinstance(contrato_id, int):  # Se for um ID, busca o objeto correspondente
+                contrato = CadastroContrato.objects.get(pk=contrato_id)
+            else:
+                contrato = contrato_id  # Caso já seja um objeto CadastroContrato
+
 
             # Agora passa o OBJETO, não o ID
             GrupoCalculationsService.calcular_grupo_a(contrato)
@@ -331,8 +325,6 @@ class GrupoCalculationsService:
             GrupoCalculationsService.calcular_grupo_c(contrato)
             GrupoCalculationsService.calcular_grupo_d(contrato)
             GrupoCalculationsService.calcular_grupo_e(contrato)
-
-            print(f"✅ Todos os grupos calculados para o contrato {contrato.pk}")
 
         except CadastroContrato.DoesNotExist:
             print(f"❌ Contrato com ID {contrato_id} não encontrado. Não foi possível calcular os grupos.")

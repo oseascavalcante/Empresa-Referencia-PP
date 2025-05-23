@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+from django.db import IntegrityError
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, View
 from .models import Equipe, Funcao, ComposicaoEquipe, FuncaoEquipe
@@ -26,14 +27,35 @@ class FuncaoCreateView(CreateView):
     success_url = reverse_lazy('adicionar_funcao')
  
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ComposicaoEquipeUpdateView(UpdateView):
     model = ComposicaoEquipe
-    fields = ['quantidade_equipes', 'observacao']
+    fields = ['equipe', 'quantidade_equipes', 'observacao']
     success_url = reverse_lazy('composicao_equipe')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contrato = self.object.contrato  # Obtém o contrato da composição atual
+
+        # Filtra as equipes que ainda não foram cadastradas para o contrato
+        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).values_list('equipe_id', flat=True)
+        context['equipes'] = Equipe.objects.exclude(id__in=equipes_cadastradas)
+
+        # Log para depuração
+        logger.info(f"Equipes cadastradas para o contrato {contrato.id}: {list(equipes_cadastradas)}")
+        logger.info(f"Equipes disponíveis: {list(context['equipes'])}")
+
+        return context
+
     def form_valid(self, form):
-        response = super().form_valid(form)
-        return JsonResponse({'status': 'success'})
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            form.add_error(None, "Essa equipe já foi cadastrada para este contrato.")
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
         return JsonResponse({'status': 'error', 'message': form.errors}, status=400)
@@ -41,23 +63,22 @@ class ComposicaoEquipeUpdateView(UpdateView):
     def put(self, request, *args, **kwargs):
         data = json.loads(request.body)
         composicao = self.get_object()
-
+    
         composicao.quantidade_equipes = data.get('quantidade_equipes')
         composicao.observacao = data.get('observacao')
         composicao.save()
-
-        # Obter o contrato associado à composição
+    
         contrato = composicao.contrato
-
-        # Atualizar FuncaoEquipe
-        FuncaoEquipe.objects.filter(composicao=composicao).delete()
+    
+        # Atualizar ou criar registros em FuncaoEquipe
+        funcao_ids_atualizados = []
         for row in data.get('dados', []):
             funcao_nome = row['funcao'].strip()
             if not funcao_nome:
                 continue
-
+    
             funcao = get_object_or_404(Funcao, nome=funcao_nome)
-            
+    
             salario = row.get('salario', funcao.salario)
             if isinstance(salario, str):
                 salario = salario.replace(',', '.')
@@ -65,22 +86,29 @@ class ComposicaoEquipeUpdateView(UpdateView):
                 salario = Decimal(salario)
             except InvalidOperation:
                 return JsonResponse({'status': 'error', 'message': f'O valor "{salario}" não é um número decimal válido.'}, status=400)
-           
-            FuncaoEquipe.objects.create(
-                contrato=contrato,  # Passar o contrato associado
+    
+            # Atualizar ou criar FuncaoEquipe
+            funcao_equipe, created = FuncaoEquipe.objects.update_or_create(
+                contrato=contrato,
                 composicao=composicao,
                 funcao=funcao,
-                quantidade_funcionarios=row['quantidade'] or 0,
-                salario=row.get('salario', funcao.salario),
-                periculosidade=row['periculosidade'] if isinstance(row['periculosidade'], bool) else False,
-                horas_extras_50=row['horas_extras_50'] or 0,
-                horas_prontidao=row['horas_prontidao'] or 0,
-                horas_extras_100=row['horas_extras_100'] or 0,
-                horas_sobreaviso=row['horas_sobreaviso'] or 0,
-                horas_adicional_noturno=row['horas_adicional_noturno'] or 0,
-                outros_custos=row['outros_custos'] or 0.00
+                defaults={
+                    'quantidade_funcionarios': row['quantidade'] or 0,
+                    'salario': salario,
+                    'periculosidade': row['periculosidade'] if isinstance(row['periculosidade'], bool) else False,
+                    'horas_extras_50': row['horas_extras_50'] or 0,
+                    'horas_prontidao': row['horas_prontidao'] or 0,
+                    'horas_extras_100': row['horas_extras_100'] or 0,
+                    'horas_sobreaviso': row['horas_sobreaviso'] or 0,
+                    'horas_adicional_noturno': row['horas_adicional_noturno'] or 0,
+                    'outros_custos': row['outros_custos'] or 0.00,
+                }
             )
-
+            funcao_ids_atualizados.append(funcao_equipe.id)
+    
+        # Remover registros de FuncaoEquipe que não foram atualizados
+        FuncaoEquipe.objects.filter(composicao=composicao).exclude(id__in=funcao_ids_atualizados).delete()
+    
         return JsonResponse({'status': 'success'})
 
 class ComposicaoEquipeDeleteView(DeleteView):
@@ -105,7 +133,10 @@ class ComposicaoEquipeDetailView(DetailView):
 class ComposicaoEquipeView(View):
     def get(self, request, contrato_id=None):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
-        equipes = Equipe.objects.all()
+        
+         # Filtrar equipes que ainda não foram cadastradas para esse contrato
+        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).values_list('equipe_id', flat=True)
+        equipes = Equipe.objects.exclude(id__in=equipes_cadastradas)
         funcoes = Funcao.objects.all()
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
 
@@ -123,6 +154,23 @@ class ComposicaoEquipeView(View):
             'fim_vigencia_contrato': contrato.fim_vigencia_contrato  # Passa a data no contexto
         })
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contrato = self.object.contrato  # Obtém o contrato da composição atual
+
+        # Equipes já cadastradas, exceto a própria equipe da composição sendo editada
+        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).exclude(
+            pk=self.object.pk
+        ).values_list('equipe_id', flat=True)
+
+        context['equipes'] = Equipe.objects.exclude(id__in=equipes_cadastradas)
+
+        logger.info(f"Equipes cadastradas para o contrato {contrato.id}: {list(equipes_cadastradas)}")
+        logger.info(f"Equipes disponíveis: {list(context['equipes'])}")
+
+        return context
+
+
     def post(self, request, contrato_id):
         try:
             data = json.loads(request.body)
@@ -135,12 +183,21 @@ class ComposicaoEquipeView(View):
             contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
             equipe = get_object_or_404(Equipe, id=equipe_id)
 
+            # Verifica se já existe uma composição dessa equipe para o contrato
+            if ComposicaoEquipe.objects.filter(contrato=contrato, equipe=equipe).exists():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Essa equipe já está cadastrada para este contrato.'
+                }, status=400)
+
+            # Se não existir, cria
             composicao = ComposicaoEquipe.objects.create(
                 contrato=contrato,
                 equipe=equipe,
                 quantidade_equipes=quantidade_equipes,
                 observacao=observacao
             )
+
 
             for row in dados:
                 funcao_nome = row['funcao'].strip()  # Remove espaços em branco
@@ -209,12 +266,14 @@ class ComposicaoEquipeJSONView(View):
         
         response_data = {
             'equipe_id': composicao.equipe.id,
+            'equipe_nome': composicao.equipe.nome,  # Adicionado aqui
             'quantidade_equipes': composicao.quantidade_equipes,
             'data_mobilizacao': composicao.data_mobilizacao.strftime('%d/%m/%Y') if composicao.data_mobilizacao else '',
             'data_desmobilizacao': composicao.data_desmobilizacao.strftime('%d/%m/%Y') if composicao.data_desmobilizacao else '',
             'observacao': composicao.observacao,
             'dados': dados
         }
+
         return JsonResponse(response_data)
 
 

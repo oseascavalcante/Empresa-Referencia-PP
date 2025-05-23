@@ -58,6 +58,12 @@ class FuncaoEquipe(models.Model):
     horas_adicional_noturno = models.PositiveIntegerField(default=0, verbose_name="Horas Adicional Noturno")
     outros_custos = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Outros Custos")
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['contrato', 'composicao', 'funcao'], name='unique_funcao_por_composicao')
+        ]
+
+
     def save(self, *args, **kwargs):
         # Só sobrescreve o salário se não tiver um valor definido
         if self.salario == 0 or self.salario is None:

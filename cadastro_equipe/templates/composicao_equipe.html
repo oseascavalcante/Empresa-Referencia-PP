@@ -333,47 +333,61 @@
 
                     // Carregar dados da composição na tabela
                     fetch(`/cadastro_equipe/composicao/${composicaoId}/json/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById("equipe").value = data.equipe_id;
-                            document.getElementById("quantidade_equipes").value = data.quantidade_equipes;
-                            document.getElementById("data_mobilizacao").value = data.data_mobilizacao;
-                            document.getElementById("data_desmobilizacao").value = data.data_desmobilizacao;
-                            document.getElementById("observacao").value = data.observacao;
-
-                            const tabelaDados = data.dados.map(row => [
-                                row.funcao,
-                                row.quantidade,
-                                row.salario,
-                                row.periculosidade,
-                                row.horas_extras_50,
-                                row.horas_prontidao,
-                                row.horas_extras_100,
-                                row.horas_sobreaviso,
-                                row.horas_adicional_noturno,
-                                row.outros_custos
-                            ]);
-
-                            hot.loadData(tabelaDados);
-
-                            // Habilitar edição na tabela
-                            hot.updateSettings({
-                                cells: function (row, col) {
-                                    const cellProperties = {};
-                                    if (col !== 0 && col !== 2) { // Permitir edição em todas as colunas, exceto Função e Salário
-                                        cellProperties.readOnly = false;
-                                        cellProperties.className = 'htEditable';
-                                    } else {
-                                        cellProperties.readOnly = true;
-                                        cellProperties.className = 'htReadOnly';
-                                    }
-                                    return cellProperties;
+                    .then(response => response.json())
+                    .then(data => {
+                        const selectEquipe = document.getElementById("equipe");
+                
+                        // Verifica se a equipe existe no select
+                        if (!Array.from(selectEquipe.options).some(option => option.value == data.equipe_id)) {
+                            // Se não existe, adiciona
+                            const option = document.createElement("option");
+                            option.value = data.equipe_id;
+                            option.text = data.equipe_nome || `Equipe ${data.equipe_id}`;
+                            selectEquipe.appendChild(option);
+                        }
+                
+                        // Define a equipe selecionada
+                        selectEquipe.value = data.equipe_id;
+                
+                        document.getElementById("quantidade_equipes").value = data.quantidade_equipes;
+                        document.getElementById("data_mobilizacao").value = data.data_mobilizacao;
+                        document.getElementById("data_desmobilizacao").value = data.data_desmobilizacao;
+                        document.getElementById("observacao").value = data.observacao;
+                
+                        const tabelaDados = data.dados.map(row => [
+                            row.funcao,
+                            row.quantidade,
+                            row.salario,
+                            row.periculosidade,
+                            row.horas_extras_50,
+                            row.horas_prontidao,
+                            row.horas_extras_100,
+                            row.horas_sobreaviso,
+                            row.horas_adicional_noturno,
+                            row.outros_custos
+                        ]);
+                
+                        hot.loadData(tabelaDados);
+                
+                        // Habilita edição na tabela
+                        hot.updateSettings({
+                            cells: function (row, col) {
+                                const cellProperties = {};
+                                if (col !== 0 && col !== 2) { 
+                                    cellProperties.readOnly = false;
+                                    cellProperties.className = 'htEditable';
+                                } else {
+                                    cellProperties.readOnly = true;
+                                    cellProperties.className = 'htReadOnly';
                                 }
-                            });
-
-                            alert("Edição habilitada para a equipe: " + composicaoId);
-                        })
-                        .catch(error => console.error("Erro ao carregar dados da equipe:", error));
+                                return cellProperties;
+                            }
+                        });
+                
+                        alert("Edição habilitada para a equipe.");
+                    })
+                    .catch(error => console.error("Erro ao carregar dados da equipe:", error));
+                
                 });
             });
 

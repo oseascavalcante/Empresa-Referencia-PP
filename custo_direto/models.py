@@ -3,7 +3,9 @@ from decimal import Decimal
 
 class CustoDiretoFuncao(models.Model):
     contrato = models.ForeignKey('cad_contrato.CadastroContrato', on_delete=models.CASCADE, related_name='custos_diretos_funcoes')
-    funcao_equipe = models.ForeignKey('cadastro_equipe.FuncaoEquipe', on_delete=models.CASCADE, related_name='custos_diretos')
+    composicao = models.ForeignKey('cadastro_equipe.ComposicaoEquipe', on_delete=models.CASCADE, related_name='custos_diretos')
+    funcao = models.ForeignKey('cadastro_equipe.Funcao', on_delete=models.PROTECT, related_name='custos_diretos')
+
 
     quantidade_funcionarios = models.PositiveIntegerField(default=1)
 
@@ -14,6 +16,7 @@ class CustoDiretoFuncao(models.Model):
     valor_adicional_noturno = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     valor_prontidao = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     valor_sobreaviso = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    outros_custos = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     beneficios = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
@@ -47,6 +50,7 @@ class CustoDiretoFuncao(models.Model):
             self.valor_adicional_noturno +
             self.valor_prontidao +
             self.valor_sobreaviso +
+            self.outros_custos +
             self.beneficios
         )
 
@@ -62,8 +66,14 @@ class CustoDiretoFuncao(models.Model):
         self.custo_total = custo_bruto_total + self.valor_total_encargos
         return self.custo_total
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['contrato', 'composicao', 'funcao'], name='unique_custo_por_funcao')
+        ]
+
     def __str__(self):
-        return f"{self.contrato} - {self.funcao_equipe}"
+        return f"{self.contrato} - {self.composicao.equipe.nome} - {self.funcao.nome}"    
+    
 
 
 class CustoDireto(models.Model):
