@@ -1,13 +1,31 @@
 from django.db import models
 from decimal import Decimal
 
-class CustoDiretoFuncao(models.Model):
-    contrato = models.ForeignKey('cad_contrato.CadastroContrato', on_delete=models.CASCADE, related_name='custos_diretos_funcoes')
-    composicao = models.ForeignKey('cadastro_equipe.ComposicaoEquipe', on_delete=models.CASCADE, related_name='custos_diretos')
-    funcao = models.ForeignKey('cadastro_equipe.Funcao', on_delete=models.PROTECT, related_name='custos_diretos')
+# models.py
 
+from django.db import models
+from decimal import Decimal
+
+
+class CustoDiretoFuncao(models.Model):
+    contrato = models.ForeignKey(
+        'cad_contrato.CadastroContrato',
+        on_delete=models.CASCADE,
+        related_name='custos_diretos_funcoes'
+    )
+    composicao = models.ForeignKey(
+        'cadastro_equipe.ComposicaoEquipe',
+        on_delete=models.CASCADE,
+        related_name='custos_diretos'
+    )
+    funcao = models.ForeignKey(
+        'cadastro_equipe.Funcao',
+        on_delete=models.PROTECT,
+        related_name='custos_diretos'
+    )
 
     quantidade_funcionarios = models.PositiveIntegerField(default=1)
+    quantidade_total_funcionarios = models.PositiveIntegerField(default=0)  # ✅ Novo campo persistente
 
     salario_base = models.DecimalField(max_digits=12, decimal_places=2)
     adicional_periculosidade = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -37,6 +55,13 @@ class CustoDiretoFuncao(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def calcular_quantidade_total_funcionarios(self):
+        """
+        Calcula a quantidade total de funcionários considerando a quantidade de equipes.
+        """
+        quantidade_equipes = self.composicao.quantidade_equipes or 0
+        return int(self.quantidade_funcionarios * quantidade_equipes)
+
     def calcular_custo_total(self):
         """
         Calcula o custo total consolidado da função no contrato,
@@ -56,15 +81,27 @@ class CustoDiretoFuncao(models.Model):
 
         custo_bruto_total = custo_bruto_unitario * self.quantidade_funcionarios
 
-        self.valor_grupo_a = custo_bruto_total * (self.percentual_grupo_a / Decimal('100'))
-        self.valor_grupo_b = custo_bruto_total * (self.percentual_grupo_b / Decimal('100'))
-        self.valor_grupo_c = custo_bruto_total * (self.percentual_grupo_c / Decimal('100'))
-        self.valor_grupo_d = custo_bruto_total * (self.percentual_grupo_d / Decimal('100'))
+        # ✅ Conversão explícita dos percentuais para Decimal
+        grupo_a = Decimal(str(self.percentual_grupo_a or 0))
+        grupo_b = Decimal(str(self.percentual_grupo_b or 0))
+        grupo_c = Decimal(str(self.percentual_grupo_c or 0))
+        grupo_d = Decimal(str(self.percentual_grupo_d or 0))
+        grupo_e = Decimal(str(self.percentual_grupo_e or 0))
 
-        self.valor_total_encargos = custo_bruto_total * (self.percentual_grupo_e / Decimal('100'))
+        self.valor_grupo_a = custo_bruto_total * (grupo_a / Decimal('100'))
+        self.valor_grupo_b = custo_bruto_total * (grupo_b / Decimal('100'))
+        self.valor_grupo_c = custo_bruto_total * (grupo_c / Decimal('100'))
+        self.valor_grupo_d = custo_bruto_total * (grupo_d / Decimal('100'))
+
+        self.valor_total_encargos = custo_bruto_total * (grupo_e / Decimal('100'))
 
         self.custo_total = custo_bruto_total + self.valor_total_encargos
         return self.custo_total
+
+    def save(self, *args, **kwargs):
+        # Atualiza a quantidade total de funcionários antes de salvar
+        self.quantidade_total_funcionarios = self.calcular_quantidade_total_funcionarios()
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
@@ -72,9 +109,7 @@ class CustoDiretoFuncao(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.contrato} - {self.composicao.equipe.nome} - {self.funcao.nome}"    
-    
-
+        return f"{self.contrato} - {self.composicao.equipe.nome} - {self.funcao.nome}"   
 
 class CustoDireto(models.Model):
     contrato = models.OneToOneField('cad_contrato.CadastroContrato', on_delete=models.CASCADE, related_name='custo_direto')
