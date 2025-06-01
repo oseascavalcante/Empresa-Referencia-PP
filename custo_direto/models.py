@@ -78,6 +78,7 @@ class CustoDiretoFuncao(models.Model):
             self.outros_custos +
             self.beneficios
         )
+        custo_bruto_unitario_es = custo_bruto_unitario - self.beneficios  # Exclui benefícios do custo bruto unitário para encargos sociais
 
         custo_bruto_total = custo_bruto_unitario * self.quantidade_funcionarios
 
@@ -88,14 +89,14 @@ class CustoDiretoFuncao(models.Model):
         grupo_d = Decimal(str(self.percentual_grupo_d or 0))
         grupo_e = Decimal(str(self.percentual_grupo_e or 0))
 
-        self.valor_grupo_a = custo_bruto_total * (grupo_a / Decimal('100'))
-        self.valor_grupo_b = custo_bruto_total * (grupo_b / Decimal('100'))
-        self.valor_grupo_c = custo_bruto_total * (grupo_c / Decimal('100'))
-        self.valor_grupo_d = custo_bruto_total * (grupo_d / Decimal('100'))
+        self.valor_grupo_a = custo_bruto_unitario_es * (grupo_a / Decimal('100'))
+        self.valor_grupo_b = custo_bruto_unitario_es * (grupo_b / Decimal('100'))
+        self.valor_grupo_c = custo_bruto_unitario_es * (grupo_c / Decimal('100'))
+        self.valor_grupo_d = custo_bruto_unitario_es * (grupo_d / Decimal('100'))
 
-        self.valor_total_encargos = custo_bruto_total * (grupo_e / Decimal('100'))
+        self.valor_total_encargos = custo_bruto_unitario_es * (grupo_e / Decimal('100'))
 
-        self.custo_total = custo_bruto_total + self.valor_total_encargos
+        self.custo_total = custo_bruto_total + (self.valor_total_encargos * self.quantidade_funcionarios)
         return self.custo_total
 
     def save(self, *args, **kwargs):

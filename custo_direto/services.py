@@ -10,6 +10,10 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos=None, beneficios=Dec
     salario_base = funcao_equipe.salario
     quantidade_funcionarios = funcao_equipe.quantidade_funcionarios
 
+    # Verifica se a quantidade de funcionários é maior que zero
+    if quantidade_funcionarios <= 0:
+        return None  # Não salva no banco de dados
+
     adicional_periculosidade = salario_base * Decimal('0.30') if funcao_equipe.periculosidade else Decimal('0')
     salario_hora = salario_base / Decimal('220')
 

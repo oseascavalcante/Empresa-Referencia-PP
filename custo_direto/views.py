@@ -21,17 +21,26 @@ class DashboardCustoDiretoView(TemplateView):
         contrato_id = self.request.GET.get('contrato')
         equipe_id = self.request.GET.get('equipe')
 
-        custos_funcoes = CustoDiretoFuncao.objects.select_related(
+        custos_funcoes_queryset = CustoDiretoFuncao.objects.select_related(
             'contrato', 'composicao', 'composicao__equipe', 'funcao'
         )
 
         if contrato_id:
-            custos_funcoes = custos_funcoes.filter(contrato_id=contrato_id)
+            custos_funcoes_queryset = custos_funcoes_queryset.filter(contrato_id=contrato_id)
 
         if equipe_id:
-            custos_funcoes = custos_funcoes.filter(composicao__equipe_id=equipe_id)
+            custos_funcoes_queryset = custos_funcoes_queryset.filter(composicao__equipe_id=equipe_id)
 
-        custos_funcoes = custos_funcoes.order_by('contrato')
+        custos_funcoes_queryset = custos_funcoes_queryset.order_by('contrato')
+
+        # Transformar o queryset em uma lista de objetos para adicionar atributos dinamicamente
+        custos_funcoes = []
+        for custo in custos_funcoes_queryset:
+            if custo.quantidade_total_funcionarios > 0:
+                custo.custo_por_funcionario = custo.custo_total / custo.quantidade_total_funcionarios
+            else:
+                custo.custo_por_funcionario = 0
+            custos_funcoes.append(custo)
 
         # Gráfico
         labels = []
@@ -40,7 +49,7 @@ class DashboardCustoDiretoView(TemplateView):
         for custo in custos_funcoes:
             label = f"{custo.funcao.nome} - {custo.composicao.equipe.nome} - {custo.contrato.contrato}"
             labels.append(label)
-            data.append(float(custo.custo_total))
+            data.append(float(custo.custo_por_funcionario))
 
         context.update({
             'grafico_labels': json.dumps(labels),
