@@ -19,6 +19,7 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos=None, beneficios=Dec
 
     valor_horas_extras_50 = salario_hora * Decimal('0.5') * funcao_equipe.horas_extras_50
     valor_horas_extras_100 = salario_hora * Decimal('1.0') * funcao_equipe.horas_extras_100
+    
     valor_adicional_noturno = salario_hora * Decimal('0.2') * Decimal('1.1428') * funcao_equipe.horas_adicional_noturno
     valor_prontidao = salario_hora * funcao_equipe.horas_prontidao * Decimal('0.67')
     valor_sobreaviso = salario_hora * funcao_equipe.horas_sobreaviso * Decimal('0.33')

@@ -1,6 +1,14 @@
+{% load static %}
    <div> 
     <nav class="sidebar d-flex flex-column">
         <ul class="nav flex-column">
+
+            <!-- Logotipo como botão centralizado -->
+            <li class="nav-item text-center mb-3">
+                <a href="{% url 'home' %}" class="nav-link p-0 d-flex justify-content-center align-items-center" style="height: 50px;">
+                    <img src="{% static 'img/logotipo.png' %}" alt="Logotipo" class="img-fluid" style="max-height: 40px; width: auto;">
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link"><i class="fa-solid fa-house-user"></i> Início</a>
             </li>
