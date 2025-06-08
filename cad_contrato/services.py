@@ -38,18 +38,18 @@ class CadastroContratoService:
             contrato=contrato
         )
 
-        # Inicializa o Custo Direto (registro principal vazio)
-        CustoDireto.objects.create(
-            contrato=contrato
+        # Verifica se o registro de CustoDireto já existe
+        custo_direto, created = CustoDireto.objects.get_or_create(
+            contrato=contrato,
+            defaults={'custo_total': 0.00}  # Define valores padrão caso o registro seja criado
         )
-        # Inicializa o Custo Direto (registro principal vazio)
-        custo_direto, created = CustoDireto.objects.get_or_create(contrato=contrato)
 
-        # Inicializa os registros de CustoDiretoFuncao para cada FuncaoEquipe associada ao contrato
-        for funcao_equipe in FuncaoEquipe.objects.filter(contrato=contrato):
-            CustoDiretoFuncao.objects.create(
-                contrato=contrato,
-                funcao_equipe=funcao_equipe,
-                quantidade_funcionarios=funcao_equipe.quantidade_funcionarios,
-                funcao_equipe_id=funcao_equipe.funcao_id  # Atribuir explicitamente o ID da função
-            )
+        if created:
+            # Inicializa os registros de CustoDiretoFuncao para cada FuncaoEquipe associada ao contrato
+            for funcao_equipe in FuncaoEquipe.objects.filter(contrato=contrato):
+                CustoDiretoFuncao.objects.create(
+                    contrato=contrato,
+                    funcao_equipe=funcao_equipe,
+                    quantidade_funcionarios=funcao_equipe.quantidade_funcionarios,
+                    funcao_equipe_id=funcao_equipe.funcao_id  # Atribuir explicitamente o ID da função
+                )

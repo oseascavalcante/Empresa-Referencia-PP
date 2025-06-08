@@ -21,9 +21,21 @@
     
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
     <!-- Campos lado a lado -->
+    
     <div class="row align-items-end">
-        <div class="col-md-3">
-            <label class="form-label">Tipo de Equipe*</label>
+        <!-- Primeira linha: Todos os campos -->
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="id_escopo" class="me-2">Escopo da Atividade*</label>
+            <select id="id_escopo" name="escopo" class="form-control">
+                {% for escopo in escopos %}
+                <option value="{{ escopo.id }}">{{ escopo.nome }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Por favor, selecione o Escopo da Atividade.</div>
+        </div>
+    
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="equipe" class="me-2">Tipo de Equipe*</label>
             <select id="equipe" class="form-control form-control-sm" required>
                 <option value="">Selecione</option>
                 {% for equipe in equipes %}
@@ -32,29 +44,30 @@
             </select>
             <div class="invalid-feedback">Por favor, selecione o tipo de equipe.</div>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">Quantidade de Equipes*</label>
+    
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="quantidade_equipes" class="me-2">Quantidade de Equipes*</label>
             <input type="number" id="quantidade_equipes" class="form-control form-control-sm" min="1" value="1" required>
             <div class="invalid-feedback">Por favor, insira a quantidade de equipes.</div>
         </div>
-
-        <div class="col-md-3">
+    
+        <div class="col-md-2 d-flex align-items-center">
             <label class="form-label">Data de Mobilização*</label>
             <input type="text" id="data_mobilizacao" name="data_mobilizacao" class="form-control datepicker" required value="{{ inicio_vigencia_contrato|date:'d/m/Y' }}">
             <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2 d-flex align-items-center">
             <label class="form-label">Data de Desmobilização*</label>
             <input type="text" id="data_desmobilizacao" name="data_desmobilizacao" class="form-control datepicker" required value="{{ fim_vigencia_contrato|date:'d/m/Y' }}">
             <div class="invalid-feedback">Por favor, insira a data de desmobilização.</div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Prefixo:</label>
-            <input type="text" id="prefixo_equipe" class="form-control form-control-sm">
-        </div>        
-        <div class="col-md-6">
-            <label class="form-label">Observação:</label>
+    </div>
+    
+    <div class="row mt-3">
+        <!-- Segunda linha: Observação -->
+        <div class="col-md-12 d-flex align-items-center">
+            <label for="observacao" class="me-2">Observação:</label>
             <input type="text" id="observacao" class="form-control form-control-sm">
         </div>
     </div>
@@ -249,6 +262,7 @@
                     event.preventDefault(); // Impede a execução se o usuário cancelar
                     return;
                 }
+                var escopoId = document.getElementById("id_escopo").value;
                 var contratoId = "{{ contrato_id }}";
                 var equipeId = document.getElementById("equipe").value;
                 var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
@@ -286,6 +300,7 @@
                     headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                     body: JSON.stringify({
                         contrato_id: contratoId,
+                        escopo_id: escopoId,
                         equipe_id: equipeId,
                         quantidade_equipes: quantidadeEquipes,
                         data_mobilizacao: dataMobilizacao,
@@ -295,7 +310,6 @@
                     })
                 })
                 .then(() => { 
-                    alert("Salvo com sucesso!"); 
                     window.location.reload(); 
                 })
                 .catch(error => console.error("Erro ao salvar:", error));
@@ -383,8 +397,6 @@
                                 return cellProperties;
                             }
                         });
-                
-                        alert("Edição habilitada para a equipe.");
                     })
                     .catch(error => console.error("Erro ao carregar dados da equipe:", error));
                 

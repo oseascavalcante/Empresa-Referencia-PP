@@ -6,9 +6,12 @@
             <!-- Logotipo como botão centralizado -->
             <li class="nav-item text-center mb-3">
                 <a href="{% url 'home' %}" class="nav-link p-0 d-flex justify-content-center align-items-center" style="height: 50px;">
-                    <img src="{% static 'img/logotipo.png' %}" alt="Logotipo" class="img-fluid" style="max-height: 40px; width: auto;">
+                    <img src="{% static 'img/logotipo.png' %}" alt="Logotipo" class="img-fluid" style="max-height: 40px; width: auto;">               
                 </a>
+                <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+
             </li>
+            
             <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link"><i class="fa-solid fa-house-user"></i> Início</a>
             </li>
@@ -25,6 +28,7 @@
             <li class="nav-item">
                 <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Controle</a>
                 <ul class="submenu">
+                    <li class="nav-item"><a href="{% url 'adicionar_escopo' %}"class="nav-link">Adicionar Escopo</a></li>       
                     <li><a href="{% url 'adicionar_equipe' %}" class="nav-link">Cadastrar Equipes</a></li>
                     <li><a href="{% url 'adicionar_funcao' %}" class="nav-link">Cadastrar Funções</a></li>
                 </ul>

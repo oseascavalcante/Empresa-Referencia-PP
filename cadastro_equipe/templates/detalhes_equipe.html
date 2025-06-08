@@ -59,6 +59,10 @@
         <div class="card-body">
             <table class="table table-bordered">
                 <tr>
+                    <th>Escopo de Atividade</th>
+                    <td>{{ composicao.escopo.nome }}</td>
+                </tr>
+                <tr>
                     <th>Equipe</th>
                     <td>{{ composicao.equipe.nome }}</td>
                 </tr>
@@ -78,10 +82,6 @@
                     <td>{{ composicao.created_at|date:"d/m/Y" }}</td>
                     <th>Data de Atualização</th>
                     <td>{{ composicao.updated_at|date:"d/m/Y" }}</td>
-                </tr>
-                <tr>
-                    <th>Prefixo da Equipe</th>
-                    <td colspan="3">{{ composicao.prefixo_equipe }}</td>
                 </tr>
                               
                 <tr>

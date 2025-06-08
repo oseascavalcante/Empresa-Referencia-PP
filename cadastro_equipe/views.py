@@ -12,6 +12,23 @@ from django.shortcuts import get_object_or_404
 from cad_contrato.models import CadastroContrato
 from django.db.models import Sum
 from collections import OrderedDict
+from .models import EscopoAtividade
+from .forms import EscopoAtividadeForm
+
+class EscopoAtividadeCreateView(CreateView):
+    model = EscopoAtividade
+    form_class = EscopoAtividadeForm
+    template_name = 'adicionar_escopo.html'
+    success_url = reverse_lazy('adicionar_escopo')  # Redireciona para a mesma página após o cadastro    from django.views.generic import CreateView
+    from .models import EscopoAtividade
+    from django.urls import reverse_lazy
+    from .forms import EscopoAtividadeForm
+    
+    class EscopoAtividadeCreateView(CreateView):
+        model = EscopoAtividade
+        form_class = EscopoAtividadeForm
+        template_name = 'adicionar_escopo.html'
+        success_url = reverse_lazy('adicionar_escopo')  # Redireciona para a mesma página após o cadastro
 
 class EquipeCreateView(CreateView):
     model = Equipe
@@ -33,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 class ComposicaoEquipeUpdateView(UpdateView):
     model = ComposicaoEquipe
-    fields = ['equipe', 'quantidade_equipes', 'observacao']
+    fields = ['escopo', 'equipe', 'quantidade_equipes', 'observacao']
     success_url = reverse_lazy('composicao_equipe')
 
     def get_context_data(self, **kwargs):
@@ -139,13 +156,15 @@ class ComposicaoEquipeView(View):
         equipes = Equipe.objects.exclude(id__in=equipes_cadastradas)
         funcoes = Funcao.objects.all()
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
-
+        escopos = EscopoAtividade.objects.all()  # <-- AQUI
+        
         # Soma total de funcionários por composição
         for composicao in composicoes:
             composicao.total_funcionarios = composicao.funcoes.aggregate(Sum('quantidade_funcionarios'))['quantidade_funcionarios__sum'] or 0
 
         return render(request, 'composicao_equipe.html', {
             'contrato_id': contrato_id,
+            'escopos': escopos,  # <-- E AQUI
             'equipes': equipes,
             'escopo_contrato': contrato.escopo_contrato,
             'funcoes': funcoes,
@@ -174,7 +193,8 @@ class ComposicaoEquipeView(View):
     def post(self, request, contrato_id):
         try:
             data = json.loads(request.body)
-
+            
+            escopo_id = data.get('escopo_id')  # ou 'escopo', dependendo do nome no frontend
             equipe_id = data.get('equipe_id')
             quantidade_equipes = data.get('quantidade_equipes')
             observacao = data.get('observacao')
@@ -191,8 +211,10 @@ class ComposicaoEquipeView(View):
                 }, status=400)
 
             # Se não existir, cria
+            escopo = get_object_or_404(EscopoAtividade, id=escopo_id)
             composicao = ComposicaoEquipe.objects.create(
                 contrato=contrato,
+                escopo=escopo,
                 equipe=equipe,
                 quantidade_equipes=quantidade_equipes,
                 observacao=observacao

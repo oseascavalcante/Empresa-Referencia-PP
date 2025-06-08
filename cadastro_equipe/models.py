@@ -15,6 +15,12 @@ Classes:
         Representa as funções dentro de uma composição de equipe, incluindo a quantidade de funcionários,
         custos adicionais e condições de trabalho, como horas extras e turnos noturnos.
 """
+class EscopoAtividade(models.Model):
+    nome = models.CharField(max_length=100, unique=True, verbose_name="Nome do Escopo")
+    descricao = models.TextField(blank=True, null=True, verbose_name="Descrição do Escopo")
+
+    def __str__(self):
+        return self.nome
 
 class Equipe(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -34,6 +40,7 @@ class Funcao(models.Model):
 class ComposicaoEquipe(models.Model):
     composicao_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.PROTECT)
+    escopo = models.ForeignKey(EscopoAtividade, on_delete=models.PROTECT, related_name="composicoes", verbose_name="Escopo da Atividade")
     equipe = models.ForeignKey(Equipe, on_delete=models.PROTECT)
     quantidade_equipes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     data_mobilizacao = models.DateField(default='2025-01-01')
