@@ -1,2 +1,6 @@
 Criar diagramas
 python manage.py graph_models cad_contrato cadastro_equipe mao_obra --group-models --rankdir=TB -o models_diagram2.png
+
+git add -A
+git commit -m "Correção de filtro de regionais para usar contrato_id corretamente e ajustes no dashboard"
+git push origin main
