@@ -59,3 +59,22 @@ class CadastroContrato(models.Model):
 
     def __str__(self):
         return f"Contrato {self.contrato} - {self.escopo_contrato}"
+
+class Regional(models.Model):
+    contrato = models.ForeignKey(
+        'cad_contrato.CadastroContrato',
+        on_delete=models.CASCADE,
+        related_name='regionais',
+        verbose_name='Contrato'
+    )
+    nome = models.CharField(max_length=100, verbose_name='Nome da Regional')
+    municipio = models.CharField(max_length=100, verbose_name='Município')
+
+    class Meta:
+        unique_together = ('contrato', 'nome')
+        verbose_name = 'Regional'
+        verbose_name_plural = 'Regionais'
+        ordering = ['nome']
+
+    def __str__(self):
+        return f"{self.nome} - {self.municipio}"

@@ -25,6 +25,18 @@
     <div class="row align-items-end">
         <!-- Primeira linha: Todos os campos -->
         <div class="col-md-2 d-flex align-items-center">
+            <label for="regional">Regional*</label>
+            <select id="regional" class="form-control form-control-sm" required>
+                <option value="">Selecione</option>
+                {% for regional in contrato.regionais.all %}
+                    <option value="{{ regional.id }}">{{ regional.nome }} - {{ regional.municipio }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Por favor, selecione a regional.</div>
+        </div>
+        
+
+        <div class="col-md-2 d-flex align-items-center">
             <label for="id_escopo" class="me-2">Escopo da Atividade*</label>
             <select id="id_escopo" name="escopo" class="form-control">
                 {% for escopo in escopos %}
@@ -51,17 +63,32 @@
             <div class="invalid-feedback">Por favor, insira a quantidade de equipes.</div>
         </div>
     
-        <div class="col-md-2 d-flex align-items-center">
-            <label class="form-label">Data de Mobilização*</label>
-            <input type="text" id="data_mobilizacao" name="data_mobilizacao" class="form-control datepicker" required value="{{ inicio_vigencia_contrato|date:'d/m/Y' }}">
-            <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
+        <div class="col-md-2 d-flex flex-column">
+            <label for="data_mobilizacao" class="form-label">Data de Mobilização*</label>
+                <input 
+                    type="date" 
+                    id="data_mobilizacao" 
+                    name="data_mobilizacao" 
+                    class="form-control" 
+                    required 
+                    value="{{ contrato.inicio_vigencia_contrato|date:'Y-m-d' }}">
+                <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
+        
         </div>
 
-        <div class="col-md-2 d-flex align-items-center">
-            <label class="form-label">Data de Desmobilização*</label>
-            <input type="text" id="data_desmobilizacao" name="data_desmobilizacao" class="form-control datepicker" required value="{{ fim_vigencia_contrato|date:'d/m/Y' }}">
+        <div class="col-md-2 d-flex flex-column">
+            <label for="data_desmobilizacao" class="form-label">Data de Desmobilização*</label>
+                <input 
+                    type="date" 
+                    id="data_desmobilizacao" 
+                    name="data_desmobilizacao" 
+                    class="form-control" 
+                    required 
+                    value="{{ contrato.fim_vigencia_contrato|date:'Y-m-d' }}">
             <div class="invalid-feedback">Por favor, insira a data de desmobilização.</div>
+            
         </div>
+
     </div>
     
     <div class="row mt-3">
@@ -95,11 +122,11 @@
                         <thead style="background-color: #483D8B; color: white; height: 35px;">
                             <tr>
                                 <th>ID - Contrato</th>
+                                <th>Regional</th>
+                                <th>Escopo de Atividade</th>
                                 <th>Equipe</th>
                                 <th>Quantidade</th>
                                 <th>Pessoas/Equipe</th>
-                                <th>Data Mob.</th>
-                                <th>Data Desmob.</th>
                                 <th>Observação</th>
                                 <th>Ações</th>
                             </tr>
@@ -108,11 +135,11 @@
                             {% for composicao in composicoes %}
                                 <tr>
                                     <td>{{ composicao.contrato_id }} - {{ composicao.contrato.escopo_contrato }}</td>
+                                    <td>{{ composicao.regional.nome }}</td>
+                                    <td>{{ composicao.escopo.nome }}</td>
                                     <td>{{ composicao.equipe.nome }}</td>
                                     <td>{{ composicao.quantidade_equipes }}</td>
-                                    <td>{{ composicao.total_funcionarios }}</td>
-                                    <td>{{ composicao.data_mobilizacao|date:"d/m/Y" }}</td>
-                                    <td>{{ composicao.data_desmobilizacao|date:"d/m/Y" }}</td>                                    
+                                    <td>{{ composicao.total_funcionarios }}</td>                                   
                                     <td>{{ composicao.observacao }}</td>
                                     <td>
                                         <a href="{% url 'detalhes_equipe' composicao.pk %}" class="btn btn-info btn-sm ver">
@@ -264,7 +291,8 @@
                 }
                 var escopoId = document.getElementById("id_escopo").value;
                 var contratoId = "{{ contrato_id }}";
-                var equipeId = document.getElementById("equipe").value;
+                var regionalId = document.getElementById("regional").value;
+                var equipeId = document.getElementById("equipe").value;              
                 var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
                 var dataMobilizacao = document.getElementById("data_mobilizacao").value;
                 var dataDesmobilizacao = document.getElementById("data_desmobilizacao").value;
@@ -300,17 +328,30 @@
                     headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                     body: JSON.stringify({
                         contrato_id: contratoId,
+                        regional_id: regionalId,
                         escopo_id: escopoId,
                         equipe_id: equipeId,
                         quantidade_equipes: quantidadeEquipes,
-                        data_mobilizacao: dataMobilizacao,
-                        data_desmobilizacao: dataDesmobilizacao,
+                        data_mobilizacao: document.getElementById('data_mobilizacao').value,
+                        data_desmobilizacao: document.getElementById('data_desmobilizacao').value,
                         observacao: observacao,
                         dados: dadosFormatados
                     })
                 })
-                .then(() => { 
-                    window.location.reload(); 
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            // Exibe erro em popup simples (pode ser melhorado com toast futuramente)
+                            alert(data.message || "Erro desconhecido ao cadastrar equipe.");
+                            throw new Error("Erro na requisição.");
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    }
                 })
                 .catch(error => console.error("Erro ao salvar:", error));
             });
@@ -333,6 +374,7 @@
                                 alert("Erro ao excluir equipe(s): " + data.message);
                             }
                         })
+
                         .catch(error => console.error("Erro ao excluir:", error));
                     }
                 });
@@ -443,12 +485,19 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dataMobilizacaoField = document.getElementById('data_mobilizacao');
-            const inicioVigenciaContrato = "{{ inicio_vigencia_contrato|date:'d/m/Y' }}";
-
+            const dataDesmobilizacaoField = document.getElementById('data_desmobilizacao');
+    
+            const inicioVigenciaContrato = "{{ inicio_vigencia_contrato|date:'Y-m-d' }}";
+            const fimVigenciaContrato = "{{ fim_vigencia_contrato|date:'Y-m-d' }}";
+    
             if (!dataMobilizacaoField.value) {
                 dataMobilizacaoField.value = inicioVigenciaContrato;
             }
+            if (!dataDesmobilizacaoField.value) {
+                dataDesmobilizacaoField.value = fimVigenciaContrato;
+            }
         });
     </script>
+    
 
 {% endblock %}

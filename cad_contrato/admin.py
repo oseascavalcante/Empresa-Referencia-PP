@@ -1,5 +1,8 @@
-# filepath: /D:/PLANILHA_PRECIFICACAO/Empresa_Referencia_PP/config_panel/admin.py
 from django.contrib import admin
-from .models import CadastroContrato
+from .models import CadastroContrato, Regional
 
-admin.site.register(CadastroContrato)
+@admin.register(Regional)
+class RegionalAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'municipio', 'contrato')
+    list_filter = ('contrato',)
+    search_fields = ('nome', 'municipio')

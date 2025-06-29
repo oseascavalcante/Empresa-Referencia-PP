@@ -1,10 +1,7 @@
 from django.db import models
 from decimal import Decimal
-
-# models.py
-
-from django.db import models
-from decimal import Decimal
+from cad_contrato.models import Regional
+from cadastro_equipe.models import EscopoAtividade
 
 
 class CustoDiretoFuncao(models.Model):
@@ -13,6 +10,8 @@ class CustoDiretoFuncao(models.Model):
         on_delete=models.CASCADE,
         related_name='custos_diretos_funcoes'
     )
+    regional = models.ForeignKey(Regional, on_delete=models.CASCADE, null=True, blank=True)
+    escopo = models.ForeignKey(EscopoAtividade, on_delete=models.CASCADE, null=True, blank=True)
     composicao = models.ForeignKey(
         'cadastro_equipe.ComposicaoEquipe',
         on_delete=models.CASCADE,
@@ -96,7 +95,7 @@ class CustoDiretoFuncao(models.Model):
 
         self.valor_total_encargos = custo_bruto_unitario_es * (grupo_e / Decimal('100'))
 
-        self.custo_total = custo_bruto_total + (self.valor_total_encargos * self.quantidade_funcionarios)
+        self.custo_total = (custo_bruto_total + (self.valor_total_encargos * self.quantidade_funcionarios)) * self.composicao.quantidade_equipes
         return self.custo_total
 
     def save(self, *args, **kwargs):

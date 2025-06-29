@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView, DetailView, UpdateView
 
 from mao_obra.services import GrupoCalculationsService
-from .models import CadastroContrato
-from .forms import CadastroContratoForm
+from .models import CadastroContrato, Regional
+from .forms import CadastroContratoForm, RegionalForm
 from django import forms
 
 from .services import CadastroContratoService  # ✅ importa a service
@@ -78,7 +78,11 @@ class SelecionarContratoView(FormView):
         self.request.session["contrato_id"] = contrato.contrato
 
         next_url = self.request.GET.get("next") or "/"
+        if "adicionar-regional" in next_url:
+            # Garante que o contrato_id esteja presente na URL
+            next_url = f"/cad_contrato/adicionar-regional/{contrato.contrato}/"
         return redirect(next_url)
+
     
 
 class MenuDespesasView(TemplateView):
@@ -122,3 +126,32 @@ class UpdateContratoView(UpdateView):
     def get_success_url(self):
         # Redireciona para o template `menu_despesas` após o update
         return reverse_lazy('menu_despesas', kwargs={'contrato_id': self.object.contrato})
+    
+
+class RegionalCreateView(CreateView):
+    model = Regional
+    form_class = RegionalForm
+    template_name = 'adicionar_regional.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        contrato_id = self.kwargs.get('contrato_id') or request.session.get('contrato_id')
+        if not contrato_id:
+            return redirect('selecionar_contrato')  # força usuário a selecionar um contrato
+
+        self.contrato = get_object_or_404(CadastroContrato, pk=contrato_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.contrato = self.contrato  # força associação correta
+        return super().form_valid(form)
+
+    def get_initial(self):
+        return {'contrato': self.contrato}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contrato'] = self.contrato
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('detalhes_contrato', kwargs={'pk': self.contrato.pk})

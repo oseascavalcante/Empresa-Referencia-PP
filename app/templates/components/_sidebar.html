@@ -28,7 +28,15 @@
             <li class="nav-item">
                 <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Controle</a>
                 <ul class="submenu">
-                    <li class="nav-item"><a href="{% url 'adicionar_escopo' %}"class="nav-link">Adicionar Escopo</a></li>       
+                    <li>
+                        {% if contrato %}
+                            <a href="{% url 'adicionar_regional' contrato_id=contrato.contrato %}" class="nav-link">Cadastrar Regional</a>
+                        {% else %}
+                            <a href="{% url 'selecionar_contrato' %}?next=/cad_contrato/adicionar-regional/">Selecionar Contrato</a> 
+                        {% endif %}
+
+                    </li>                   
+                    <li><a href="{% url 'adicionar_escopo' %}"class="nav-link">Escopos de Atividade</a></li>       
                     <li><a href="{% url 'adicionar_equipe' %}" class="nav-link">Cadastrar Equipes</a></li>
                     <li><a href="{% url 'adicionar_funcao' %}" class="nav-link">Cadastrar Funções</a></li>
                 </ul>

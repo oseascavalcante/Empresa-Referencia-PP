@@ -13,4 +13,5 @@ urlpatterns = [
     path('adicionar-escopo/', EscopoAtividadeCreateView.as_view(), name='adicionar_escopo'),
     
     
+    
 ]

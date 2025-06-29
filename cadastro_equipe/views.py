@@ -1,15 +1,16 @@
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from django.db import IntegrityError
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, View
 from .models import Equipe, Funcao, ComposicaoEquipe, FuncaoEquipe
-from .forms import EquipeForm, FuncaoForm
+from .forms import ComposicaoEquipeForm, EquipeForm, FuncaoForm
 from django.shortcuts import redirect, render
 import json
 from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import get_object_or_404
-from cad_contrato.models import CadastroContrato
+from cad_contrato.models import CadastroContrato, Regional
 from django.db.models import Sum
 from collections import OrderedDict
 from .models import EscopoAtividade
@@ -57,8 +58,7 @@ class ComposicaoEquipeUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         contrato = self.object.contrato  # Obtém o contrato da composição atual
 
-        # Filtra as equipes que ainda não foram cadastradas para o contrato
-        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).values_list('equipe_id', flat=True)
+        equipes_cadastradas = Equipe.objects.all()
         context['equipes'] = Equipe.objects.exclude(id__in=equipes_cadastradas)
 
         # Log para depuração
@@ -150,81 +150,87 @@ class ComposicaoEquipeDetailView(DetailView):
 class ComposicaoEquipeView(View):
     def get(self, request, contrato_id=None):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
-        
-         # Filtrar equipes que ainda não foram cadastradas para esse contrato
-        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).values_list('equipe_id', flat=True)
-        equipes = Equipe.objects.exclude(id__in=equipes_cadastradas)
-        funcoes = Funcao.objects.all()
+
+        regional_id = request.GET.get('regional_id')
+        escopo_id = request.GET.get('escopo_id')
+
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
-        escopos = EscopoAtividade.objects.all()  # <-- AQUI
-        
-        # Soma total de funcionários por composição
+        escopos = EscopoAtividade.objects.all()
+        equipes = Equipe.objects.all()
+        funcoes = Funcao.objects.all()
+
+        if regional_id and escopo_id:
+            equipes_cadastradas = ComposicaoEquipe.objects.filter(
+                contrato=contrato,
+                regional_id=regional_id,
+                escopo_id=escopo_id
+            ).values_list('equipe_id', flat=True)
+            equipes_disponiveis = equipes.exclude(id__in=equipes_cadastradas)
+        else:
+            equipes_disponiveis = equipes
+
+        # Soma de funcionários por composição
         for composicao in composicoes:
-            composicao.total_funcionarios = composicao.funcoes.aggregate(Sum('quantidade_funcionarios'))['quantidade_funcionarios__sum'] or 0
+            composicao.total_funcionarios = composicao.funcoes.aggregate(
+                Sum('quantidade_funcionarios')
+            )['quantidade_funcionarios__sum'] or 0
 
         return render(request, 'composicao_equipe.html', {
-            'contrato_id': contrato_id,
-            'escopos': escopos,  # <-- E AQUI
-            'equipes': equipes,
-            'escopo_contrato': contrato.escopo_contrato,
+            'contrato_id': contrato.contrato,
+            'escopos': escopos,
+            'equipes': equipes_disponiveis,
             'funcoes': funcoes,
             'composicoes': composicoes,
-            'inicio_vigencia_contrato': contrato.inicio_vigencia_contrato,  # Passa a data no contexto
-            'fim_vigencia_contrato': contrato.fim_vigencia_contrato  # Passa a data no contexto
+            'escopo_contrato': contrato.escopo_contrato,
+            'inicio_vigencia_contrato': contrato.inicio_vigencia_contrato,
+            'fim_vigencia_contrato': contrato.fim_vigencia_contrato
         })
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        contrato = self.object.contrato  # Obtém o contrato da composição atual
-
-        # Equipes já cadastradas, exceto a própria equipe da composição sendo editada
-        equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).exclude(
-            pk=self.object.pk
-        ).values_list('equipe_id', flat=True)
-
-        context['equipes'] = Equipe.objects.exclude(id__in=equipes_cadastradas)
-
-        logger.info(f"Equipes cadastradas para o contrato {contrato.id}: {list(equipes_cadastradas)}")
-        logger.info(f"Equipes disponíveis: {list(context['equipes'])}")
-
-        return context
-
 
     def post(self, request, contrato_id):
         try:
             data = json.loads(request.body)
-            
-            escopo_id = data.get('escopo_id')  # ou 'escopo', dependendo do nome no frontend
-            equipe_id = data.get('equipe_id')
-            quantidade_equipes = data.get('quantidade_equipes')
-            observacao = data.get('observacao')
-            dados = data.get('dados')
+            print("DEBUG payload recebido:", data)
 
             contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
-            equipe = get_object_or_404(Equipe, id=equipe_id)
+            regional = get_object_or_404(Regional, id=data.get('regional_id'))
+            escopo = get_object_or_404(EscopoAtividade, id=data.get('escopo_id'))
+            equipe = get_object_or_404(Equipe, id=data.get('equipe_id'))
 
-            # Verifica se já existe uma composição dessa equipe para o contrato
-            if ComposicaoEquipe.objects.filter(contrato=contrato, equipe=equipe).exists():
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Essa equipe já está cadastrada para este contrato.'
-                }, status=400)
+            # Conversão segura de datas
+            try:
+                data_mobilizacao = datetime.strptime(data.get('data_mobilizacao'), '%Y-%m-%d').date()
+                data_desmobilizacao = datetime.strptime(data.get('data_desmobilizacao'), '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                return JsonResponse({'status': 'error', 'message': 'Formato de data inválido'}, status=400)
 
-            # Se não existir, cria
-            escopo = get_object_or_404(EscopoAtividade, id=escopo_id)
-            composicao = ComposicaoEquipe.objects.create(
-                contrato=contrato,
-                escopo=escopo,
-                equipe=equipe,
-                quantidade_equipes=quantidade_equipes,
-                observacao=observacao
-            )
+            # Prepara dados para o form
+            form_data = {
+                'contrato': contrato,
+                'regional': regional,
+                'escopo': escopo,
+                'equipe': equipe,
+                'quantidade_equipes': data.get('quantidade_equipes'),
+                'observacao': data.get('observacao'),
+                'data_mobilizacao': data_mobilizacao,
+                'data_desmobilizacao': data_desmobilizacao,
+            }
+
+            form = ComposicaoEquipeForm(form_data)
+
+            if not form.is_valid():
+                print("ERROS DO FORMULÁRIO:", form.errors)
+                # Intercepta duplicidade
+                all_errors = form.errors.get("__all__")
+                if all_errors:
+                    return JsonResponse({"status": "error", "message": str(all_errors[0])}, status=400)
+                return JsonResponse({"status": "error", "message": "Erro no preenchimento do formulário."}, status=400)
 
 
-            for row in dados:
-                funcao_nome = row['funcao'].strip()  # Remove espaços em branco
-                
-                # Ignora linhas vazias
+            composicao = form.save()
+
+            # Inserção de funções
+            for row in data.get('dados', []):
+                funcao_nome = row.get('funcao', '').strip()
                 if not funcao_nome:
                     continue
 
@@ -233,39 +239,37 @@ class ComposicaoEquipeView(View):
                 except Funcao.DoesNotExist:
                     return JsonResponse({'status': 'error', 'message': f'Função {funcao_nome} não encontrada'}, status=400)
 
-                # Converte o salário para o formato decimal esperado
-                salario = row.get('salario', funcao.salario)
-                if isinstance(salario, str):
-                    salario = salario.replace(',', '.')
                 try:
-                    salario = Decimal(salario)
+                    salario_str = row.get('salario', '0').replace(',', '.')
+                    salario = Decimal(salario_str)
                 except InvalidOperation:
-                    return JsonResponse({'status': 'error', 'message': f'O valor "{salario}" não é um número decimal válido.'}, status=400)
+                    return JsonResponse({'status': 'error', 'message': f'Salário inválido: {row.get("salario")}'}, status=400)
 
                 FuncaoEquipe.objects.create(
                     contrato=contrato,
                     composicao=composicao,
                     funcao=funcao,
-                    quantidade_funcionarios=row['quantidade'] or 0,
+                    quantidade_funcionarios=row.get('quantidade', 0),
                     salario=salario,
-                    periculosidade=row['periculosidade'] if isinstance(row['periculosidade'], bool) else False,
-                    horas_extras_50=row['horas_extras_50'] or 0,
-                    horas_prontidao=row['horas_prontidao'] or 0,
-                    horas_extras_100=row['horas_extras_100'] or 0,
-                    horas_sobreaviso=row['horas_sobreaviso'] or 0,
-                    horas_adicional_noturno=row['horas_adicional_noturno'] or 0,
-                    outros_custos=row['outros_custos'] or 0.00
+                    periculosidade=row.get('periculosidade', False),
+                    horas_extras_50=row.get('horas_extras_50', 0),
+                    horas_prontidao=row.get('horas_prontidao', 0),
+                    horas_extras_100=row.get('horas_extras_100', 0),
+                    horas_sobreaviso=row.get('horas_sobreaviso', 0),
+                    horas_adicional_noturno=row.get('horas_adicional_noturno', 0),
+                    outros_custos=row.get('outros_custos', 0),
                 )
 
             return JsonResponse({'status': 'success'})
 
         except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Erro ao decodificar JSON'}, status=400)
-
+            return JsonResponse({'status': 'error', 'message': 'JSON inválido'}, status=400)
         except Exception as e:
-            print("Erro interno:", str(e))  # Log para verificar erros internos
+            print("Erro interno:", str(e))
             return JsonResponse({'status': 'error', 'message': f'Erro interno do servidor: {str(e)}'}, status=500)
 
+        
+               
 class ComposicaoEquipeJSONView(View):
     def get(self, request, pk):
         composicao = get_object_or_404(ComposicaoEquipe, pk=pk)
@@ -326,7 +330,7 @@ class EditarSalariosView(View):
         funcoes = list(funcoes_dict.values())
 
         return render(request, self.template_name, {
-            'contrato': contrato,
+            'contrato': contrato.contrato,
             'funcoes': funcoes
         })
 

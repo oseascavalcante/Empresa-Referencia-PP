@@ -1,5 +1,5 @@
 from django.db import models
-from cad_contrato.models import CadastroContrato  # Importando a model do outro app
+from cad_contrato.models import CadastroContrato, Regional  # Importando a model do outro app
 import uuid
 """
 Modelos para gerenciar equipes, funções e suas composições em uma aplicação Django.
@@ -40,6 +40,7 @@ class Funcao(models.Model):
 class ComposicaoEquipe(models.Model):
     composicao_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.PROTECT)
+    regional = models.ForeignKey(Regional, on_delete=models.PROTECT, related_name="composicoes", verbose_name="Regional")
     escopo = models.ForeignKey(EscopoAtividade, on_delete=models.PROTECT, related_name="composicoes", verbose_name="Escopo da Atividade")
     equipe = models.ForeignKey(Equipe, on_delete=models.PROTECT)
     quantidade_equipes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -49,6 +50,16 @@ class ComposicaoEquipe(models.Model):
     observacao = models.TextField(blank=True, null=True)  # Agora salva uma única vez por composição
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['contrato', 'regional', 'escopo', 'equipe'],
+                name='unique_composicao_por_regional_escopo_equipe'
+            )
+        ]
+        verbose_name = "Composição de Equipe"
+        verbose_name_plural = "Composições de Equipe"
 
 #Cadastro das funções dentro da Equipe
 class FuncaoEquipe(models.Model):

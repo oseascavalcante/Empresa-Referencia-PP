@@ -26,10 +26,10 @@
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label fw-bold">Contrato</label>
-                <select class="form-select" name="contrato" onchange="this.form.submit()">
+                <select class="form-select" name="contrato" onchange="atualizarFiltro()">
                     <option value="">Todos os Contratos</option>
                     {% for contrato in contratos %}
-                        <option value="{{ contrato.contrato }}" {% if contrato.contrato == contrato_selecionado %}selected{% endif %}>
+                            <option value="{{ contrato.contrato }}" {% if contrato.contrato|stringformat:"s" == contrato_selecionado %}selected{% endif %}>
                             {{ contrato.contrato }} - {{ contrato.escopo_contrato }}
                         </option>
                     {% endfor %}
@@ -38,7 +38,7 @@
 
             <div class="col-md-4">
                 <label class="form-label fw-bold">Tipo de Equipe</label>
-                <select class="form-select" name="equipe" onchange="this.form.submit()">
+                <select class="form-select" name="equipe" onchange="atualizarFiltro()">
                     <option value="">Todas as Equipes</option>
                     {% for equipe in equipes %}
                         <option value="{{ equipe.id }}" {% if equipe.id == equipe_selecionada %}selected{% endif %}>
@@ -57,7 +57,6 @@
     </form>
 
     <!-- Tabela -->
-
     <div class="mb-3">
         <h5 class="titulo-grupo">Custos da Mão de Obra</h5>
         <div class="linha-abaixo-titulo"></div>
@@ -67,6 +66,8 @@
                     <thead class="table-light">
                         <tr>
                             <th>Contrato</th>
+                            <th>Regional</th>
+                            <th>Escopo</th>
                             <th>Equipe</th>
                             <th>Função</th>
                             <th>Qtd. por Equipe</th>
@@ -76,13 +77,14 @@
                             <th>Encargos Sociais (R$)</th>
                             <th>Custo Total por Funcionário (R$)</th>
                             <th>Custo Total (R$)</th>
-                            <th>Atualizado em</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for custo in custos_funcoes %}
                         <tr>
                             <td>{{ custo.contrato.contrato }}</td>
+                            <td>{{ custo.composicao.regional.nome }}</td>
+                            <td>{{ custo.composicao.escopo.nome }}</td>
                             <td>{{ custo.composicao.equipe.nome }}</td>
                             <td>{{ custo.funcao.nome }}</td>
                             <td>{{ custo.quantidade_funcionarios }}</td>
@@ -90,15 +92,12 @@
                             <td>{{ custo.salario_base|floatformat:2 }}</td>
                             <td>{{ custo.beneficios|floatformat:2 }}</td>
                             <td>{{ custo.valor_total_encargos|floatformat:2 }}</td>
-                            <td>
-                                {{ custo.custo_por_funcionario|floatformat:2 }}
-                            </td>
+                            <td>{{ custo.custo_por_funcionario|floatformat:2 }}</td>
                             <td>{{ custo.custo_total|floatformat:2 }}</td>
-                            <td>{{ custo.updated_at|date:'d/m/Y H:i' }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="10" class="text-center">Nenhum custo encontrado.</td>
+                            <td colspan="13" class="text-center">Nenhum custo encontrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -163,5 +162,17 @@
         },
         plugins: [ChartDataLabels]
     });
+
+    function atualizarFiltro() {
+        const form = document.forms[0];
+        const contrato = form.contrato.value;
+        const equipe = form.equipe.value;
+
+        const params = new URLSearchParams();
+        if (contrato) params.append('contrato', contrato);
+        if (equipe) params.append('equipe', equipe);
+
+        window.location.search = params.toString();
+    }
 </script>
 {% endblock %}

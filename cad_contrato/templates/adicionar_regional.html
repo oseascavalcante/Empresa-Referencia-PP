@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Regional{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="text-center text-primary">Cadastrar Regional para o Contrato {{ contrato }}</h3>
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Corrija os erros abaixo:</strong>
+        </div>
+    {% endif %}
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Salvar Regional</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

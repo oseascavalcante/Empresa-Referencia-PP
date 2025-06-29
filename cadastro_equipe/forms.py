@@ -31,13 +31,28 @@ class EscopoAtividadeForm(forms.ModelForm):
 class ComposicaoEquipeForm(forms.ModelForm):
     class Meta:
         model = ComposicaoEquipe
-        fields = ['escopo', 'equipe', 'quantidade_equipes', 'data_mobilizacao', 'data_desmobilizacao', 'observacao']
+        fields = '__all__'
 
-    def __init__(self, *args, **kwargs):
-        contrato = kwargs.pop('contrato', None)  # Recebe o contrato como argumento
-        super().__init__(*args, **kwargs)
+    def clean(self):
+        cleaned_data = super().clean()
+        contrato = cleaned_data.get("contrato")
+        regional = cleaned_data.get("regional")
+        escopo = cleaned_data.get("escopo")
+        equipe = cleaned_data.get("equipe")
 
-        if contrato:
-            # Filtra as equipes que ainda não foram cadastradas para o contrato
-            equipes_cadastradas = ComposicaoEquipe.objects.filter(contrato=contrato).values_list('equipe_id', flat=True)
-            self.fields['equipe'].queryset = Equipe.objects.exclude(id__in=equipes_cadastradas)
+        if contrato and regional and escopo and equipe:
+            existe = ComposicaoEquipe.objects.filter(
+                contrato=contrato,
+                regional=regional,
+                escopo=escopo,
+                equipe=equipe
+            )
+
+            if self.instance.pk:
+                existe = existe.exclude(pk=self.instance.pk)
+
+            if existe.exists():
+                raise forms.ValidationError("Essa equipe já foi cadastrada para esta combinação de contrato, regional e escopo de atividade.")
+
+        return cleaned_data
+

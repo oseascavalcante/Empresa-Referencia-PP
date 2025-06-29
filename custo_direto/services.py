@@ -1,4 +1,6 @@
 from decimal import Decimal
+
+from cadastro_equipe.models import FuncaoEquipe
 from .models import CustoDiretoFuncao, CustoDireto
 from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
 from decimal import Decimal
@@ -27,6 +29,8 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos=None, beneficios=Dec
     # Busca ou cria o custo direto da função
     custo_funcao, _ = CustoDiretoFuncao.objects.get_or_create(
         contrato=contrato,
+        regional=funcao_equipe.composicao.regional,
+        escopo=funcao_equipe.composicao.escopo,
         composicao=funcao_equipe.composicao,
         funcao=funcao_equipe.funcao,
         defaults={
@@ -64,8 +68,6 @@ def recalcular_custo_contrato(contrato):
     """
     Serviço para recalcular o custo direto de todas as funções no contrato.
     """
-    from cadastro_equipe.models import FuncaoEquipe
-    from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
 
     try:
         encargos = contrato.encargos_centralizados
