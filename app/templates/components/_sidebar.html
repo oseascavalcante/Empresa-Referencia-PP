@@ -29,8 +29,8 @@
                 <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Controle</a>
                 <ul class="submenu">
                     <li>
-                        {% if contrato %}
-                            <a href="{% url 'adicionar_regional' contrato_id=contrato.contrato %}" class="nav-link">Cadastrar Regional</a>
+                        {% if contrato and contrato.pk %}
+                            <a href="{% url 'adicionar_regional' contrato_id=contrato.pk %}" class="nav-link">Cadastrar Regional</a>
                         {% else %}
                             <a href="{% url 'selecionar_contrato' %}?next=/cad_contrato/adicionar-regional/">Selecionar Contrato</a> 
                         {% endif %}
@@ -46,14 +46,12 @@
                 <a href="#" class="nav-link"><i class="fa-solid fa-person-digging"></i> Mão de Obra</a>
                 <ul class="submenu">
                     <li>
-                        {% if contrato %}
+                        {% if contrato and contrato.contrato %}
                           <a href="{% url 'grupo_abc_form' contrato_id=contrato.contrato %}" class="nav-link">
                             Encargos Sociais
                           </a>
                         {% else %}
-                          <a href="{% url 'selecionar_contrato' %}?next={% url 'grupo_abc_form' contrato_id=1 %}" class="nav-link">
-                            Encargos Sociais
-                          </a>
+                          <a href="{% url 'selecionar_contrato' %}">Encargos Sociais</a>
                         {% endif %}
                     </li>
                       

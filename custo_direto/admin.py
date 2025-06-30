@@ -22,4 +22,3 @@ class CustoDiretoFuncaoAdmin(admin.ModelAdmin):
 class CustoDiretoAdmin(admin.ModelAdmin):
     list_display = ('contrato', 'custo_total', 'updated_at')
     search_fields = ('contrato__contrato',)
-

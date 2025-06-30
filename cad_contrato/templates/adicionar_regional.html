@@ -1,14 +1,25 @@
-{% extends 'base.html' %}
-
-{% block title %}Adicionar Regional{% endblock %}
+<!-- filepath: cad_contrato/templates/adicionar_regional.html -->
+{% extends "base.html" %}
 
 {% block content %}
 <div class="container mt-4">
-    <h3 class="text-center text-primary">Cadastrar Regional para o Contrato {{ contrato }}</h3>
+    <h3 class="text-center text-primary">
+        Cadastrar Regional{% if contrato %} para o Contrato {{ contrato }}{% endif %}
+    </h3>
 
     {% if form.errors %}
         <div class="alert alert-danger">
             <strong>Corrija os erros abaixo:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
     {% endif %}
 
@@ -20,5 +31,11 @@
             <button type="submit" class="btn btn-primary">Salvar Regional</button>
         </div>
     </form>
+
+    <div class="mt-3">
+        <a href="{% url 'menu_despesas' contrato_id=contrato.pk %}" class="btn btn-secondary">
+            Voltar para o contrato
+        </a>
+    </div>
 </div>
 {% endblock %}

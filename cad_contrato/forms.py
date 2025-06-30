@@ -16,9 +16,16 @@ class CadastroContratoForm(forms.ModelForm):
 class RegionalForm(forms.ModelForm):
     class Meta:
         model = Regional
-        fields = ['nome', 'municipio']  # contrato removido
-        labels = {
-            'nome': 'Nome da Regional',
-            'municipio': 'Município',
-        }
+        exclude = ['contrato']
 
+    def __init__(self, *args, **kwargs):
+        self.contrato = kwargs.pop('contrato', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nome = cleaned_data.get('nome')
+        contrato = self.contrato
+        if contrato and nome and Regional.objects.filter(contrato=contrato, nome=nome).exists():
+            raise forms.ValidationError("Já existe uma regional com esse nome para este contrato.")
+        return cleaned_data

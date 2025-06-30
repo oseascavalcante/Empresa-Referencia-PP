@@ -28,7 +28,7 @@
             <label for="regional">Regional*</label>
             <select id="regional" class="form-control form-control-sm" required>
                 <option value="">Selecione</option>
-                {% for regional in contrato.regionais.all %}
+                {% for regional in regionais %}
                     <option value="{{ regional.id }}">{{ regional.nome }} - {{ regional.municipio }}</option>
                 {% endfor %}
             </select>

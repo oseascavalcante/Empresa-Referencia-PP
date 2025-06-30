@@ -152,6 +152,11 @@ class RegionalCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context['contrato'] = self.contrato
         return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['contrato'] = self.contrato  # passa o contrato para o form
+        return kwargs
 
     def get_success_url(self):
-        return reverse_lazy('detalhes_contrato', kwargs={'pk': self.contrato.pk})
+        return reverse_lazy('adicionar_regional', kwargs={'contrato_id': self.object.contrato.pk if hasattr(self.object.contrato, "pk") else self.object.contrato})

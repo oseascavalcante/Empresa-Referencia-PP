@@ -1,3 +1,6 @@
+
+Consertar salário. Não está selecionando o contrato para atualizar.
+
 Criar diagramas
 python manage.py graph_models cad_contrato cadastro_equipe mao_obra --group-models --rankdir=TB -o models_diagram2.png
 

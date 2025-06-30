@@ -158,6 +158,7 @@ class ComposicaoEquipeView(View):
         escopos = EscopoAtividade.objects.all()
         equipes = Equipe.objects.all()
         funcoes = Funcao.objects.all()
+        regionais = contrato.regionais.all()  # <-- ADICIONADO
 
         if regional_id and escopo_id:
             equipes_cadastradas = ComposicaoEquipe.objects.filter(
@@ -169,7 +170,6 @@ class ComposicaoEquipeView(View):
         else:
             equipes_disponiveis = equipes
 
-        # Soma de funcionários por composição
         for composicao in composicoes:
             composicao.total_funcionarios = composicao.funcoes.aggregate(
                 Sum('quantidade_funcionarios')
@@ -183,7 +183,8 @@ class ComposicaoEquipeView(View):
             'composicoes': composicoes,
             'escopo_contrato': contrato.escopo_contrato,
             'inicio_vigencia_contrato': contrato.inicio_vigencia_contrato,
-            'fim_vigencia_contrato': contrato.fim_vigencia_contrato
+            'fim_vigencia_contrato': contrato.fim_vigencia_contrato,
+            'regionais': regionais  # <-- ADICIONADO
         })
 
     def post(self, request, contrato_id):
