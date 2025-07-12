@@ -77,9 +77,21 @@ class CustoDiretoFuncao(models.Model):
             self.outros_custos +
             self.beneficios
         )
-        custo_bruto_unitario_es = custo_bruto_unitario - self.beneficios  # Exclui benefícios do custo bruto unitário para encargos sociais
-
-        custo_bruto_total = custo_bruto_unitario * self.quantidade_funcionarios
+        
+        #Custo para aplicar encargos sociais grupos A, B e C
+        custo_funcionario_horas_normais = (
+            self.salario_base +
+            self.adicional_periculosidade +
+            self.outros_custos 
+        )
+        # Custo para aplicar encargos sociais grupos A e B
+        custo_funcionario_horas_extras = (
+            self.valor_horas_extras_50 +
+            self.valor_horas_extras_100 +
+            self.valor_adicional_noturno +
+            self.valor_prontidao +
+            self.valor_sobreaviso 
+        )
 
         # ✅ Conversão explícita dos percentuais para Decimal
         grupo_a = Decimal(str(self.percentual_grupo_a or 0))
@@ -88,20 +100,28 @@ class CustoDiretoFuncao(models.Model):
         grupo_d = Decimal(str(self.percentual_grupo_d or 0))
         grupo_e = Decimal(str(self.percentual_grupo_e or 0))
 
-        self.valor_grupo_a = custo_bruto_unitario_es * (grupo_a / Decimal('100'))
-        self.valor_grupo_b = custo_bruto_unitario_es * (grupo_b / Decimal('100'))
-        self.valor_grupo_c = custo_bruto_unitario_es * (grupo_c / Decimal('100'))
-        self.valor_grupo_d = custo_bruto_unitario_es * (grupo_d / Decimal('100'))
+        valor_encargos_he =  custo_funcionario_horas_extras * ((grupo_a + grupo_b) / Decimal('100'))  # Encargos sociais para horas extras (grupos A e B)           
+        valor_encargos_hn =  custo_funcionario_horas_normais * (grupo_e / Decimal('100')) # Encargos sociais para horas normais (grupo E) 
+           
+        self.valor_total_encargos = valor_encargos_he + valor_encargos_hn # Valor total dos encargos sociais por funcionário
 
-        self.valor_total_encargos = custo_bruto_unitario_es * (grupo_e / Decimal('100'))
-
-        self.custo_total = (custo_bruto_total + (self.valor_total_encargos * self.quantidade_funcionarios)) * self.composicao.quantidade_equipes
+        self.custo_total = (custo_bruto_unitario + self.valor_total_encargos) * self.quantidade_funcionarios * self.composicao.quantidade_equipes
         return self.custo_total
 
+    def calcular_beneficios(self):
+        from mao_obra.services import BeneficioCustoDiretoService  # Agora é um arquivo, não uma pasta
+        return BeneficioCustoDiretoService.calcular_beneficios_por_funcao(
+            contrato=self.contrato,
+            salario_base_funcao=self.salario_base
+        )
+
+  
     def save(self, *args, **kwargs):
-        # Atualiza a quantidade total de funcionários antes de salvar
         self.quantidade_total_funcionarios = self.calcular_quantidade_total_funcionarios()
+        self.beneficios = self.calcular_beneficios()
+        self.calcular_custo_total()
         super().save(*args, **kwargs)
+
 
     class Meta:
         constraints = [

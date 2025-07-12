@@ -2,7 +2,7 @@ from cad_contrato.models import CadastroContrato
 from decimal import Decimal
 import decimal
 from .models import (
-    GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes,
+    BeneficiosColaborador, GrupoAEncargos, GrupoBIndenizacoes, GrupoCSubstituicoes,
     CalcGrupoAEncargos, CalcGrupoBIndenizacoes, CalcGrupoCSubstituicoes,
     CalcGrupoD, CalcGrupoE
 )
@@ -332,3 +332,31 @@ class GrupoCalculationsService:
         except Exception as e:
             print(f"❌ Erro inesperado ao calcular todos os grupos: {e}")
 
+# mao_obra/services.py
+class BeneficioCustoDiretoService:
+    @staticmethod
+    def calcular_beneficios_por_funcao(contrato, salario_base_funcao):
+        """
+        Calcula os benefícios totais para uma função considerando VT líquido.
+        """
+        beneficios = BeneficiosColaborador.objects.filter(contrato=contrato).first()
+        if not beneficios:
+            return Decimal('0.00')
+
+        desconto_max = salario_base_funcao * beneficios.percentual_participacao_transporte / Decimal('100')
+        desconto_aplicado = min(beneficios.transporte, desconto_max)
+        vt_liquido = beneficios.transporte - desconto_aplicado
+
+        total = (
+            beneficios.assistencia_medica_odonto +
+            beneficios.exames_periodicos +
+            beneficios.refeicao +
+            beneficios.cesta_basica +
+            beneficios.alojamento +
+            beneficios.seguro_vida +
+            beneficios.previdencia_privada +
+            beneficios.outros_custos +
+            vt_liquido
+        )
+
+        return total.quantize(Decimal('0.01'))

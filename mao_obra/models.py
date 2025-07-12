@@ -192,61 +192,41 @@ class EncargosSociaisCentralizados(models.Model):
 
 class BeneficiosColaborador(models.Model):
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.CASCADE)  # Vínculo com o contrato
-    assistencia_medica_odonto = models.DecimalField(
-        max_digits=7, decimal_places=2, default=151.00, verbose_name="Assistência médica odontológica"
-    )
-    exames_periodicos = models.DecimalField(
-        max_digits=7, decimal_places=2, default=109.00, verbose_name="Exames periódicos (um por ano)"
-    )
-    refeicao = models.DecimalField(
-        max_digits=7, decimal_places=2, default=398.00, verbose_name="Refeição"
-    )
-    cesta_basica = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0.00, verbose_name="Cesta básica"
-    )
 
-    alojamento = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0.00, verbose_name="Alojamento"
-    )
+    assistencia_medica_odonto = models.DecimalField(max_digits=7, decimal_places=2, default=151.00)
+    exames_periodicos = models.DecimalField(max_digits=7, decimal_places=2, default=109.00)
+    refeicao = models.DecimalField(max_digits=7, decimal_places=2, default=398.00)
+    cesta_basica = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    alojamento = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    seguro_vida = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    previdencia_privada = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    transporte = models.DecimalField(max_digits=7, decimal_places=2, default=278.00)
+    percentual_participacao_transporte = models.DecimalField(max_digits=5, decimal_places=2, default=6.00)
+    dias_trabalhados_mes = models.DecimalField(max_digits=5, decimal_places=2, default=21.00)
+    outros_custos = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
 
-    seguro_vida = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0.00, verbose_name="Seguro de vida"
-    )
-    previdencia_privada = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0.00, verbose_name="Plano de previdência privada"
-    )
-    transporte = models.DecimalField(
-        max_digits=7, decimal_places=2, default=278.00, verbose_name="Transporte"
-    )
-    percentual_participacao_transporte = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        default=6.00,
-        verbose_name="Participação do trabalhador no VT (%)"
-    )
-    dias_trabalhados_mes = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        default=21.00,
-        verbose_name="Dias médios trabalhados no mês"
-    )       
-    outros_custos = models.DecimalField(max_digits=7, decimal_places=2, default=0.00, verbose_name='Outros Custos')       
-    total = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0, verbose_name="Total"
-    )
-    def save(self, *args, **kwargs):
-        self.total = (
+    # Removido: total = models.DecimalField(...)
+    # pois o valor depende da função, e será calculado fora
+
+    def __str__(self):
+        return f"Benefícios do contrato {self.contrato_id}"
+
+    def total_sem_transporte(self):
+        """
+        Retorna o valor total de benefícios sem o transporte.
+        Útil para reaproveitamento externo (ex: em services).
+        """
+        return (
             self.assistencia_medica_odonto +
             self.exames_periodicos +
             self.refeicao +
-            self.transporte +
-            self.outros_custos +
-            self.alojamento +
             self.cesta_basica +
+            self.alojamento +
             self.seguro_vida +
-            self.previdencia_privada
+            self.previdencia_privada +
+            self.outros_custos
         )
-        super().save(*args, **kwargs)
+
 
 
 

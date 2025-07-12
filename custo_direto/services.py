@@ -17,14 +17,15 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos=None, beneficios=Dec
         return None  # Não salva no banco de dados
 
     adicional_periculosidade = salario_base * Decimal('0.30') if funcao_equipe.periculosidade else Decimal('0')
-    salario_hora = salario_base / Decimal('220')
+    salario_hora = (salario_base + adicional_periculosidade) / Decimal('220')
+    salario_hora_sem_periculosidade = salario_base / Decimal('220')
 
-    valor_horas_extras_50 = salario_hora * Decimal('0.5') * funcao_equipe.horas_extras_50
-    valor_horas_extras_100 = salario_hora * Decimal('1.0') * funcao_equipe.horas_extras_100
+    valor_horas_extras_50 = salario_hora * Decimal('1.5') * funcao_equipe.horas_extras_50
+    valor_horas_extras_100 = salario_hora * Decimal('2.0') * funcao_equipe.horas_extras_100
     
-    valor_adicional_noturno = salario_hora * Decimal('0.2') * Decimal('1.1428') * funcao_equipe.horas_adicional_noturno
-    valor_prontidao = salario_hora * funcao_equipe.horas_prontidao * Decimal('0.67')
-    valor_sobreaviso = salario_hora * funcao_equipe.horas_sobreaviso * Decimal('0.33')
+    valor_adicional_noturno = salario_hora_sem_periculosidade * Decimal('0.2') * Decimal('1.1428') * funcao_equipe.horas_adicional_noturno
+    valor_prontidao = salario_hora_sem_periculosidade * funcao_equipe.horas_prontidao * Decimal('0.67')
+    valor_sobreaviso = salario_hora_sem_periculosidade * funcao_equipe.horas_sobreaviso * Decimal('0.33')
 
     # Busca ou cria o custo direto da função
     custo_funcao, _ = CustoDiretoFuncao.objects.get_or_create(
@@ -66,26 +67,24 @@ def calcular_custo_funcao(funcao_equipe, contrato, encargos=None, beneficios=Dec
 
 def recalcular_custo_contrato(contrato):
     """
-    Serviço para recalcular o custo direto de todas as funções no contrato.
+    Recalcula os custos diretos por função vinculados ao contrato.
+    Atualiza os registros de CustoDiretoFuncao com novos valores de benefícios.
     """
+    # Verifica se há benefícios cadastrados para o contrato
+    beneficios = BeneficiosColaborador.objects.filter(contrato=contrato).first()
+    if not beneficios:
+        return  # Sem benefícios definidos, não há o que recalcular
 
-    try:
-        encargos = contrato.encargos_centralizados
-    except EncargosSociaisCentralizados.DoesNotExist:
-        encargos = None
+    # Para cada função vinculada ao contrato, recalcula os valores
+    funcoes = CustoDiretoFuncao.objects.filter(contrato=contrato)
 
-    try:
-        beneficios = BeneficiosColaborador.objects.get(contrato=contrato).total
-    except BeneficiosColaborador.DoesNotExist:
-        beneficios = Decimal('0.00')
+    for funcao in funcoes:
+        # Recalcula benefícios com base na função e contrato
+        from mao_obra.services import BeneficioCustoDiretoService
+        funcao.beneficios = BeneficioCustoDiretoService.calcular_beneficios_por_funcao(
+            contrato=contrato,
+            salario_base_funcao=funcao.salario_base
+        )
 
-    # Itera sobre todas as funções de equipe e recalcula o custo
-    for funcao_equipe in FuncaoEquipe.objects.filter(contrato=contrato):
-        calcular_custo_funcao(funcao_equipe, contrato, encargos, beneficios)
-
-    # Recalcula o custo total do contrato
-    custo_contrato, created = CustoDireto.objects.get_or_create(contrato=contrato)
-    custo_contrato.calcular_custo_total()
-    custo_contrato.save()
-
-    return custo_contrato
+        funcao.calcular_custo_total()
+        funcao.save()

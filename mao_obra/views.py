@@ -123,7 +123,7 @@ class BeneficiosColaboradorUpdateView(View):
 
     def get(self, request, contrato_id):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
-        beneficio, _ = BeneficiosColaborador.objects.get_or_create(contrato=contrato)
+        beneficio, _ = BeneficiosColaborador.objects.get_or_create(contrato=contrato)        
         form = BeneficiosColaboradorForm(instance=beneficio)
         return render(request, self.template_name, {'form': form, 'contrato': contrato})
 
