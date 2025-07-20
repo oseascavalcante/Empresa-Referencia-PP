@@ -30,11 +30,15 @@ class Equipe(models.Model):
 
 
 class Funcao(models.Model):
-    nome = models.CharField(max_length=100, unique=True)
+    contrato = models.ForeignKey(CadastroContrato, on_delete=models.PROTECT, related_name="funcoes")
+    nome = models.CharField(max_length=100)
     salario = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    class Meta:
+        unique_together = ('contrato', 'nome')
+
     def __str__(self):
-        return f"{self.nome} - R$ {self.salario}"
+        return f"{self.nome} - R$ {self.salario} ({self.contrato})"
 
 #Cadastro das equipes
 class ComposicaoEquipe(models.Model):

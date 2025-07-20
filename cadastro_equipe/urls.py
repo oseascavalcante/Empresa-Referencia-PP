@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.urls import path
 from .views import EquipeCreateView, EscopoAtividadeCreateView, FuncaoCreateView, ComposicaoEquipeView, ComposicaoEquipeDeleteView, ComposicaoEquipeUpdateView, ComposicaoEquipeDetailView, ComposicaoEquipeJSONView, EditarSalariosView 
 
@@ -9,6 +10,7 @@ urlpatterns = [
     path('composicao/<uuid:pk>/editar/', ComposicaoEquipeUpdateView.as_view(), name='editar_composicao'),
     path('composicao/<uuid:pk>/detalhes/', ComposicaoEquipeDetailView.as_view(), name='detalhes_equipe'),  # Nova rota
     path('composicao/<uuid:pk>/json/', ComposicaoEquipeJSONView.as_view(), name='composicao_equipe_json'),
+    path('editar-salarios/', lambda r: redirect('editar_salarios', contrato_id=r.GET.get('contrato')), name='editar_salarios_redirect'),
     path('editar-salarios/<int:contrato_id>/', EditarSalariosView.as_view(), name='editar_salarios'),
     path('adicionar-escopo/', EscopoAtividadeCreateView.as_view(), name='adicionar_escopo'),
     

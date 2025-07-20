@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Novo Contrato - SINCOP{% endblock %}
+
+{% block content %}
+<style>
+        .card {
+            
+            border-radius: 5px;
+        }
+        .small-header {
+            background-color:rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+</style>
+
+
+<div class="container py-4">
+
+    <div class="small-header">
+        <i class="fas fa-cog me-2 text-primary"></i>
+        Cadastro de Estrutura
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <p class="mb-4 text-muted">Siga a ordem abaixo para preencher todas as informações necessárias para um novo contrato:</p>
+
+                    <div class="d-grid gap-3">
+
+                        <a href="#" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-map-marker-alt me-2"></i> 1. Regionais
+                        </a>
+
+                        <a href="#" class="btn btn-outline-secondary btn-lg text-start">
+                            <i class="fas fa-users me-2"></i> 2. Equipes
+                        </a>
+
+                        <a href="#" class="btn btn-outline-success btn-lg text-start">
+                            <i class="fas fa-briefcase me-2"></i> 3. Funções/Salários
+                        </a>
+
+                        <a href="#" class="btn btn-outline-warning btn-lg text-start">
+                            <i class="fas fa-tasks me-2"></i> 4. Escopo de Atividades
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

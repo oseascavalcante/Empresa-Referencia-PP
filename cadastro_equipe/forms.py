@@ -1,11 +1,31 @@
 from django import forms
-from .models import Equipe, Funcao, ComposicaoEquipe, EscopoAtividade
+from .models import Equipe, Funcao, ComposicaoEquipe, EscopoAtividade, FuncaoEquipe
+from .models import Funcao
 
 class FuncaoForm(forms.ModelForm):
     class Meta:
         model = Funcao
+        fields = ['contrato', 'nome', 'salario']
+
+    def __init__(self, *args, **kwargs):
+        contrato_padrao = kwargs.pop('contrato_padrao', None)
+        super().__init__(*args, **kwargs)
+        if contrato_padrao:
+            self.fields['contrato'].initial = contrato_padrao
+        self.fields['contrato'].widget.attrs['class'] = 'form-select'
+        self.fields['nome'].widget.attrs['class'] = 'form-control'
+        self.fields['salario'].widget.attrs['class'] = 'form-control'
+
+class FuncaoEquipeForm(forms.ModelForm):
+    class Meta:
+        model = FuncaoEquipe
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        contrato = kwargs.pop('contrato', None)
+        super().__init__(*args, **kwargs)
+        if contrato:
+            self.fields['funcao'].queryset = Funcao.objects.filter(contrato=contrato)
 
 class EquipeForm(forms.ModelForm):
     class Meta:

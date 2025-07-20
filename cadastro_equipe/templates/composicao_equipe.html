@@ -7,17 +7,15 @@
 <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
 
 
-    {% with contrato=composicoes.0.contrato %}
-        <div class="col mt-3">
-            <div class="row">
-                <div class="col-md-6"><strong>ID - Contrato:</strong> {{ contrato }}</div>
-                <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
-            </div>
-            <div class="col-md-3"><strong>Lote:</strong> {{ contrato.municipio }} -  {{ contrato.estado }}</div>
-            <div class="col-md-3"><strong>Vigência:</strong> {{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }} a {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</div>
-            <div class="col-md-3"><strong>Criado em:</strong> {{ contrato.updated_at|date:"d/m/Y" }}</div>
+    <div class="col mt-3">
+        <div class="row">
+            <div class="col-md-6"><strong>ID - Contrato:</strong> {{ contrato }}</div>
+            <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
         </div>
-    {% endwith %}
+        <div class="col-md-3"><strong>Lote:</strong> {{ contrato.municipio }} -  {{ contrato.estado }}</div>
+        <div class="col-md-3"><strong>Vigência:</strong> {{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }} a {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</div>
+        <div class="col-md-3"><strong>Criado em:</strong> {{ contrato.updated_at|date:"d/m/Y" }}</div>
+    </div>
     
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
     <!-- Campos lado a lado -->

@@ -43,6 +43,20 @@ class FuncaoCreateView(CreateView):
     form_class = FuncaoForm
     template_name = 'adicionar_funcao.html'
     success_url = reverse_lazy('adicionar_funcao')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        contrato_padrao = self.request.session.get('contrato_id')
+        if contrato_padrao:
+            kwargs['contrato_padrao'] = contrato_padrao
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contrato_id = self.request.session.get('contrato_id')
+        if contrato_id:
+            context['contrato'] = CadastroContrato.objects.get(pk=contrato_id)
+        return context
  
 
 import logging
@@ -148,6 +162,13 @@ class ComposicaoEquipeDetailView(DetailView):
         return context
 
 class ComposicaoEquipeView(View):
+    # Exemplo na view:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contrato_id = self.kwargs.get('contrato_id')
+        context['contrato'] = get_object_or_404(CadastroContrato, pk=contrato_id)
+        return context
+      
     def get(self, request, contrato_id=None):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
 
@@ -157,7 +178,7 @@ class ComposicaoEquipeView(View):
         composicoes = ComposicaoEquipe.objects.filter(contrato=contrato)
         escopos = EscopoAtividade.objects.all()
         equipes = Equipe.objects.all()
-        funcoes = Funcao.objects.all()
+        funcoes = Funcao.objects.filter(contrato=contrato)
         regionais = contrato.regionais.all()  # <-- ADICIONADO
 
         if regional_id and escopo_id:
@@ -176,6 +197,7 @@ class ComposicaoEquipeView(View):
             )['quantidade_funcionarios__sum'] or 0
 
         return render(request, 'composicao_equipe.html', {
+            'contrato': contrato,  # <-- ADICIONADO
             'contrato_id': contrato.contrato,
             'escopos': escopos,
             'equipes': equipes_disponiveis,
@@ -310,12 +332,21 @@ class EditarSalariosView(View):
     def get(self, request, contrato_id):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
 
-        # Buscar todas as funções do contrato
+    def get(self, request, contrato_id=None):
+        contratos = CadastroContrato.objects.all().order_by("contrato")
+
+        contrato = (
+            get_object_or_404(CadastroContrato, contrato=contrato_id)
+            if contrato_id else contratos.first()
+        )
+
+        abrir_modal = contrato_id is None
+
         funcoes_queryset = (
             FuncaoEquipe.objects
             .filter(contrato=contrato)
             .select_related('funcao')
-            .order_by('funcao_id')  # Facilita o agrupamento
+            .order_by('funcao_id')
         )
 
         funcoes_dict = OrderedDict()
@@ -325,16 +356,15 @@ class EditarSalariosView(View):
                     'id': funcao_equipe.funcao_id,
                     'nome': funcao_equipe.funcao.nome,
                     'salario_atual': str(funcao_equipe.salario)
-
                 }
 
-        funcoes = list(funcoes_dict.values())
-
         return render(request, self.template_name, {
-            'contrato': contrato.contrato,
-            'funcoes': funcoes
+            'contrato': contrato,
+            'funcoes': list(funcoes_dict.values()),
+            'contratos': contratos,
+            'abrir_modal': abrir_modal,
         })
-
+        
     def post(self, request, contrato_id):
         contrato = get_object_or_404(CadastroContrato, contrato=contrato_id)
         data = json.loads(request.body)

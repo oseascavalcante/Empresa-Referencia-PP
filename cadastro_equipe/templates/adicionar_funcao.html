@@ -3,11 +3,14 @@
 {% block content %}
 <h2>Adicionar Nova Função</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Salvar</button>
-</form>
+<div class="container mt-4">
+    <h3>Cadastrar Função e Salário</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</div>
 
 <a href="#">Voltar</a>
 
