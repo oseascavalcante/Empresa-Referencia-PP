@@ -23,7 +23,16 @@ class EscopoAtividade(models.Model):
         return self.nome
 
 class Equipe(models.Model):
-    nome = models.CharField(max_length=100, unique=True)
+    nome = models.CharField(max_length=100)
+    contrato = models.ForeignKey(
+        'cad_contrato.CadastroContrato',
+        on_delete=models.PROTECT,
+        related_name='equipes'
+    )
+    descricao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Descrição breve")  # NOVO
+
+    class Meta:
+        unique_together = ('contrato', 'nome')
 
     def __str__(self):
         return self.nome

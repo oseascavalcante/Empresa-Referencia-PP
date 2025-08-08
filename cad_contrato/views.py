@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, FormView, TemplateView, DetailView, UpdateView
 
 from mao_obra.services import GrupoCalculationsService
@@ -68,23 +69,23 @@ class SelecionarContratoForm(forms.Form):
         empty_label="Selecione um contrato"
     )
 
+class SelecionarContratoView(View):
+    def get(self, request):
+        contratos = CadastroContrato.objects.all()
+        return render(request, "selecionar_contrato.html", {"contratos": contratos})
 
-class SelecionarContratoView(FormView):
-    template_name = "selecionar_contrato.html"
-    form_class = SelecionarContratoForm
-
-    def form_valid(self, form):
-        contrato = form.cleaned_data["contrato_id"]
-        self.request.session["contrato_id"] = contrato.contrato
-
-        next_url = self.request.GET.get("next") or "/"
-        if "adicionar-regional" in next_url:
-            # Garante que o contrato_id esteja presente na URL
-            next_url = f"/cad_contrato/adicionar-regional/{contrato.contrato}/"
-        return redirect(next_url)
-
-    
-
+    def post(self, request):
+        contrato_id = request.POST.get("contrato_id")
+        next_url = request.GET.get("next") or reverse_lazy("menu_cadastro_estrutura")
+        if contrato_id:
+            request.session["contrato_id"] = contrato_id
+            return redirect(next_url)
+        contratos = CadastroContrato.objects.all()
+        return render(request, "selecionar_contrato.html", {
+            "contratos": contratos,
+            "erro": "Selecione um contrato.",
+        })
+        
 class MenuDespesasView(TemplateView):
     template_name = 'menu_despesas.html'
 

@@ -1,0 +1,42 @@
+{# Parcial da tabela/lista de Funções #}
+<table class="table table-bordered table-striped">
+  <thead style="background-color: #483D8B; color: white;">
+    <tr>
+      <th>Nome da Função</th>
+      <th>Salário</th>
+      <th class="text-end">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for funcao in funcoes %}
+      <tr id="row-{{ funcao.pk }}">
+        <td>{{ funcao.nome }}</td>
+        <td>R$ {{ funcao.salario|floatformat:2 }}</td>
+        <td class="text-end">
+          <!-- Editar: carrega o form na região do form -->
+          <a class="btn btn-sm btn-primary"
+             hx-get="{% url 'editar_funcao' funcao.pk %}?partial=1"
+             hx-target="#funcao-form"
+             hx-swap="innerHTML"
+             title="Editar">
+            <i class="fas fa-edit"></i>
+          </a>
+
+          <!-- Excluir: confirma e atualiza somente a lista -->
+          <button class="btn btn-sm btn-danger"
+                  hx-post="{% url 'excluir_funcao' funcao.pk %}"
+                  hx-confirm="Deseja excluir esta função?"
+                  hx-target="#lista-funcoes"
+                  hx-swap="innerHTML"
+                  title="Excluir">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3" class="text-center">Nenhuma função cadastrada.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

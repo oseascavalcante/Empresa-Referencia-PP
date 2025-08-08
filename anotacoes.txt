@@ -1,6 +1,12 @@
 
-Consertar salário. Não está selecionando o contrato para atualizar. O Salario deve ser por contrato.
 
+1. Excluir a tela de edição de salarios http://127.0.0.1:8000/cadastro_equipe/editar-salarios/3/ para não haver duplicata de tela.
+
+2. Padronizar os itens 1.Regional, 4.Eescopo da atividade conforme 2.Equipe
+
+3. Dashboard custos diretos não está funcionando
+
+------------------------------------------------------------------------
 Criar diagramas
 python manage.py graph_models cad_contrato cadastro_equipe mao_obra --group-models --rankdir=TB -o models_diagram2.png
 

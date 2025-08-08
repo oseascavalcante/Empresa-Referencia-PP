@@ -1,17 +1,150 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h2>Adicionar Nova Função</h2>
-
 <div class="container mt-4">
-    <h3>Cadastrar Função e Salário</h3>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Salvar</button>
-    </form>
+    <div class="header">Adicionar/Editar Função</div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"></p>
+
+    <!-- Informações do contrato -->
+    <div class="row mb-3">
+        <div class="col-md-6"><strong>Contrato:</strong> {{ contrato }}</div>
+        <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Form de criação via HTMX -->
+    <div id="funcao-form">
+      <form method="post" class="mt-4"
+            action="{% url 'adicionar_funcao' %}"
+            hx-post="{% url 'adicionar_funcao' %}"
+            hx-target="#lista-funcoes"
+            hx-swap="innerHTML"
+            hx-on:htmx:responseError="if(event.detail.xhr && event.detail.xhr.status===400){
+                try{
+                const data = JSON.parse(event.detail.xhr.responseText);
+                document.getElementById('alert-container').innerHTML =
+                    '<div class=&quot;alert alert-danger&quot;>'+data.error+'</div>';
+                }catch(e){
+                document.getElementById('alert-container').innerHTML =
+                    '<div class=&quot;alert alert-danger&quot;>Não foi possível salvar.</div>';
+                }
+            }"
+
+            hx-on:htmx:afterRequest="htmx.ajax('GET','{% url 'adicionar_funcao' %}?fragment=form','#funcao-form')" 
+        >
+
+          {% csrf_token %}
+          <div class="row">
+              <div class="col-md-6 mb-3">
+                  <div class="card">
+                      <div class="card-header">Nome da Função</div>
+                      <div class="card-body">
+                          {{ form.nome }}
+                          {% if form.nome.errors %}
+                              <div class="text-danger small">{{ form.nome.errors.0 }}</div>
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                  <div class="card">
+                      <div class="card-header">Salário Base</div>
+                      <div class="card-body">
+                          {{ form.salario }}
+                          {% if form.salario.errors %}
+                              <div class="text-danger small">{{ form.salario.errors.0 }}</div>
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="row mt-3 justify-content-end">
+              <div class="col-md-12 d-flex justify-content-end gap-2">
+                  <button type="button" class="btn btn-secondary" onclick="window.history.back();">← Voltar</button>
+                  <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
+              </div>
+          </div>
+      </form>
+    </div>
+
+    <!-- Listagem das funções -->
+    <div class="small-header mt-5"> Funções Cadastradas </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"></p>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="alert-container" class="mb-2"></div>
+                    <div id="lista-funcoes">
+                      <table class="table table-bordered table-striped">
+                          <thead style="background-color: #483D8B; color: white;">
+                              <tr>
+                                  <th>Nome da Função</th>
+                                  <th>Salário</th>
+                                  <th class="text-end">Ações</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for funcao in funcoes %}
+                                  <tr id="row-{{ funcao.pk }}">
+                                      <td>{{ funcao.nome }}</td>
+                                      <td>R$ {{ funcao.salario|floatformat:2 }}</td>
+                                      <td class="text-end">
+                                          <!-- Edita inline -->
+                                          <a class="btn btn-sm btn-primary"
+                                             hx-get="{% url 'editar_funcao' funcao.pk %}?partial=1"
+                                             hx-target="#funcao-form"
+                                             hx-swap="innerHTML"
+                                             title="Editar">
+                                              <i class="fas fa-edit"></i>
+                                          </a>
+                                          <!-- Exclui com confirmação e atualiza lista -->
+                                          <button class="btn btn-sm btn-danger"
+                                                  hx-post="{% url 'excluir_funcao' funcao.pk %}"
+                                                  hx-confirm="Deseja excluir esta função?"
+                                                  hx-target="#lista-funcoes"
+                                                  hx-swap="innerHTML"
+                                                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                                                  hx-on:error="if(event.detail.xhr.status===409){alert(JSON.parse(event.detail.xhr.responseText).error)}"
+                                                  title="Excluir">
+                                              <i class="fas fa-trash-alt"></i>
+                                          </button>
+                                      </td>
+                                  </tr>
+                              {% empty %}
+                                  <tr>
+                                      <td colspan="3" class="text-center">Nenhuma função cadastrada.</td>
+                                  </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<a href="#">Voltar</a>
-
+<!-- HTMX (se não estiver no base.html) -->
+<script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+<script>
+  // CSRF para HTMX (Django)
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.body.addEventListener('htmx:configRequest', (e) => {
+    const token = getCookie('csrftoken');
+    if (token) e.detail.headers['X-CSRFToken'] = token;
+  });
+</script>
 {% endblock %}
