@@ -3,37 +3,81 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="header">Adicionar Escopo de Atividade</div>
+    <div class="header">Cadastrar Escopo de Atividade</div>
     <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"></p>
 
-    <form method="post" class="mt-4">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Nome do Escopo</div>
-                    <div class="card-body">
-                        {{ form.nome }}
-                    </div>
-                </div>
-            </div>
+    <!-- Informações do contrato -->
+    <div class="row mb-3">
+        <div class="col-md-6"><strong>Contrato:</strong> {{ contrato }}</div>
+        <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
+    </div>
 
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Descrição do Escopo</div>
-                    <div class="card-body">
-                        {{ form.descricao }}
+    <div id="alert-container" class="mb-2"></div>
+
+    <!-- Formulário de cadastro/edição de escopo (inline) -->
+    <div id="escopo-form">
+        {% include "_form_adicionar_escopo_inline.html" %}
+    </div>
+
+    <!-- Listagem dos escopos -->
+    <div class="small-header mt-5"> Escopos Cadastrados </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="lista-escopos">
+                        {% include "_lista_escopos_inline.html" %}
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row mt-3 justify-content-end">
-            <div class="col-md-12 d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary" onclick="window.history.back();">← Voltar</button>
-                <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
-            </div>
-        </div>
-    </form>
+    </div>
 </div>
+
+<!-- HTMX (igual Equipe) -->
+<script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+<script>
+  // CSRF global p/ HTMX (fallback; a view já injeta token na lista)
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.body.addEventListener('htmx:configRequest', (e) => {
+    const token = getCookie('csrftoken');
+    if (token) e.detail.headers['X-CSRFToken'] = token;
+  });
+</script>
+
+<style>
+    .header {
+        background-color: rgb(231, 229, 247);
+        color: #483D8B;
+        text-align: center;
+        padding: 10px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+    .small-header {
+        background-color: rgb(231, 229, 247);
+        color: #483D8B;
+        text-align: center;
+        padding: 10px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+    .card-header {
+        background-color: #483D8B;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+    .btn-save { background-color: #483D8B; color: #fff; }
+</style>
 {% endblock %}

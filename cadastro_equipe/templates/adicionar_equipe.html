@@ -12,48 +12,12 @@
         <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
     </div>
 
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                {{ error }}
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div id="alert-container" class="mb-2"></div>
 
-    <form method="post" class="mt-4">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Nome da Equipe</div>
-                    <div class="card-body">
-                        {{ form.nome }}
-                        {% if form.nome.errors %}
-                            <div class="text-danger small">
-                                {{ form.nome.errors.0 }}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Descrição</div>
-                    <div class="card-body">
-                        {{ form.descricao }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-3 justify-content-end">
-            <div class="col-md-12 d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary" onclick="window.history.back();">← Voltar</button>
-                <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
-            </div>
-        </div>
-    </form>
+    <!-- Formulário de cadastro/edição de equipe -->
+    <div id="equipe-form">
+        {% include "_form_adicionar_equipe_inline.html" %}
+    </div>
 
     <!-- Listagem das equipes -->
     <div class="small-header mt-5"> Equipes Cadastradas </div>
@@ -63,41 +27,29 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-
-                    <table class="table table-bordered table-striped">
-                        <thead style="background-color: #483D8B; color: white;">
-                            <tr>
-                                <th>Nome da Equipe</th>
-                                <th>Descrição</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for equipe in equipes %}
-                                <tr>
-                                    <td>{{ equipe.nome }}</td>
-                                    <td>{{ equipe.descricao }}</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center">Nenhuma equipe cadastrada.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div id="lista-equipes">
+                        {% include "_lista_equipes_inline.html" %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- HTMX para requisições AJAX -->
+<script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+<script>
+  // CSRF para HTMX (Django)
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.body.addEventListener('htmx:configRequest', (e) => {
+    const token = getCookie('csrftoken');
+    if (token) e.detail.headers['X-CSRFToken'] = token;
+  });
+</script>
 
 <style>
     .header {

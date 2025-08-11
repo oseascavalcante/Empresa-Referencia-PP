@@ -1,0 +1,50 @@
+<form method="post" class="mt-4"
+      action="{% url 'adicionar_escopo' %}"
+      hx-post="{% url 'adicionar_escopo' %}"
+      hx-target="#lista-escopos"
+      hx-swap="innerHTML"
+      hx-on:htmx:responseError="if(event.detail.xhr && event.detail.xhr.status===400){
+          try{
+            const data = JSON.parse(event.detail.xhr.responseText);
+            document.getElementById('alert-container').innerHTML =
+                '<div class=&quot;alert alert-danger&quot;>'+data.error+'</div>';
+          }catch(e){
+            document.getElementById('alert-container').innerHTML =
+                '<div class=&quot;alert alert-danger&quot;>Não foi possível salvar.</div>';
+          }
+      }"
+      hx-on:htmx:afterRequest="htmx.ajax('GET','{% url 'adicionar_escopo' %}?fragment=form','#escopo-form')">
+    {% csrf_token %}
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">Nome do Escopo</div>
+                <div class="card-body">
+                    {{ form.nome }}
+                    {% if form.nome.errors %}
+                        <div class="text-danger small">{{ form.nome.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">Descrição</div>
+                <div class="card-body">
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}
+                        <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3 justify-content-end">
+        <div class="col-md-12 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back();">← Voltar</button>
+            <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Salvar</button>
+        </div>
+    </div>
+</form>

@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ContractCreateView, RegionalCreateView, lista_formularios, menu_principal, abrir_contratos, DetailContratosView
+from .views import ContractCreateView, RegionalCreateView, RegionalDeleteView, RegionalUpdateView, lista_formularios, menu_principal, abrir_contratos, DetailContratosView
 from .views import SelecionarContratoView, UpdateContratoView
 from .views import MenuDespesasView
 
@@ -13,5 +13,8 @@ urlpatterns = [
     path('detalhes-contrato/<int:pk>/', DetailContratosView.as_view(), name='detalhes_contrato'),
     path('editar-contrato/<int:pk>/', UpdateContratoView.as_view(), name='editar_contrato'),
     path('cad_contrato/adicionar-regional/<int:contrato_id>/', RegionalCreateView.as_view(), name='adicionar_regional'),
+    path('cad_contrato/editar-regional/<int:pk>/', RegionalUpdateView.as_view(), name='editar_regional'),
+    path('cad_contrato/excluir-regional/<int:pk>/', RegionalDeleteView.as_view(), name='excluir_regional'),
+    
     ]
 

@@ -1,0 +1,39 @@
+<table class="table table-bordered table-striped">
+    <thead style="background-color: #483D8B; color: white;">
+        <tr>
+            <th>Nome da Equipe</th>
+            <th>Descrição</th>
+            <th class="text-end">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for equipe in equipes %}
+            <tr id="row-{{ equipe.pk }}">
+                <td>{{ equipe.nome }}</td>
+                <td>{{ equipe.descricao }}</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-primary"
+                       hx-get="{% url 'editar_equipe' equipe.pk %}?partial=1"
+                       hx-target="#equipe-form"
+                       hx-swap="innerHTML"
+                       title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger"
+                            hx-post="{% url 'excluir_equipe' equipe.pk %}"
+                            hx-confirm="Deseja excluir esta equipe?"
+                            hx-target="#lista-equipes"
+                            hx-swap="innerHTML"
+                            hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                            title="Excluir">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhuma equipe cadastrada.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

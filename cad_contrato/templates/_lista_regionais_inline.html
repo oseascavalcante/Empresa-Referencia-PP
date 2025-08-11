@@ -1,0 +1,39 @@
+<table class="table table-bordered table-striped">
+    <thead style="background-color: #483D8B; color: white;">
+        <tr>
+            <th>Nome</th>
+            <th>Município</th>
+            <th class="text-end">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for regional in regionais %}
+            <tr id="row-{{ regional.pk }}">
+                <td>{{ regional.nome }}</td>
+                <td>{{ regional.municipio }}</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-primary"
+                       hx-get="{% url 'editar_regional' regional.pk %}?partial=1"
+                       hx-target="#regional-form"
+                       hx-swap="innerHTML"
+                       title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger"
+                            hx-post="{% url 'excluir_regional' regional.pk %}"
+                            hx-confirm="Deseja excluir esta regional?"
+                            hx-target="#lista-regionais"
+                            hx-swap="innerHTML"
+                            hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                            title="Excluir">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhuma regional cadastrada.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

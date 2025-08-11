@@ -33,6 +33,8 @@ logger = logging.getLogger(__name__)
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.db.models.deletion import ProtectedError
+from django.middleware.csrf import get_token
+
 
 # --------------------------------------------
 # Helpers
@@ -159,25 +161,228 @@ class FuncaoDeleteView(DeleteView):
         return redirect(self.success_url)
 
 
-
-
-
 # ------------------------------------------------------------
-# Escopo da Atividade
+# Escopo da Atividade (implementação única/canônica)
 # ------------------------------------------------------------
-class EscopoAtividadeCreateView(CreateView):
-    """CreateView simples para cadastrar Escopos de Atividade."""
+def _render_tabela_escopos(request, contrato):
+    """
+    Renderiza a tabela de escopos do contrato.
+    Injeta CSRF para que os botões HTMX (ex.: excluir) enviem X-CSRFToken válido.
+    """
+    escopos = EscopoAtividade.objects.filter(contrato=contrato).order_by("nome")
+    html = render_to_string(
+        "_lista_escopos_inline.html",
+        {
+            "escopos": escopos,
+            "contrato": contrato,
+            "csrf_token": get_token(request),  # importante p/ hx-headers do template
+        },
+        request=request,
+    )
+    return HttpResponse(html)
 
+
+class EscopoCreateView(CreateView):
+    """
+    Criação de escopo por contrato (contrato vem da sessão).
+    - Em sucesso HTMX: devolve a lista atualizada.
+    - Em erro HTMX: devolve JSON 400 com mensagem amigável (consumido no template).
+    """
     model = EscopoAtividade
     form_class = EscopoAtividadeForm
     template_name = "adicionar_escopo.html"
-    # Redireciona para a mesma página após o cadastro
-    success_url = reverse_lazy("adicionar_escopo")
 
+    def dispatch(self, request, *args, **kwargs):
+        # contrato da sessão (mesmo padrão de Equipe/Função)
+        contrato_id = request.session.get("contrato_id")
+        if not contrato_id:
+            return redirect("selecionar_contrato")
+        self.contrato = get_object_or_404(CadastroContrato, pk=contrato_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["contrato"] = self.contrato
+        ctx["escopos"] = EscopoAtividade.objects.filter(contrato=self.contrato).order_by("nome")
+        return ctx
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["contrato"] = self.contrato  # form injeta no save()
+        return kwargs
+
+    def form_valid(self, form):
+        # redundante (o form já injeta), mas inofensivo:
+        form.instance.contrato = self.contrato
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            return _render_tabela_escopos(self.request, self.contrato)
+        return response
+
+    def form_invalid(self, form):
+        # Para HTMX, retornamos JSON 400 com uma mensagem simples (UX consistente)
+        if self.request.headers.get("HX-Request"):
+            msg = (
+                form.errors.get("nome", ["Erro no formulário."])[0]
+                if form.errors
+                else (form.non_field_errors()[0] if form.non_field_errors() else "Erro no formulário.")
+            )
+            return JsonResponse({"error": msg}, status=400)
+        return super().form_invalid(form)
+
+    def get(self, request, *args, **kwargs):
+        # carrega só o form via HTMX (?fragment=form)
+        if request.GET.get("fragment") == "form":
+            form = EscopoAtividadeForm(contrato=self.contrato)
+            html = render_to_string(
+                "_form_adicionar_escopo_inline.html",
+                {"form": form, "contrato": self.contrato},
+                request=request,
+            )
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        # ❌ nada de kwargs={'contrato_id': ...} — a rota não aceita isso
+        return reverse_lazy("adicionar_escopo")
+
+
+class EscopoUpdateView(UpdateView):
+    """
+    Edição inline via HTMX:
+    - GET com ?partial=1 devolve o form parcial.
+    - Em sucesso HTMX: devolve a lista atualizada.
+    - Em erro HTMX: devolve o próprio fragmento com status 400 e retarget no form.
+    """
+    model = EscopoAtividade
+    form_class = EscopoAtividadeForm
+    template_name = "editar_escopo.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.object and self.object.contrato_id:
+            kwargs["contrato"] = self.object.contrato
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.headers.get("HX-Request") or request.GET.get("partial"):
+            form = self.get_form()
+            html = render_to_string(
+                "_form_editar_escopo_inline.html",
+                {"form": form, "obj": self.object, "contrato": self.object.contrato},
+                request=request,
+            )
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            return _render_tabela_escopos(self.request, self.object.contrato)
+        return response
+
+    def form_invalid(self, form):
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string(
+                "_form_editar_escopo_inline.html",
+                {"form": form, "obj": self.object, "contrato": self.object.contrato},
+                request=self.request,
+            )
+            resp = HttpResponse(html, status=400)
+            resp["HX-Retarget"] = "#escopo-form"
+            return resp
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        # ❌ nada de kwargs={'contrato_id': ...}
+        return reverse_lazy("adicionar_escopo")
+
+
+class EscopoDeleteView(DeleteView):
+    """
+    Exclusão via HTMX:
+    - POST HTMX: devolve só a lista atualizada.
+    - POST normal: redireciona para a página de escopos.
+    """
+    model = EscopoAtividade
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        contrato = self.object.contrato
+        self.object.delete()
+        if request.headers.get("HX-Request"):
+            return _render_tabela_escopos(request, contrato)
+        # ❌ nada de kwargs={'contrato_id': ...}
+        return redirect(reverse_lazy("adicionar_escopo"))
 
 # ------------------------------------------------------------
 # Equipes
 # ------------------------------------------------------------
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+class EquipeUpdateView(UpdateView):
+    model = Equipe
+    form_class = EquipeForm
+    template_name = "editar_equipe.html"  # fallback
+    success_url = reverse_lazy("adicionar_equipe")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.object and self.object.contrato_id:
+            kwargs["contrato"] = self.object.contrato
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.headers.get("HX-Request") or request.GET.get("partial"):
+            form = self.get_form()
+            html = render_to_string("_form_editar_equipe_inline.html", {"form": form, "obj": self.object}, request=request)
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            return _render_tabela_equipes(self.request)
+        return response
+
+    def form_invalid(self, form):
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string("_form_editar_equipe_inline.html", {"form": form, "obj": self.object}, request=self.request)
+            return HttpResponse(html, status=400)
+        return super().form_invalid(form)
+
+class EquipeDeleteView(DeleteView):
+    model = Equipe
+    success_url = reverse_lazy("adicionar_equipe")
+    template_name = "confirmar_excluir_equipe.html"  # fallback
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        try:
+            self.object.delete()
+        except ProtectedError:
+            if request.headers.get("HX-Request"):
+                return JsonResponse({"error": "Esta equipe está em uso e não pode ser excluída."}, status=409)
+            from django.contrib import messages
+            messages.error(request, "Esta equipe está em uso e não pode ser excluída.")
+            return redirect(self.success_url)
+
+        if request.headers.get("HX-Request"):
+            return _render_tabela_equipes(self.request)
+        return redirect(self.success_url)
+
+def _render_tabela_equipes(request):
+    contrato = _get_contrato_from_session(request)
+    equipes = Equipe.objects.filter(contrato=contrato).order_by("nome")
+    html = render_to_string("_lista_equipes_inline.html", {"equipes": equipes}, request=request)
+    return HttpResponse(html)
+
+#----------------------------------------------------------
+
+
 class EquipeCreateView(CreateView):
     """Cadastro de Equipe.
 
@@ -219,7 +424,20 @@ class EquipeCreateView(CreateView):
         else:
             context["equipes"] = []
         return context
-
+    
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("fragment") == "form":
+            contrato = _get_contrato_from_session(request)
+            form = EquipeForm(contrato=contrato)
+            html = render_to_string("_form_adicionar_equipe_inline.html", {"form": form}, request=request)
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            return _render_tabela_equipes(self.request)
+        return response
 # ------------------------------------------------------------
 # Composição de Equipe
 # ------------------------------------------------------------

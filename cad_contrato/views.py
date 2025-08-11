@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, TemplateView, DetailView, UpdateView
+from django.views.generic.edit import DeleteView
 
 from mao_obra.services import GrupoCalculationsService
 from .models import CadastroContrato, Regional
@@ -9,6 +10,10 @@ from .forms import CadastroContratoForm, RegionalForm
 from django import forms
 
 from .services import CadastroContratoService  # ✅ importa a service
+
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
+from django.db.models.deletion import ProtectedError
 
 class ContractCreateView(CreateView):
     model = CadastroContrato
@@ -143,8 +148,11 @@ class RegionalCreateView(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.contrato = self.contrato  # força associação correta
-        return super().form_valid(form)
+        form.instance.contrato = self.contrato  # contrato já definido no dispatch
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            return _render_tabela_regionais(self.request, self.contrato)
+        return response
 
     def get_initial(self):
         return {'contrato': self.contrato}
@@ -152,6 +160,7 @@ class RegionalCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['contrato'] = self.contrato
+        context['regionais'] = Regional.objects.filter(contrato=self.contrato)
         return context
     
     def get_form_kwargs(self):
@@ -161,3 +170,84 @@ class RegionalCreateView(CreateView):
 
     def get_success_url(self):
         return reverse_lazy('adicionar_regional', kwargs={'contrato_id': self.object.contrato.pk if hasattr(self.object.contrato, "pk") else self.object.contrato})
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("fragment") == "form":
+            form = RegionalForm(contrato=self.contrato)
+            html = render_to_string("_form_adicionar_regional_inline.html", {"form": form, "contrato": self.contrato}, request=request)
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)    
+
+def _render_tabela_regionais(request, contrato):
+    regionais = Regional.objects.filter(contrato=contrato).order_by("nome")
+    html = render_to_string("_lista_regionais_inline.html", {"regionais": regionais, "contrato": contrato}, request=request)
+    return HttpResponse(html)
+
+class RegionalUpdateView(UpdateView):
+    model = Regional
+    form_class = RegionalForm
+    template_name = "editar_regional.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.object and self.object.contrato_id:
+            kwargs["contrato"] = self.object.contrato
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.headers.get("HX-Request") or request.GET.get("partial"):
+            form = self.get_form()
+            html = render_to_string("_form_editar_regional_inline.html", {"form": form, "obj": self.object, "contrato": self.object.contrato}, request=request)
+            return HttpResponse(html)
+        return super().get(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string("_form_editar_regional_inline.html",
+                                    {"form": form, "obj": self.object, "contrato": self.object.contrato},
+                                    request=self.request)
+            resp = HttpResponse(html, status=400)
+            resp['HX-Retarget'] = '#regional-form'
+            return resp
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        form.instance.contrato = self.object.contrato
+        response = super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            # Retorna apenas a tabela para atualizar #lista-regionais
+            html = render_to_string("_lista_regionais_inline.html", {
+                "regionais": Regional.objects.filter(contrato=self.object.contrato),
+                "contrato": self.object.contrato
+            }, request=self.request)
+            resp = HttpResponse(html)
+            resp['HX-Retarget'] = '#lista-regionais'
+            return resp
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('adicionar_regional', kwargs={'contrato_id': self.object.contrato.pk})
+    
+class RegionalDeleteView(DeleteView):
+    model = Regional
+    template_name = "confirmar_excluir_regional.html"
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        contrato = self.object.contrato
+        try:
+            self.object.delete()
+        except ProtectedError:
+            if request.headers.get("HX-Request"):
+                return JsonResponse({"error": "Esta regional está em uso e não pode ser excluída."}, status=409)
+            from django.contrib import messages
+            messages.error(request, "Esta regional está em uso e não pode ser excluída.")
+            return redirect(self.success_url)
+        if request.headers.get("HX-Request"):
+            return _render_tabela_regionais(request, contrato)
+        return redirect(self.success_url)
+
+    @property
+    def success_url(self):
+        return reverse_lazy('adicionar_regional', kwargs={'contrato_id': self.object.contrato.pk})

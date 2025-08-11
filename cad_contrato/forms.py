@@ -13,10 +13,11 @@ class CadastroContratoForm(forms.ModelForm):
         model = CadastroContrato
         fields = '__all__'
 
+# forms.py
 class RegionalForm(forms.ModelForm):
     class Meta:
         model = Regional
-        exclude = ['contrato']
+        fields = ['nome', 'municipio']
 
     def __init__(self, *args, **kwargs):
         self.contrato = kwargs.pop('contrato', None)
@@ -26,6 +27,15 @@ class RegionalForm(forms.ModelForm):
         cleaned_data = super().clean()
         nome = cleaned_data.get('nome')
         contrato = self.contrato
-        if contrato and nome and Regional.objects.filter(contrato=contrato, nome=nome).exists():
-            raise forms.ValidationError("Já existe uma regional com esse nome para este contrato.")
+
+        if contrato and nome:
+            qs = Regional.objects.filter(contrato=contrato, nome=nome)
+            # ✅ Ignora a própria instância no update
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                # opcional: atrelar o erro ao campo 'nome' (melhor UX)
+                self.add_error('nome', "Já existe uma regional com esse nome para este contrato.")
+
         return cleaned_data

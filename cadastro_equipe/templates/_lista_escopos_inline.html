@@ -1,0 +1,40 @@
+<table class="table table-bordered table-striped">
+    <thead style="background-color: #483D8B; color: white;">
+        <tr>
+            <th>Nome do Escopo</th>
+            <th>Descrição</th>
+            <th class="text-end">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for escopo in escopos %}
+            <tr id="row-{{ escopo.pk }}">
+                <td>{{ escopo.nome }}</td>
+                <td>{{ escopo.descricao|default:"—" }}</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-primary"
+                       href="{% url 'editar_escopo' escopo.pk %}?partial=1"
+                       hx-get="{% url 'editar_escopo' escopo.pk %}?partial=1"
+                       hx-target="#escopo-form"
+                       hx-swap="innerHTML"
+                       title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-danger"
+                            hx-post="{% url 'excluir_escopo' escopo.pk %}"
+                            hx-confirm="Deseja excluir este escopo?"
+                            hx-target="#lista-escopos"
+                            hx-swap="innerHTML"
+                            hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                            title="Excluir">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhum escopo cadastrado.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

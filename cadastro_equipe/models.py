@@ -16,8 +16,22 @@ Classes:
         custos adicionais e condições de trabalho, como horas extras e turnos noturnos.
 """
 class EscopoAtividade(models.Model):
-    nome = models.CharField(max_length=100, unique=True, verbose_name="Nome do Escopo")
+    contrato = models.ForeignKey(
+        CadastroContrato,
+        on_delete=models.PROTECT,
+        related_name="escopos",
+        verbose_name="Contrato",
+    )
+    nome = models.CharField(max_length=100, verbose_name="Nome do Escopo")
     descricao = models.TextField(blank=True, null=True, verbose_name="Descrição do Escopo")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["contrato", "nome"],
+                name="uniq_escopo_por_contrato",
+            )
+        ]
 
     def __str__(self):
         return self.nome

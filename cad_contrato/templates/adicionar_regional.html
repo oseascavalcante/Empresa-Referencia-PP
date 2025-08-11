@@ -1,41 +1,50 @@
 <!-- filepath: cad_contrato/templates/adicionar_regional.html -->
 {% extends "base.html" %}
-
 {% block content %}
 <div class="container mt-4">
-    <h3 class="text-center text-primary">
-        Cadastrar Regional{% if contrato %} para o Contrato {{ contrato }}{% endif %}
-    </h3>
+    <div class="header">Adicionar Nova Regional</div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"></p>
 
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            <strong>Corrija os erros abaixo:</strong>
-            <ul>
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+    <!-- Informações do contrato -->
+    <div class="row mb-3">
+        <div class="col-md-6"><strong>Contrato:</strong> {{ contrato }}</div>
+        <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
+    </div>
+
+    <div id="alert-container" class="mb-2"></div>
+
+    <!-- Formulário de cadastro/edição de regional -->
+    <div id="regional-form">
+        {% include "_form_adicionar_regional_inline.html" %}
+    </div>
+
+    <!-- Listagem das regionais -->
+    <div class="small-header mt-5"> Regionais Cadastradas </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"></p>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="lista-regionais">
+                        {% include "_lista_regionais_inline.html" %}
+                    </div>
+                </div>
+            </div>
         </div>
-    {% endif %}
-
-    <form method="post" class="mt-4">
-        {% csrf_token %}
-        {{ form.as_p }}
-
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary">Salvar Regional</button>
-        </div>
-    </form>
-
-    <div class="mt-3">
-        <a href="{% url 'menu_despesas' contrato_id=contrato.pk %}" class="btn btn-secondary">
-            Voltar para o contrato
-        </a>
     </div>
 </div>
+
+<!-- HTMX para requisições AJAX -->
+<script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  document.body.addEventListener('htmx:configRequest', (e) => {
+    const token = getCookie('csrftoken');
+    if (token) e.detail.headers['X-CSRFToken'] = token;
+  });
+</script>
 {% endblock %}

@@ -107,12 +107,40 @@ class EquipeForm(forms.ModelForm):
 
 
 class EscopoAtividadeForm(forms.ModelForm):
-    """Form simples para cadastro de Escopo da Atividade."""
-
+    """
+    - Recebe `contrato` via kwargs (não expõe no form).
+    - Valida unicidade (contrato + nome) ignorando a própria instância no update.
+    - Injeta o contrato no save().
+    """
     class Meta:
         model = EscopoAtividade
         fields = ["nome", "descricao"]
 
+    def __init__(self, *args, **kwargs):
+        self.contrato = kwargs.pop('contrato', None)
+        super().__init__(*args, **kwargs)
+        # Aparência/UX consistente
+        self.fields["nome"].widget.attrs.update({"class": "form-control"})
+        self.fields["descricao"].widget.attrs.update({"class": "form-control"})
+
+    def clean(self):
+        cleaned = super().clean()
+        nome = cleaned.get("nome")
+        if nome and self.contrato:
+            qs = EscopoAtividade.objects.filter(contrato=self.contrato, nome__iexact=nome)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)  # ✅ ignora o próprio registro
+            if qs.exists():
+                self.add_error("nome", "Já existe um escopo com este nome para este contrato.")
+        return cleaned
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        if self.contrato is not None:
+            obj.contrato = self.contrato
+        if commit:
+            obj.save()
+        return obj
 
 class ComposicaoEquipeForm(forms.ModelForm):
     """Mantido como estava, com validação de duplicidade por (contrato, regional, escopo, equipe)."""
