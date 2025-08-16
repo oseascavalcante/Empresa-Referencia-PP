@@ -42,17 +42,7 @@
                         <i class="fas fa-edit me-2"></i>
                         Composição de Equipe
                     </h5>
-                    <div class="card-actions d-flex gap-2">
-                        <button type="button" class="btn btn-warning btn-sm" id="limpar-tabela">
-                            <i class="fas fa-broom"></i> Limpar Tudo
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm" id="cole-excel-btn">
-                            <i class="fas fa-file-excel"></i> Cole do Excel
-                        </button>
-                        <button type="button" class="btn btn-success btn-sm" id="salvar-btn">
-                            <i class="fas fa-save"></i> Salvar
-                        </button>
-                    </div>
+                    <!-- Botões movidos para baixo da tabela -->
                 </div>
                 
                 <div class="card-body">
@@ -148,7 +138,7 @@
                                     </td>
                                     <td>
                                         <input type="number" class="form-control funcao-salario" 
-                                               value="{{ funcao.salario }}" step="0.01" placeholder="Salário será carregado automaticamente">
+                                               value="{{ funcao.salario }}" step="0.01" readonly>
                                     </td>
                                     <td>
                                         <div class="form-check d-flex justify-content-center">
@@ -190,9 +180,18 @@
                         </table>
                     </div>
                     
-                    <div class="d-flex justify-content-start align-items-center mt-3">
+                    <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back();">
                             <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-warning" id="limpar-tabela">
+                            <i class="fas fa-broom"></i> Limpar Tudo
+                        </button>
+                        <button type="button" class="btn btn-info" id="cole-excel-btn">
+                            <i class="fas fa-file-excel"></i> Cole do Excel
+                        </button>
+                        <button type="button" class="btn btn-success" id="salvar-btn">
+                            <i class="fas fa-save"></i> Salvar
                         </button>
                     </div>
                 </div>
@@ -244,7 +243,7 @@
                         Equipes Cadastradas
                     </h5>
                     <div class="badge bg-primary" id="contador-equipes" style="font-size: 1.1rem; font-weight: 600;">
-                        <span id="total-pessoas">0</span> pessoas
+                        <span id="total-equipes">{{ composicoes|length }}</span> equipe(s)
                     </div>
                 </div>
                 
@@ -621,75 +620,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const composicaoTable = document.getElementById('composicao-table');
     const composicaoTbody = document.getElementById('composicao-tbody');
     
-    // Função para calcular e atualizar contador de pessoas
-    function atualizarContadorPessoas() {
-        // Calcular total de pessoas dinamicamente da página atual
-        let totalPessoas = 0;
+    // Função para calcular e atualizar contador de equipes
+    function atualizarContadorEquipes() {
+        // Calcular total de equipes dinamicamente da página atual
         const linhasTabela = document.querySelectorAll('#equipes-cadastradas-table tbody tr');
+        let totalEquipes = linhasTabela.length;
         
-        linhasTabela.forEach(linha => {
-            const pessoasCell = linha.querySelector('td:nth-child(6)'); // Coluna "Pessoas/Equipe"
-            if (pessoasCell) {
-                const pessoas = parseInt(pessoasCell.textContent.trim()) || 0;
-                totalPessoas += pessoas;
-            }
-        });
-        
-        const contadorElement = document.getElementById('total-pessoas');
+        const contadorElement = document.getElementById('total-equipes');
         if (contadorElement) {
-            contadorElement.textContent = totalPessoas;
+            contadorElement.textContent = totalEquipes;
         }
     }
     
-    // Função para buscar salário da função via AJAX
-    function buscarSalarioFuncao(funcaoNome, callback) {
-        // Procurar na lista de funções usando dados do template
-        const funcoes = JSON.parse('{{ funcoes_json|safe }}');
-        const funcaoEncontrada = funcoes.find(f => f.nome.toLowerCase() === funcaoNome.toLowerCase());
-        
-        if (funcaoEncontrada) {
-            callback({
-                success: true,
-                salario: parseFloat(funcaoEncontrada.salario),
-                nome: funcaoEncontrada.nome
-            });
-        } else {
-            callback({
-                success: false,
-                error: 'Função não encontrada'
-            });
-        }
-    }
-    
-    // Event listener para auto-preenchimento de salário
-    composicaoTbody.addEventListener('input', function(e) {
-        if (e.target.classList.contains('funcao-nome')) {
-            const row = e.target.closest('tr');
-            const salarioInput = row.querySelector('.funcao-salario');
-            const funcaoNome = e.target.value.trim();
-            
-            if (funcaoNome && salarioInput && !salarioInput.dataset.userModified) {
-                buscarSalarioFuncao(funcaoNome, function(response) {
-                    if (response.success) {
-                        salarioInput.value = response.salario.toFixed(2);
-                        // Visual feedback
-                        salarioInput.style.backgroundColor = '#d4edda';
-                        setTimeout(() => {
-                            salarioInput.style.backgroundColor = '';
-                        }, 1000);
-                    }
-                });
-            }
-        }
-        
-        if (e.target.classList.contains('funcao-salario')) {
-            // Marcar que o usuário modificou o salário manualmente
-            e.target.dataset.userModified = 'true';
-        }
-    });
+    // Campos de função e salário são readonly, sem necessidade de busca automática
     
     // Inicializar contador
-    atualizarContadorPessoas();
+    atualizarContadorEquipes();
     
     // Função para mostrar alertas
     function showAlert(message, type = 'info') {
@@ -1001,7 +947,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     if (data.status === 'success') {
                         showAlert('Equipe excluída com sucesso!', 'success');
-                        setTimeout(() => window.location.reload(), 1500);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     } else {
                         showAlert('Erro ao excluir equipe.', 'danger');
                     }
