@@ -79,8 +79,23 @@ class EquipeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.contrato = kwargs.pop("contrato", None)
         super().__init__(*args, **kwargs)
-        self.fields["nome"].widget.attrs.update({"class": "form-control"})
-        self.fields["descricao"].widget.attrs.update({"class": "form-control"})
+        self.fields["nome"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Nome da equipe"
+        })
+        self.fields["descricao"].widget.attrs.update({
+            "class": "form-control", 
+            "placeholder": "Descrição da equipe"
+        })
+        
+        # Adiciona classes de erro se existirem
+        if self.errors:
+            for field_name, field in self.fields.items():
+                if field_name in self.errors:
+                    if 'class' in field.widget.attrs:
+                        field.widget.attrs['class'] += ' is-invalid'
+                    else:
+                        field.widget.attrs['class'] = 'form-control is-invalid'
 
     class Meta:
         model = Equipe

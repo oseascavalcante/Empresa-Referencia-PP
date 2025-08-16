@@ -1,0 +1,501 @@
+<!-- filepath: /D:/PLANILHA_PRECIFICACAO/Empresa_Referencia_PP/cadastro_equipe/templates/composicao_equipe.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="header">Cadastro de Equipes</div>
+<p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
+
+
+    <div class="col mt-3">
+        <div class="row">
+            <div class="col-md-6"><strong>ID - Contrato:</strong> {{ contrato }}</div>
+            <div class="col-md-6"><strong>Concessionária:</strong> {{ contrato.concessionaria }}</div>
+        </div>
+        <div class="col-md-3"><strong>Lote:</strong> {{ contrato.municipio }} -  {{ contrato.estado }}</div>
+        <div class="col-md-3"><strong>Vigência:</strong> {{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }} a {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</div>
+        <div class="col-md-3"><strong>Criado em:</strong> {{ contrato.updated_at|date:"d/m/Y" }}</div>
+    </div>
+    
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
+    <!-- Campos lado a lado -->
+    
+    <div class="row align-items-end">
+        <!-- Primeira linha: Todos os campos -->
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="regional">Regional*</label>
+            <select id="regional" class="form-control form-control-sm" required>
+                <option value="">Selecione</option>
+                {% for regional in regionais %}
+                    <option value="{{ regional.id }}">{{ regional.nome }} - {{ regional.municipio }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Por favor, selecione a regional.</div>
+        </div>
+        
+
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="id_escopo" class="me-2">Escopo da Atividade*</label>
+            <select id="id_escopo" name="escopo" class="form-control">
+                {% for escopo in escopos %}
+                <option value="{{ escopo.id }}">{{ escopo.nome }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Por favor, selecione o Escopo da Atividade.</div>
+        </div>
+    
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="equipe" class="me-2">Tipo de Equipe*</label>
+            <select id="equipe" class="form-control form-control-sm" required>
+                <option value="">Selecione</option>
+                {% for equipe in equipes %}
+                    <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Por favor, selecione o tipo de equipe.</div>
+        </div>
+    
+        <div class="col-md-2 d-flex align-items-center">
+            <label for="quantidade_equipes" class="me-2">Quantidade de Equipes*</label>
+            <input type="number" id="quantidade_equipes" class="form-control form-control-sm" min="1" value="1" required>
+            <div class="invalid-feedback">Por favor, insira a quantidade de equipes.</div>
+        </div>
+    
+        <div class="col-md-2 d-flex flex-column">
+            <label for="data_mobilizacao" class="form-label">Data de Mobilização*</label>
+                <input 
+                    type="date" 
+                    id="data_mobilizacao" 
+                    name="data_mobilizacao" 
+                    class="form-control" 
+                    required 
+                    value="{{ contrato.inicio_vigencia_contrato|date:'Y-m-d' }}">
+                <div class="invalid-feedback">Por favor, insira a data de mobilização.</div>
+        
+        </div>
+
+        <div class="col-md-2 d-flex flex-column">
+            <label for="data_desmobilizacao" class="form-label">Data de Desmobilização*</label>
+                <input 
+                    type="date" 
+                    id="data_desmobilizacao" 
+                    name="data_desmobilizacao" 
+                    class="form-control" 
+                    required 
+                    value="{{ contrato.fim_vigencia_contrato|date:'Y-m-d' }}">
+            <div class="invalid-feedback">Por favor, insira a data de desmobilização.</div>
+            
+        </div>
+
+    </div>
+    
+    <div class="row mt-3">
+        <!-- Segunda linha: Observação -->
+        <div class="col-md-12 d-flex align-items-center">
+            <label for="observacao" class="me-2">Observação:</label>
+            <input type="text" id="observacao" class="form-control form-control-sm">
+        </div>
+    </div>
+
+    <!-- Handsontable para inserir dados -->
+    <div id="tabela_composicao" class="table-responsive mt-3"></div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+            ← Voltar
+        </button>
+        <button id="adicionar" class="btn btn-primary">
+            + Adicionar
+        </button>
+    </div>
+    
+
+    <div class="small-header"> Equipes Cadastradas </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead style="background-color: #483D8B; color: white; height: 35px;">
+                            <tr>
+                                <th>ID - Contrato</th>
+                                <th>Regional</th>
+                                <th>Escopo de Atividade</th>
+                                <th>Equipe</th>
+                                <th>Quantidade</th>
+                                <th>Pessoas/Equipe</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for composicao in composicoes %}
+                                <tr>
+                                    <td>{{ composicao.contrato_id }} - {{ composicao.contrato.escopo_contrato }}</td>
+                                    <td>{{ composicao.regional.nome }}</td>
+                                    <td>{{ composicao.escopo.nome }}</td>
+                                    <td>{{ composicao.equipe.nome }}</td>
+                                    <td>{{ composicao.quantidade_equipes }}</td>
+                                    <td>{{ composicao.total_funcionarios }}</td>                                   
+                                    <td>{{ composicao.observacao }}</td>
+                                    <td>
+                                        <a href="{% url 'detalhes_equipe' composicao.pk %}" class="btn btn-info btn-sm ver">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-primary btn-sm editar" data-id="{{ composicao.pk }}" onclick="if (confirm('Tem certeza de que deseja editar esta equipe?')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return true; } else { return false; }">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm excluir" data-id="{{ composicao.pk }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>  
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Nenhuma equipe cadastrada.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Handsontable -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.js"></script>
+
+    <style>
+
+        .datepicker {
+            font-size: 1rem; /* Ajusta o tamanho do texto */
+        }
+        .datepicker-dropdown {
+            background-color: white; /* Fundo branco */
+            border: 1px solid #ccc; /* Borda mais sutil */
+            border-radius: 8px; /* Borda arredondada */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+            padding: 8px;
+            z-index: 1050 !important; /* Ajusta o z-index para garantir que o calendário fique na frente */
+        }
+        .datepicker table {
+            width: 100%;
+        }
+        .datepicker td, .datepicker th {
+            padding: 8px; /* Ajusta o espaçamento */
+            text-align: center;
+        }
+        .datepicker td.today {
+            background-color: #007bff !important; /* Destaca a data atual */
+            color: white !important;
+            border-radius: 50%;
+        }
+        .datepicker td.active {
+            background-color: #28a745 !important; /* Cor verde para a data selecionada */
+            color: white !important;
+            border-radius: 50%;
+        }
+
+
+        .header {
+            background-color:rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .small-header {
+            background-color:rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        #tabela_composicao {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .ht_clone_top thead th {
+            text-align: center;
+            background-color: #483D8B;
+            color: white;
+            height: auto !important; 
+            white-space: nowrap;
+            padding: 2px 3px; /* Ajusta o espaçamento interno */
+            line-height: normal !important; /* Mantém o texto corretamente centralizado */
+        }
+        .htEditable { background-color: #FFF2CC !important; border: 1px solid #ced4da; }
+        .htReadOnly { background-color: #E6E6E6 !important; color: black !important; }
+        .card-header { background-color: #483D8B; color: white; text-align: center; font-weight: bold; font-size: 14px; padding: 5px 10px; }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var container = document.getElementById("tabela_composicao");
+            var data = [
+                {% for funcao in funcoes %} 
+                    ["{{ funcao.nome }}", 0, "{{ funcao.salario }}", false, 0, 0, 0, 0, 0, 0], 
+                {% endfor %}
+            ];
+        
+            var hot = new Handsontable(container, {
+                data: data,
+                colHeaders: [
+                    'Função', 'Quantidade', 'Salário', 'Periculosidade', 
+                    'Horas Extras 50%', 'Horas Prontidão', 'Horas Extras 100%', 
+                    'Horas Sobreaviso', 'Horas Adicional Noturno', 'Outros Custos'
+                ],
+                columns: [
+                    { type: 'text', readOnly: true, className: 'htReadOnly' },  
+                    { type: 'numeric', className: 'htEditable' },                
+                    { type: 'numeric', readOnly: true, className: 'htReadOnly' }, 
+                    { type: 'checkbox', className: 'htEditable' },              
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' },               
+                    { type: 'numeric', className: 'htEditable' }
+                ],
+                rowHeaders: true,
+                minSpareRows: 1,
+                contextMenu: true,
+                autoColumnSize: true,
+                stretchH: 'all',
+                licenseKey: 'non-commercial-and-evaluation'
+            });
+
+            let isEditing = false;
+            let editingId = null;
+        
+            document.getElementById("adicionar").addEventListener("click", function (event) {
+                if (!confirm("Deseja adicionar equipe(s)?")) {
+                    event.preventDefault(); // Impede a execução se o usuário cancelar
+                    return;
+                }
+                var escopoId = document.getElementById("id_escopo").value;
+                var contratoId = "{{ contrato_id }}";
+                var regionalId = document.getElementById("regional").value;
+                var equipeId = document.getElementById("equipe").value;              
+                var quantidadeEquipes = document.getElementById("quantidade_equipes").value;
+                var dataMobilizacao = document.getElementById("data_mobilizacao").value;
+                var dataDesmobilizacao = document.getElementById("data_desmobilizacao").value;
+                var observacao = document.getElementById("observacao").value;
+
+                // Validação dos campos obrigatórios
+                if (!equipeId || !quantidadeEquipes || !dataMobilizacao || !dataDesmobilizacao) {
+                    alert("Por favor, preencha todos os campos obrigatórios.");
+                    return;
+                }
+
+                var tabelaDados = hot.getData();
+                var dadosFormatados = tabelaDados
+                    .filter(row => row[0] && row[0].trim() !== "")
+                    .map(row => ({
+                        funcao: row[0].trim(),
+                        quantidade: row[1] || 0,
+                        salario: row[2] || 0.00,
+                        periculosidade: row[3] || false,
+                        horas_extras_50: row[4] || 0,
+                        horas_prontidao: row[5] || 0,
+                        horas_extras_100: row[6] || 0,
+                        horas_sobreaviso: row[7] || 0,
+                        horas_adicional_noturno: row[8] || 0,
+                        outros_custos: row[9] || 0.00
+                    }));
+
+                const url = isEditing ? `/cadastro_equipe/composicao/${editingId}/editar/` : "{% url 'composicao_equipe' contrato_id %}";
+                const method = isEditing ? "PUT" : "POST";
+
+                fetch(url, {
+                    method: method,
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                    body: JSON.stringify({
+                        contrato_id: contratoId,
+                        regional_id: regionalId,
+                        escopo_id: escopoId,
+                        equipe_id: equipeId,
+                        quantidade_equipes: quantidadeEquipes,
+                        data_mobilizacao: document.getElementById('data_mobilizacao').value,
+                        data_desmobilizacao: document.getElementById('data_desmobilizacao').value,
+                        observacao: observacao,
+                        dados: dadosFormatados
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            // Exibe erro em popup simples (pode ser melhorado com toast futuramente)
+                            alert(data.message || "Erro desconhecido ao cadastrar equipe.");
+                            throw new Error("Erro na requisição.");
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error("Erro ao salvar:", error));
+            });
+
+            // Função para excluir composição
+            document.querySelectorAll(".excluir").forEach(button => {
+                button.addEventListener("click", function() {
+                    const composicaoId = this.getAttribute("data-id");
+                    if (confirm("Tem certeza que deseja excluir esta(s) equipe(s)?")) {
+                        fetch(`/cadastro_equipe/composicao/${composicaoId}/excluir/`, {
+                            method: "DELETE",
+                            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert("Equipe excluída com sucesso!");
+                                window.location.reload();
+                            } else {
+                                alert("Erro ao excluir equipe(s): " + data.message);
+                            }
+                        })
+
+                        .catch(error => console.error("Erro ao excluir:", error));
+                    }
+                });
+            });
+
+            // Função para editar composição
+            document.querySelectorAll(".editar").forEach(button => {
+                button.addEventListener("click", function() {
+                    const composicaoId = this.getAttribute("data-id");
+                    isEditing = true;
+                    editingId = composicaoId;
+
+                    // Carregar dados da composição na tabela
+                    fetch(`/cadastro_equipe/composicao/${composicaoId}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const selectEquipe = document.getElementById("equipe");
+                
+                        // Verifica se a equipe existe no select
+                        if (!Array.from(selectEquipe.options).some(option => option.value == data.equipe_id)) {
+                            // Se não existe, adiciona
+                            const option = document.createElement("option");
+                            option.value = data.equipe_id;
+                            option.text = data.equipe_nome || `Equipe ${data.equipe_id}`;
+                            selectEquipe.appendChild(option);
+                        }
+                
+                        // Define a equipe selecionada
+                        selectEquipe.value = data.equipe_id;
+                
+                        document.getElementById("quantidade_equipes").value = data.quantidade_equipes;
+                        document.getElementById("data_mobilizacao").value = data.data_mobilizacao;
+                        document.getElementById("data_desmobilizacao").value = data.data_desmobilizacao;
+                        document.getElementById("observacao").value = data.observacao;
+                
+                        const tabelaDados = data.dados.map(row => [
+                            row.funcao,
+                            row.quantidade,
+                            row.salario,
+                            row.periculosidade,
+                            row.horas_extras_50,
+                            row.horas_prontidao,
+                            row.horas_extras_100,
+                            row.horas_sobreaviso,
+                            row.horas_adicional_noturno,
+                            row.outros_custos
+                        ]);
+                
+                        hot.loadData(tabelaDados);
+                
+                        // Habilita edição na tabela
+                        hot.updateSettings({
+                            cells: function (row, col) {
+                                const cellProperties = {};
+                                if (col !== 0 && col !== 2) { 
+                                    cellProperties.readOnly = false;
+                                    cellProperties.className = 'htEditable';
+                                } else {
+                                    cellProperties.readOnly = true;
+                                    cellProperties.className = 'htReadOnly';
+                                }
+                                return cellProperties;
+                            }
+                        });
+                    })
+                    .catch(error => console.error("Erro ao carregar dados da equipe:", error));
+                
+                });
+            });
+
+            // Função para ver detalhes da composição
+            document.querySelectorAll(".ver").forEach(button => {
+                button.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const url = this.getAttribute("href");
+                    const width = 800;
+                    const height = 600;
+                    const left = (screen.width - width) / 2;
+                    const top = (screen.height - height) / 2;
+                    window.open(url, "Detalhes da Equipe", `width=${width},height=${height},top=${top},left=${left}`);
+                });
+            });
+        });
+    </script>
+    <!-- jQuery (Necessário para o Datepicker funcionar) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Bootstrap Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+    <!-- Tradução para português (se necessário) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy', // Define o formato da data
+                todayHighlight: true,
+                autoclose: true,
+                language: "pt-BR" // Define para Português (se necessário)
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dataMobilizacaoField = document.getElementById('data_mobilizacao');
+            const dataDesmobilizacaoField = document.getElementById('data_desmobilizacao');
+    
+            const inicioVigenciaContrato = "{{ inicio_vigencia_contrato|date:'Y-m-d' }}";
+            const fimVigenciaContrato = "{{ fim_vigencia_contrato|date:'Y-m-d' }}";
+    
+            if (!dataMobilizacaoField.value) {
+                dataMobilizacaoField.value = inicioVigenciaContrato;
+            }
+            if (!dataDesmobilizacaoField.value) {
+                dataDesmobilizacaoField.value = fimVigenciaContrato;
+            }
+        });
+    </script>
+    
+
+{% endblock %}

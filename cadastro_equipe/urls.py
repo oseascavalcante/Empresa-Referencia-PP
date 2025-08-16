@@ -62,4 +62,28 @@ urlpatterns = [
     ),
     # Tela canônica com contrato na URL
     path('editar-salarios/<int:contrato_id>/', EditarSalariosView.as_view(), name='editar_salarios'),
+    
+    # -----------------------------
+    # API para buscar salário de função
+    # -----------------------------
+    path('funcao/<int:funcao_id>/salario/', lambda r, funcao_id: _buscar_salario_funcao(r, funcao_id), name='buscar_salario_funcao'),
 ]
+
+def _buscar_salario_funcao(request, funcao_id):
+    """Função helper para buscar salário da função via AJAX"""
+    from django.http import JsonResponse
+    from .models import Funcao
+    from django.shortcuts import get_object_or_404
+    
+    try:
+        funcao = get_object_or_404(Funcao, id=funcao_id)
+        return JsonResponse({
+            'success': True,
+            'salario': float(funcao.salario),
+            'nome': funcao.nome
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=404)

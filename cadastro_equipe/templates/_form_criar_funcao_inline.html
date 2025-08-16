@@ -1,9 +1,11 @@
 {# Parcial do formulário de criação/edição de Função #}
-<form method="post"
-      action="{% url 'adicionar_funcao' %}"
-      hx-post="{% url 'adicionar_funcao' %}"
-      hx-target="#lista-funcoes"
-      hx-swap="innerHTML">
+<form method="post" class="mt-4"
+      action="{% url 'adicionar_equipe' %}"
+      hx-post="{% url 'adicionar_equipe' %}"
+      hx-target="#lista-equipes"
+      hx-swap="innerHTML"
+>
+
   {% csrf_token %}
 
   <div class="row">

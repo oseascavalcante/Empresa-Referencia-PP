@@ -438,6 +438,17 @@ class EquipeCreateView(CreateView):
         if self.request.headers.get("HX-Request"):
             return _render_tabela_equipes(self.request)
         return response
+    
+    def form_invalid(self, form):
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string("_form_adicionar_equipe_inline.html", {"form": form}, request=self.request)
+            resp = HttpResponse(html)
+            resp['HX-Retarget'] = '#equipe-form'
+            resp['HX-Reswap'] = 'innerHTML'
+            return resp
+        return super().form_invalid(form)
+
+
 # ------------------------------------------------------------
 # Composição de Equipe
 # ------------------------------------------------------------
@@ -583,6 +594,15 @@ class ComposicaoEquipeView(View):
                 or 0
             )
 
+        # Serializar funções para JSON
+        funcoes_json = []
+        for funcao in funcoes:
+            funcoes_json.append({
+                'id': funcao.id,
+                'nome': funcao.nome,
+                'salario': str(funcao.salario)
+            })
+
         return render(
             request,
             "composicao_equipe.html",
@@ -592,6 +612,7 @@ class ComposicaoEquipeView(View):
                 "escopos": escopos,
                 "equipes": equipes_disponiveis,
                 "funcoes": funcoes,
+                "funcoes_json": json.dumps(funcoes_json),
                 "composicoes": composicoes,
                 "escopo_contrato": contrato.escopo_contrato,
                 "inicio_vigencia_contrato": contrato.inicio_vigencia_contrato,
@@ -664,7 +685,7 @@ class ComposicaoEquipeView(View):
                     continue
 
                 try:
-                    funcao = Funcao.objects.get(nome=funcao_nome)
+                    funcao = Funcao.objects.get(nome=funcao_nome, contrato=contrato)
                 except Funcao.DoesNotExist:
                     return JsonResponse(
                         {
@@ -675,7 +696,9 @@ class ComposicaoEquipeView(View):
                     )
 
                 try:
-                    salario_str = row.get("salario", "0").replace(",", ".")
+                    salario_value = row.get("salario", "0")
+                    # Converte para string primeiro, depois faz replace se necessário
+                    salario_str = str(salario_value).replace(",", ".") if isinstance(salario_value, str) else str(salario_value)
                     salario = Decimal(salario_str)
                 except InvalidOperation:
                     return JsonResponse(

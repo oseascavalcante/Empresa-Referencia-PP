@@ -3,19 +3,23 @@
       hx-post="{% url 'adicionar_equipe' %}"
       hx-target="#lista-equipes"
       hx-swap="innerHTML"
-      hx-on:htmx:responseError="if(event.detail.xhr && event.detail.xhr.status===400){
-          try{
-          const data = JSON.parse(event.detail.xhr.responseText);
-          document.getElementById('alert-container').innerHTML =
-              '<div class=&quot;alert alert-danger&quot;>'+data.error+'</div>';
-          }catch(e){
-          document.getElementById('alert-container').innerHTML =
-              '<div class=&quot;alert alert-danger&quot;>Não foi possível salvar.</div>';
+      hx-on:htmx:afterRequest="
+          // Só limpa o formulário se foi sucesso (status 200) e não tem HX-Retarget
+          if(event.detail.xhr.status === 200 && !event.detail.xhr.getResponseHeader('HX-Retarget')) {
+              htmx.ajax('GET','{% url 'adicionar_equipe' %}?fragment=form','#equipe-form')
           }
-      }"
-      hx-on:htmx:afterRequest="htmx.ajax('GET','{% url 'adicionar_equipe' %}?fragment=form','#equipe-form')"
+      "
 >
     {% csrf_token %}
+    
+    <!-- Erros gerais do formulário -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <div class="row">
         <div class="col-md-6 mb-3">
             <div class="card">
@@ -23,9 +27,9 @@
                 <div class="card-body">
                     {{ form.nome }}
                     {% if form.nome.errors %}
-                        <div class="text-danger small">
-                            {{ form.nome.errors.0 }}
-                        </div>
+                        {% for error in form.nome.errors %}
+                            <div class="invalid-feedback d-block"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -36,9 +40,9 @@
                 <div class="card-body">
                     {{ form.descricao }}
                     {% if form.descricao.errors %}
-                        <div class="text-danger small">
-                            {{ form.descricao.errors.0 }}
-                        </div>
+                        {% for error in form.descricao.errors %}
+                            <div class="invalid-feedback d-block"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>
