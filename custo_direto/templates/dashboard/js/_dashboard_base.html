@@ -1,0 +1,170 @@
+<script>
+// Módulo Base do Dashboard - Funções Globais
+const DashboardBase = {
+    
+    // Função para atualizar filtros
+    atualizarFiltro: function() {
+        const form = document.forms[0];
+        const contrato = form.contrato.value;
+        const equipe = form.equipe.value;
+        const regional = form.regional.value;
+        const escopo = form.escopo.value;
+
+        const params = new URLSearchParams();
+        if (contrato) params.append('contrato', contrato);
+        if (equipe) params.append('equipe', equipe);
+        if (regional) params.append('regional', regional);
+        if (escopo) params.append('escopo', escopo);
+
+        window.location.search = params.toString();
+    },
+
+    // Função para recalcular custos
+    recalcularCustos: function() {
+        const btn = document.getElementById('recalcularBtn');
+        const mensagensDiv = document.getElementById('mensagens');
+        const contratoSelecionado = document.querySelector('[name="contrato"]').value;
+        
+        if (!btn || !mensagensDiv) {
+            console.error('Elementos necessários não encontrados');
+            return;
+        }
+        
+        // Desabilita o botão e mostra loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
+        
+        // Limpa mensagens anteriores
+        mensagensDiv.innerHTML = '';
+
+        // Dados para enviar
+        const formData = new FormData();
+        if (contratoSelecionado) {
+            formData.append('contrato_id', contratoSelecionado);
+        }
+        
+        // Adiciona CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+        } else {
+            // Busca o token do cookie se não estiver no form
+            const token = DashboardBase.getCookie('csrftoken');
+            if (token) {
+                formData.append('csrfmiddlewaretoken', token);
+            }
+        }
+
+        fetch('{% url "recalcular_custos" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                DashboardBase.mostrarMensagem('success', data.message);
+                // Recarrega a página após 2 segundos para mostrar os novos dados
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                DashboardBase.mostrarMensagem('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao recalcular custos:', error);
+            DashboardBase.mostrarMensagem('danger', 'Erro ao recalcular custos: ' + error);
+        })
+        .finally(() => {
+            // Restaura o botão
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-calculator"></i> Recalcular';
+        });
+    },
+
+    // Função para exportar dados
+    exportarDados: function() {
+        console.log('🔄 Preparando exportação de dados...');
+        
+        // Coletar dados da página
+        const dadosExportacao = {
+            contrato: document.querySelector('[name="contrato"]').value,
+            equipe: document.querySelector('[name="equipe"]').value,
+            regional: document.querySelector('[name="regional"]').value,
+            escopo: document.querySelector('[name="escopo"]').value,
+            timestamp: new Date().toISOString()
+        };
+        
+        // TODO: Implementar exportação real
+        DashboardBase.mostrarMensagem('info', 'Funcionalidade de exportação será implementada em breve!');
+        console.log('📊 Dados para exportação:', dadosExportacao);
+    },
+
+    // Função para mostrar mensagens
+    mostrarMensagem: function(tipo, mensagem) {
+        const mensagensDiv = document.getElementById('mensagens');
+        if (!mensagensDiv) return;
+        
+        const alertClass = tipo === 'success' ? 'alert-success' : 
+                          tipo === 'danger' ? 'alert-danger' : 
+                          tipo === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const icon = tipo === 'success' ? 'fa-check-circle' : 
+                    tipo === 'danger' ? 'fa-exclamation-triangle' : 
+                    tipo === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        
+        mensagensDiv.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="fas ${icon}"></i> ${mensagem}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    },
+
+    // Função para buscar cookie CSRF
+    getCookie: function(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    },
+
+    // Inicialização do módulo
+    init: function() {
+        console.log('🚀 Dashboard Base inicializado');
+        
+        // Adicionar eventos de teclado para filtros rápidos
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+R para recalcular
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                DashboardBase.recalcularCustos();
+            }
+            // Ctrl+E para exportar
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                DashboardBase.exportarDados();
+            }
+        });
+    }
+};
+
+// Tornar funções globais para compatibilidade com onclick
+window.atualizarFiltro = DashboardBase.atualizarFiltro;
+window.recalcularCustos = DashboardBase.recalcularCustos;
+window.exportarDados = DashboardBase.exportarDados;
+
+// Inicializar quando DOM carregar
+document.addEventListener('DOMContentLoaded', DashboardBase.init);
+</script>

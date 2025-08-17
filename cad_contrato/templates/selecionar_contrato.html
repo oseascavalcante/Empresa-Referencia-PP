@@ -1,28 +1,360 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container mt-4">
-  <div class="card">
-    <div class="header">
-      <h5 class="mb-0">Selecione um contrato para continuar</h5>
-    </div>
-    <div class="card-body">
+<!-- CSS para tela de transição focada -->
+<style>
+    /* Variáveis CSS para consistência */
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --primary-soft: #6B5ACF;
+        --secondary-soft: #8B7ED8;
+        --success-soft: #52C585;
+        --info-soft: #4FCADB;
+        --warning-soft: #FFD93D;
+        --background-soft: #FAFBFF;
+        
+        --border-radius: 12px;
+        --box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        --box-shadow-hover: 0 16px 48px rgba(0,0,0,0.18);
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-      <form method="post" action="">
-          {% csrf_token %}
-          {% if erro %}
-            <div class="alert alert-danger">{{ erro }}</div>
-          {% endif %}
-          <input type="hidden" name="next" value="{{ request.GET.next }}">
-          <select name="contrato_id" class="form-select mb-3">
-              <option value="">Selecione...</option>
-              {% for contrato in contratos %}
-                  <option value="{{ contrato.pk }}">{{ contrato }}</option>
-              {% endfor %}
-          </select>
-          <button type="submit" class="btn btn-primary">Selecionar</button>
-      </form>
+    /* Container de tela cheia para centralização perfeita */
+    .transition-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, 
+            rgba(72, 61, 139, 0.03) 0%, 
+            rgba(106, 90, 205, 0.06) 50%, 
+            rgba(72, 61, 139, 0.03) 100%);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
 
+    /* Efeito de background animado */
+    .transition-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, 
+            rgba(72, 61, 139, 0.05) 0%, 
+            transparent 50%);
+        animation: rotate 20s linear infinite;
+        z-index: 1;
+    }
+
+    /* Card principal centrado e destacado */
+    .selection-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(72, 61, 139, 0.1);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+    }
+
+    .selection-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--box-shadow-hover);
+    }
+
+    /* Header do card com gradiente */
+    .selection-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .selection-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255,255,255,0.2) 50%, 
+            transparent 100%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .selection-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .selection-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Body do card */
+    .selection-body {
+        padding: 2rem;
+    }
+
+    /* Estilização do select */
+    .contract-select {
+        border: 2px solid rgba(72, 61, 139, 0.15) !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        transition: var(--transition) !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(10px);
+        margin-bottom: 1.5rem !important;
+    }
+
+    .contract-select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(72, 61, 139, 0.25) !important;
+        outline: none !important;
+        background: white !important;
+    }
+
+    /* Botão de seleção destacado */
+    .select-button {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        box-shadow: 0 4px 16px rgba(72, 61, 139, 0.3);
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .select-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(72, 61, 139, 0.4);
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    }
+
+    .select-button:active {
+        transform: translateY(0);
+    }
+
+    .select-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255,255,255,0.3) 50%, 
+            transparent 100%);
+        transition: left 0.6s ease;
+    }
+
+    .select-button:hover::before {
+        left: 100%;
+    }
+
+    /* Indicador de loading/progresso */
+    .progress-indicator {
+        text-align: center;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        opacity: 0.8;
+    }
+
+    /* Alert de erro modernizado */
+    .modern-alert {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 8px;
+        color: #721c24;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .transition-container {
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        
+        .selection-card {
+            max-width: 100%;
+        }
+        
+        .selection-header {
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .selection-title {
+            font-size: 1.3rem;
+        }
+        
+        .selection-body {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Animações */
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmer {
+        0%, 100% { left: -100%; }
+        50% { left: 100%; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .selection-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
+
+<div class="transition-container">
+    <div class="selection-card">
+        <!-- Header destacado -->
+        <div class="selection-header">
+            <h1 class="selection-title">
+                <i class="fas fa-file-contract"></i>
+                Selecionar Contrato
+            </h1>
+            <p class="selection-subtitle">Escolha um contrato para continuar</p>
+        </div>
+        
+        <!-- Body do formulário -->
+        <div class="selection-body">
+            <form method="post" action="" id="contractSelectionForm">
+                {% csrf_token %}
+                
+                <!-- Alert de erro modernizado -->
+                {% if erro %}
+                    <div class="modern-alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{ erro }}
+                    </div>
+                {% endif %}
+                
+                <!-- Campo hidden -->
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                
+                <!-- Select estilizado -->
+                <select name="contrato_id" class="form-select contract-select" required>
+                    <option value="">🔍 Selecione um contrato...</option>
+                    {% for contrato in contratos %}
+                        <option value="{{ contrato.pk }}">📋 {{ contrato }}</option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Botão de ação destacado -->
+                <button type="submit" class="select-button">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    Continuar
+                </button>
+                
+                <!-- Indicador de progresso -->
+                <div class="progress-indicator">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Você será redirecionado após a seleção
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('contractSelectionForm');
+        const selectButton = document.querySelector('.select-button');
+        const contractSelect = document.querySelector('.contract-select');
+        
+        // Efeito de loading no botão
+        form.addEventListener('submit', function(e) {
+            if (contractSelect.value) {
+                selectButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Carregando...';
+                selectButton.disabled = true;
+            } else {
+                e.preventDefault();
+                // Destacar o select se não houver seleção
+                contractSelect.style.borderColor = 'var(--danger-color)';
+                contractSelect.focus();
+                
+                setTimeout(() => {
+                    contractSelect.style.borderColor = '';
+                }, 2000);
+            }
+        });
+        
+        // Reset do estado do select quando selecionado
+        contractSelect.addEventListener('change', function() {
+            this.style.borderColor = 'var(--success-color)';
+            setTimeout(() => {
+                this.style.borderColor = '';
+            }, 1000);
+        });
+        
+        // Efeito de focus melhorado
+        contractSelect.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        contractSelect.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+</script>
+
 {% endblock %}

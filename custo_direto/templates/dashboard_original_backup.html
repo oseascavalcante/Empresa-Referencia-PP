@@ -1,0 +1,600 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<style>
+    .titulo-grupo {
+        color: #483D8B;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .linha-abaixo-titulo {
+        border-bottom: 2px solid #483D8B;
+        margin-bottom: 0.5rem;
+    }
+    .linha-subgrupo {
+        border-bottom: 1px solid #b0b0b0;
+        margin-bottom: 0.25rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="header">Dashboard de Custos Diretos</div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <!-- Área para mensagens -->
+    <div id="mensagens" class="mb-3"></div>
+
+    <!-- Filtros -->
+    <form method="get">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Contrato</label>
+                <select class="form-select" name="contrato" onchange="atualizarFiltro()">
+                    <option value="">Todos os Contratos</option>
+                    {% for contrato in contratos %}
+                            <option value="{{ contrato.contrato }}" {% if contrato.contrato|stringformat:"s" == contrato_selecionado %}selected{% endif %}>
+                            {{ contrato.contrato }} - {{ contrato.escopo_contrato }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Tipo de Equipe</label>
+                <select class="form-select" name="equipe" onchange="atualizarFiltro()">
+                    <option value="">Todas as Equipes</option>
+                    {% for equipe in equipes %}
+                        <option value="{{ equipe.id }}" {% if equipe.id == equipe_selecionada %}selected{% endif %}>
+                            {{ equipe.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Regional</label>
+                <select class="form-select" name="regional" onchange="atualizarFiltro()">
+                    <option value="">Todas as Regionais</option>
+                    {% for regional in regionais %}
+                        <option value="{{ regional.id }}" {% if regional.id == regional_selecionada %}selected{% endif %}>
+                            {{ regional.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Escopo</label>
+                <select class="form-select" name="escopo" onchange="atualizarFiltro()">
+                    <option value="">Todos os Escopos</option>
+                    {% for escopo in escopos %}
+                        <option value="{{ escopo.id }}" {% if escopo.id == escopo_selecionado %}selected{% endif %}>
+                            {{ escopo.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                <button type="button" class="btn btn-warning btn-sm" id="recalcularBtn" 
+                        onclick="recalcularCustos()" title="Recalcular custos diretos">
+                    <i class="fas fa-calculator"></i> Recalcular
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabela -->
+    <div class="mb-3">
+        <h5 class="titulo-grupo">Custos da Mão de Obra</h5>
+        <div class="linha-abaixo-titulo"></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contrato</th>
+                            <th>Regional</th>
+                            <th>Escopo</th>
+                            <th>Equipe</th>
+                            <th>Função</th>
+                            <th>Qtd. por Equipe</th>
+                            <th>Qtd. Total Funcionários</th>
+                            <th>Salário Base (R$)</th>
+                            <th>Benefícios (R$)</th>
+                            <th>Encargos Sociais (R$)</th>
+                            <th>Periculosidade (R$)</th>
+                            <th>HE 50% (R$)</th>
+                            <th>HE 100% (R$)</th>
+                            <th>Prontidão (R$)</th>
+                            <th>Sobreaviso (R$)</th>
+                            <th>Adicional Noturno (R$)</th>
+                            <th>Outros Custos (R$)</th>
+                            <th>Custo Total por Funcionário (R$)</th>
+                            <th>Custo Total (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for custo in custos_funcoes %}
+                        <tr>
+                            <td>{{ custo.contrato.contrato }}</td>
+                            <td>{{ custo.composicao.regional.nome }}</td>
+                            <td>{{ custo.composicao.escopo.nome }}</td>
+                            <td>{{ custo.composicao.equipe.nome }}</td>
+                            <td>{{ custo.funcao.nome }}</td>
+                            <td>{{ custo.quantidade_funcionarios }}</td>
+                            <td>{{ custo.quantidade_total_funcionarios }}</td>
+                            <td>{{ custo.salario_base|floatformat:2 }}</td>
+                            <td>{{ custo.beneficios|floatformat:2 }}</td>
+                            <td>{{ custo.valor_total_encargos|floatformat:2 }}</td>
+                            <td>{{ custo.adicional_periculosidade|floatformat:2 }}</td>
+                            <td>{{ custo.valor_horas_extras_50|floatformat:2 }}</td>
+                            <td>{{ custo.valor_horas_extras_100|floatformat:2 }}</td>
+                            <td>{{ custo.valor_prontidao|floatformat:2 }}</td>
+                            <td>{{ custo.valor_sobreaviso|floatformat:2 }}</td>
+                            <td>{{ custo.valor_adicional_noturno|floatformat:2 }}</td>
+                            <td>{{ custo.outros_custos|floatformat:2 }}</td>
+                            <td>{{ custo.custo_por_funcionario|floatformat:2 }}</td>
+                            <td>{{ custo.custo_total|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="19" class="text-center">
+                                <div class="alert alert-info mt-3">
+                                    <h5><i class="fas fa-info-circle"></i> Nenhum custo direto encontrado</h5>
+                                    <p class="mb-2">Para visualizar os custos diretos, é necessário:</p>
+                                    <ol class="text-start mb-3">
+                                        <li>Cadastrar <strong>regionais</strong> no contrato</li>
+                                        <li>Criar <strong>equipes</strong> e <strong>funções</strong></li>
+                                        <li>Definir <strong>escopos de atividade</strong></li>
+                                        <li>Configurar <strong>composições de equipe</strong> (regional + escopo + equipe)</li>
+                                        <li>Adicionar <strong>funções às composições</strong> com quantidade de funcionários</li>
+                                    </ol>
+                                    <a href="{% url 'menu_cadastro_estrutura' %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus"></i> Configurar Estrutura
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Equipamentos -->
+    <div class="mb-3 mt-4">
+        <h5 class="titulo-grupo">Custos de Equipamentos</h5>
+        <div class="linha-abaixo-titulo"></div>
+        
+        {% if tem_dados_equipamentos %}
+            <!-- Gráficos -->
+            <div class="row mb-4">
+                <!-- Gráfico de Rosca -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <h6 class="text-center mb-3">Distribuição por Categoria</h6>
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="graficoRoscaEquipamentos"></canvas>
+                                <!-- Card central -->
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; min-width: 100px;">
+                                    <small class="text-muted d-block">Total Geral</small>
+                                    <strong class="text-primary">R$ {{ custo_total_equipamentos|floatformat:2 }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Barras Empilhadas -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <h6 class="text-center mb-3">Custo Mensal por Equipe</h6>
+                            <div style="height: 300px;">
+                                <canvas id="graficoBarrasEmpilhadasEquipamentos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela detalhada -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Contrato</th>
+                                <th>Equipe</th>
+                                <th>Regional</th>
+                                <th>Escopo</th>
+                                <th>Qtd Equipes</th>
+                                <th>EPI</th>
+                                <th>EPC</th>
+                                <th>Ferramentas</th>
+                                <th>Equipamentos TI</th>
+                                <th>Despesas TI</th>
+                                <th>Materiais</th>
+                                <th>Diversas</th>
+                                <th>Mensal por Equipe</th>
+                                <th>Total Mensal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for custo_equipamento in custos_equipamentos %}
+                            <tr>
+                                <td>{{ custo_equipamento.contrato.contrato }}</td>
+                                <td>{{ custo_equipamento.equipe.nome }}</td>
+                                <td>{{ custo_equipamento.regional.nome }}</td>
+                                <td>{{ custo_equipamento.escopo.nome }}</td>
+                                <td>{{ custo_equipamento.quantidade_equipes }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.EPI|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.EPC|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.FERRAMENTAS|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.EQUIPAMENTOS_TI|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.DESPESAS_TI|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.MATERIAIS_CONSUMO|floatformat:2 }}</td>
+                                <td>R$ {{ custo_equipamento.custos_categorias.DESPESAS_DIVERSAS|floatformat:2 }}</td>
+                                <td><strong>R$ {{ custo_equipamento.custo_mensal_por_equipe|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ custo_equipamento.custo_total_mensal|floatformat:2 }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            <!-- Linha de Somatório -->
+                            <tr class="table-warning">
+                                <td colspan="5"><strong>TOTAL GERAL</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.EPI|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.EPC|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.FERRAMENTAS|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.EQUIPAMENTOS_TI|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.DESPESAS_TI|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.MATERIAIS_CONSUMO|floatformat:2 }}</strong></td>
+                                <td><strong>R$ {{ totais_equipamentos_categoria.DESPESAS_DIVERSAS|floatformat:2 }}</strong></td>
+                                <td><strong>-</strong></td>
+                                <td><strong>R$ {{ custo_total_equipamentos|floatformat:2 }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <h5><i class="fas fa-tools"></i> Nenhum equipamento cadastrado</h5>
+                <p class="mb-2">Para visualizar os custos de equipamentos, é necessário:</p>
+                <ol class="text-start mb-3">
+                    <li>Cadastrar <strong>equipamentos</strong> nas categorias (EPI, EPC, Ferramentas, etc.)</li>
+                    <li>Vincular os <strong>equipamentos às equipes</strong> com quantidades específicas</li>
+                    <li>Ter <strong>composições de equipe</strong> configuradas</li>
+                </ol>
+                <a href="{% url 'menu_cadastro_estrutura' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Cadastrar Equipamentos
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Botões de ação -->
+<div class="row mt-3">
+    <div class="col-md-12 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+            ← Voltar
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado!');
+    
+    // Verifica se os elementos existem
+    var graficoRosca = document.getElementById('graficoRoscaEquipamentos');
+    var graficoBarras = document.getElementById('graficoBarrasEmpilhadasEquipamentos');
+    
+    console.log('Elemento rosca existe?', !!graficoRosca);
+    console.log('Elemento barras existe?', !!graficoBarras);
+    
+    {% if tem_dados_equipamentos %}
+    console.log('Tem dados de equipamentos: SIM');
+    
+    try {
+        // Dados passados via JSON seguro do backend
+        var dadosEquipamentos = {
+            totais_categoria: {{ totais_equipamentos_categoria_js|safe }},
+            custos_equipamentos: {{ custos_equipamentos_js|safe }}
+        };
+        
+        console.log('✅ Dados equipamentos carregados com sucesso:', dadosEquipamentos);
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados equipamentos:', error);
+        return;
+    }
+    
+    // Gráfico de rosca
+    if (graficoRosca && dadosEquipamentos.totais_categoria) {
+        console.log('Criando gráfico de rosca...');
+        
+        var dadosRosca = [];
+        var mapeamentoLabels = {
+            'EPI': 'EPI',
+            'EPC': 'EPC', 
+            'FERRAMENTAS': 'Ferramentas',
+            'EQUIPAMENTOS_TI': 'Equipamentos TI',
+            'DESPESAS_TI': 'Despesas TI',
+            'MATERIAIS_CONSUMO': 'Materiais',
+            'DESPESAS_DIVERSAS': 'Diversas'
+        };
+        
+        for (var categoria in dadosEquipamentos.totais_categoria) {
+            var valor = dadosEquipamentos.totais_categoria[categoria];
+            if (valor > 0) {
+                dadosRosca.push({
+                    label: mapeamentoLabels[categoria] || categoria,
+                    valor: valor
+                });
+            }
+        }
+        
+        if (dadosRosca.length > 0) {
+            dadosRosca.sort((a, b) => b.valor - a.valor);
+            
+            var labels = dadosRosca.map(d => d.label);
+            var valores = dadosRosca.map(d => d.valor);
+            
+            console.log('Rosca - Labels:', labels);
+            console.log('Rosca - Valores:', valores);
+            
+            try {
+                new Chart(graficoRosca, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: valores,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': R$ ' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('Gráfico de rosca criado!');
+            } catch (error) {
+                console.error('Erro ao criar gráfico de rosca:', error);
+            }
+        }
+    }
+    
+    // Gráfico de barras empilhadas  
+    if (graficoBarras && dadosEquipamentos.custos_equipamentos.length > 0) {
+        console.log('Criando gráfico de barras...');
+        
+        var dadosBarras = dadosEquipamentos.custos_equipamentos.map(function(item) {
+            return {
+                equipe: item.equipe_nome,
+                total: item.custo_mensal_por_equipe,
+                qtd: item.quantidade_equipes,
+                epi: item.custos_categorias.EPI / item.quantidade_equipes,
+                epc: item.custos_categorias.EPC / item.quantidade_equipes,
+                ferramentas: item.custos_categorias.FERRAMENTAS / item.quantidade_equipes,
+                equipTI: item.custos_categorias.EQUIPAMENTOS_TI / item.quantidade_equipes,
+                despTI: item.custos_categorias.DESPESAS_TI / item.quantidade_equipes,
+                materiais: item.custos_categorias.MATERIAIS_CONSUMO / item.quantidade_equipes,
+                diversas: item.custos_categorias.DESPESAS_DIVERSAS / item.quantidade_equipes
+            };
+        });
+        
+        dadosBarras.sort((a, b) => b.total - a.total);
+        
+        var labels = dadosBarras.map(d => d.equipe);
+        var datasets = [];
+        var cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6B6B'];
+        
+        var categorias = [
+            {nome: 'EPI', dados: dadosBarras.map(d => d.epi)},
+            {nome: 'EPC', dados: dadosBarras.map(d => d.epc)},
+            {nome: 'Ferramentas', dados: dadosBarras.map(d => d.ferramentas)},
+            {nome: 'Equipamentos TI', dados: dadosBarras.map(d => d.equipTI)},
+            {nome: 'Despesas TI', dados: dadosBarras.map(d => d.despTI)},
+            {nome: 'Materiais', dados: dadosBarras.map(d => d.materiais)},
+            {nome: 'Diversas', dados: dadosBarras.map(d => d.diversas)}
+        ];
+        
+        categorias.forEach(function(cat, index) {
+            if (cat.dados.some(v => v > 0)) {
+                datasets.push({
+                    label: cat.nome,
+                    data: cat.dados,
+                    backgroundColor: cores[index]
+                });
+            }
+        });
+        
+        console.log('Barras - Labels:', labels);
+        console.log('Barras - Datasets:', datasets.length);
+        
+        try {
+            new Chart(graficoBarras, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': R$ ' + context.parsed.y.toFixed(2);
+                                },
+                                footer: function(tooltipItems) {
+                                    var index = tooltipItems[0].dataIndex;
+                                    return 'Total: R$ ' + dadosBarras[index].total.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Gráfico de barras criado!');
+        } catch (error) {
+            console.error('Erro ao criar gráfico de barras:', error);
+        }
+    }
+    
+    {% else %}
+    console.log('Tem dados de equipamentos: NÃO');
+    {% endif %}
+});
+
+// Funções globais (fora do DOMContentLoaded para serem acessíveis via onclick)
+function atualizarFiltro() {
+    const form = document.forms[0];
+    const contrato = form.contrato.value;
+    const equipe = form.equipe.value;
+    const regional = form.regional.value;
+    const escopo = form.escopo.value;
+
+    const params = new URLSearchParams();
+    if (contrato) params.append('contrato', contrato);
+    if (equipe) params.append('equipe', equipe);
+    if (regional) params.append('regional', regional);
+    if (escopo) params.append('escopo', escopo);
+
+    window.location.search = params.toString();
+}
+
+function recalcularCustos() {
+    const btn = document.getElementById('recalcularBtn');
+    const mensagensDiv = document.getElementById('mensagens');
+    const contratoSelecionado = document.querySelector('[name="contrato"]').value;
+    
+    // Desabilita o botão e mostra loading
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
+    
+    // Limpa mensagens anteriores
+    mensagensDiv.innerHTML = '';
+
+    // Dados para enviar
+    const formData = new FormData();
+    if (contratoSelecionado) {
+        formData.append('contrato_id', contratoSelecionado);
+    }
+    
+    // Adiciona CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+    } else {
+        // Busca o token do cookie se não estiver no form
+        const token = getCookie('csrftoken');
+        if (token) {
+            formData.append('csrfmiddlewaretoken', token);
+        }
+    }
+
+    fetch('{% url "recalcular_custos" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mensagensDiv.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            // Recarrega a página após 2 segundos para mostrar os novos dados
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            mensagensDiv.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        mensagensDiv.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> Erro ao recalcular custos: ${error}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    })
+    .finally(() => {
+        // Restaura o botão
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-calculator"></i> Recalcular';
+    });
+}
+
+// Função para buscar cookie CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

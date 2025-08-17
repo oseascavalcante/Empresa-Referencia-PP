@@ -1,0 +1,66 @@
+<div class="border rounded p-4 bg-light">
+    <form hx-post="{% url 'configurar_precos_combustivel' contrato.pk %}"
+          hx-target="#lista-precos"
+          hx-swap="innerHTML">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.tipo_combustivel.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-gas-pump me-1"></i>
+                        {{ form.tipo_combustivel.label }}
+                    </label>
+                    {{ form.tipo_combustivel }}
+                    {% if form.tipo_combustivel.help_text %}
+                        <div class="form-text">{{ form.tipo_combustivel.help_text }}</div>
+                    {% endif %}
+                    {% if form.tipo_combustivel.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.tipo_combustivel.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.preco_por_litro.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        {{ form.preco_por_litro.label }}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        {{ form.preco_por_litro }}
+                    </div>
+                    {% if form.preco_por_litro.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.preco_por_litro.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="fas fa-info-circle me-2"></i>
+            <small>
+                Configure os preços atuais por litro. Estes valores serão utilizados para calcular automaticamente 
+                o custo de combustível dos veículos baseado na eficiência e quilometragem mensal.
+            </small>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-custom">
+                <i class="fas fa-save me-2"></i>
+                Salvar Preço
+            </button>
+            <button type="button" 
+                    class="btn btn-secondary btn-custom"
+                    onclick="document.getElementById('preco-form').innerHTML = ''">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </button>
+        </div>
+    </form>
+</div>

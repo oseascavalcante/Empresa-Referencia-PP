@@ -1,0 +1,71 @@
+{% if precos %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Tipo de Combustível</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Preço por Litro</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Última Atualização</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;" width="120">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for preco in precos %}
+        <tr>
+            <td>
+                <span class="combustivel-badge combustivel-{{ preco.tipo_combustivel }}">
+                    <i class="fas fa-{% if preco.tipo_combustivel == 'gasolina' %}gas-pump{% elif preco.tipo_combustivel == 'etanol' %}leaf{% elif preco.tipo_combustivel == 'diesel' %}truck{% elif preco.tipo_combustivel == 'flex' %}exchange-alt{% elif preco.tipo_combustivel == 'gnv' %}fire{% else %}bolt{% endif %} me-1"></i>
+                    {{ preco.get_tipo_combustivel_display }}
+                </span>
+            </td>
+            <td>
+                {% if preco.preco_por_litro > 0 %}
+                    <span class="preco-destaque">R$ {{ preco.preco_por_litro|floatformat:3 }}</span>
+                {% else %}
+                    <span class="text-warning fw-bold">Não configurado</span>
+                    <br><small class="text-muted">Clique em editar para configurar</small>
+                {% endif %}
+            </td>
+            <td>
+                <small class="text-muted">
+                    {{ preco.updated_at|date:"d/m/Y H:i" }}
+                </small>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-outline-primary btn-sm-custom"
+                            hx-get="{% url 'editar_preco_combustivel' preco.pk %}?partial=true"
+                            hx-target="#preco-form"
+                            hx-swap="innerHTML"
+                            title="{% if preco.preco_por_litro > 0 %}Editar{% else %}Configurar{% endif %}">
+                        <i class="fas fa-{% if preco.preco_por_litro > 0 %}edit{% else %}plus{% endif %}"></i>
+                    </button>
+                    {% if preco.preco_por_litro > 0 %}
+                    <button class="btn btn-outline-danger btn-sm-custom btn-delete"
+                            hx-post="{% url 'excluir_preco_combustivel' preco.pk %}"
+                            hx-target="#lista-precos"
+                            hx-swap="innerHTML"
+                            data-tipo="{{ preco.get_tipo_combustivel_display }}"
+                            title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-gas-pump fa-3x text-muted mb-3"></i>
+    <p class="text-muted">Nenhum preço de combustível configurado ainda.</p>
+    <p class="text-muted small">Configure os preços dos combustíveis utilizados pelos veículos do contrato.</p>
+    <button class="btn btn-primary-custom btn-custom"
+            hx-get="?fragment=form"
+            hx-target="#preco-form"
+            hx-swap="innerHTML">
+        <i class="fas fa-plus me-2"></i>
+        Configurar Primeiro Preço
+    </button>
+</div>
+{% endif %}

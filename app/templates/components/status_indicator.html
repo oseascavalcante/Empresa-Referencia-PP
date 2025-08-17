@@ -1,0 +1,24 @@
+<!-- Componente: Indicador de Status -->
+{% load static %}
+
+{% if status.status.value == 'completo' %}
+    <div class="status-indicator status-completo">
+        <i class="fas fa-check-circle text-success"></i>
+        <span class="visually-hidden">Completo</span>
+    </div>
+{% elif status.status.value == 'parcial' %}
+    <div class="status-indicator status-parcial">
+        <i class="fas fa-exclamation-triangle text-warning"></i>
+        <span class="visually-hidden">Parcial</span>
+    </div>
+{% elif status.status.value == 'vazio' %}
+    <div class="status-indicator status-vazio">
+        <i class="fas fa-circle text-muted"></i>
+        <span class="visually-hidden">Vazio</span>
+    </div>
+{% else %}
+    <div class="status-indicator status-na">
+        <i class="fas fa-minus text-secondary"></i>
+        <span class="visually-hidden">Não aplicável</span>
+    </div>
+{% endif %}

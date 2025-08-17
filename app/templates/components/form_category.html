@@ -1,0 +1,57 @@
+<!-- Componente: Categoria de Formulários -->
+{% load static %}
+{% load dict_extras %}
+
+<div class="form-category form-category--{{ categoria_id }} mb-5">
+    <!-- Cabeçalho da Categoria -->
+    <div class="category-header mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="category-title-group">
+                <h4 class="category-title">
+                    <i class="{{ categoria.icon }} text-{{ categoria.color }} me-2"></i>
+                    {{ categoria.title }}
+                </h4>
+                <p class="category-subtitle text-muted mb-0">
+                    {{ categoria.subtitle }}
+                </p>
+            </div>
+            
+            {% if show_status_indicators and categoria_status %}
+                <div class="category-status">
+                    <div class="status-summary">
+                        <div class="status-counts">
+                            <span class="badge bg-success me-1">
+                                {{ categoria_status.summary.completos }}
+                                <i class="fas fa-check"></i>
+                            </span>
+                            {% if categoria_status.summary.parciais > 0 %}
+                                <span class="badge bg-warning me-1">
+                                    {{ categoria_status.summary.parciais }}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </span>
+                            {% endif %}
+                            {% if categoria_status.summary.vazios > 0 %}
+                                <span class="badge bg-secondary">
+                                    {{ categoria_status.summary.vazios }}
+                                    <i class="fas fa-circle"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            {{ categoria_status.summary.completos }}/{{ categoria_status.summary.total }} completos
+                        </small>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Grid de Formulários -->
+    <div class="forms-grid">
+        {% for form in categoria.forms %}
+            {% with form_status=categoria_status.forms|get_item:form.id %}
+                {% include 'components/form_card.html' with form=form form_status=form_status %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>

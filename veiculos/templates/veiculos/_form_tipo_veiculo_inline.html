@@ -1,0 +1,78 @@
+<div class="border rounded p-4 bg-light">
+    <form hx-post="{% url 'cadastrar_tipo_veiculo' %}"
+          hx-target="#lista-tipos"
+          hx-swap="innerHTML">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.nome.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-tag me-1"></i>
+                        {{ form.nome.label }}
+                    </label>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.nome.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.categoria.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-layer-group me-1"></i>
+                        {{ form.categoria.label }}
+                    </label>
+                    {{ form.categoria }}
+                    {% if form.categoria.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.categoria.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.descricao.id_for_label }}" class="form-label fw-bold">
+                <i class="fas fa-align-left me-1"></i>
+                {{ form.descricao.label }}
+            </label>
+            {{ form.descricao }}
+            {% if form.descricao.errors %}
+                <div class="text-danger small mt-1">
+                    {{ form.descricao.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.especificacoes_tecnicas.id_for_label }}" class="form-label fw-bold">
+                <i class="fas fa-cog me-1"></i>
+                {{ form.especificacoes_tecnicas.label }}
+            </label>
+            {{ form.especificacoes_tecnicas }}
+            {% if form.especificacoes_tecnicas.errors %}
+                <div class="text-danger small mt-1">
+                    {{ form.especificacoes_tecnicas.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-custom">
+                <i class="fas fa-save me-2"></i>
+                Salvar Tipo
+            </button>
+            <button type="button" 
+                    class="btn btn-secondary btn-custom"
+                    onclick="document.getElementById('tipo-form').innerHTML = ''">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </button>
+        </div>
+    </form>
+</div>

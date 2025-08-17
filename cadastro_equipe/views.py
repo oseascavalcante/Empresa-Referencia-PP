@@ -761,11 +761,13 @@ class ComposicaoEquipeJSONView(View):
         response_data = {
             "equipe_id": composicao.equipe.id,
             "equipe_nome": composicao.equipe.nome,
+            "regional_id": composicao.regional.id,
+            "escopo_id": composicao.escopo.id,
             "quantidade_equipes": composicao.quantidade_equipes,
-            "data_mobilizacao": composicao.data_mobilizacao.strftime("%d/%m/%Y")
+            "data_mobilizacao": composicao.data_mobilizacao.strftime("%Y-%m-%d")
             if composicao.data_mobilizacao
             else "",
-            "data_desmobilizacao": composicao.data_desmobilizacao.strftime("%d/%m/%Y")
+            "data_desmobilizacao": composicao.data_desmobilizacao.strftime("%Y-%m-%d")
             if composicao.data_desmobilizacao
             else "",
             "observacao": composicao.observacao,

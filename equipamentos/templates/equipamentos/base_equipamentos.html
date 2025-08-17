@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="header">
+                {{ titulo }} - Contrato: {{ contrato.nome_contrato }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        {{ titulo }}
+                    </h5>
+                    <div>
+                        <button type="button" class="btn btn-success btn-sm" id="salvar-equipamentos">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm" id="importar-excel">
+                            <i class="fas fa-file-excel"></i> Cole do Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Alert container para mensagens -->
+                    <div id="alert-container" class="mb-3"></div>
+                    
+                    <!-- Área de importação do Excel -->
+                    <div id="excel-import-area" class="mb-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Como importar do Excel:</strong>
+                            <ol class="mb-2">
+                                <li>Selecione as células no Excel (incluindo cabeçalhos se desejar)</li>
+                                <li>Copie (Ctrl+C)</li>
+                                <li>Cole na área de texto abaixo (Ctrl+V)</li>
+                                <li>Clique em "Processar Dados"</li>
+                            </ol>
+                            <strong>Formato suportado:</strong>
+                            <small class="d-block mb-2">
+                                {% if tipo_equipamento == 'vida_util' %}
+                                    <code>Descrição | Vida Útil | Valor{% for equipe in equipes %} | {{ equipe.nome }}{% endfor %}</code>
+                                {% else %}
+                                    <code>Descrição | Valor{% for equipe in equipes %} | {{ equipe.nome }}{% endfor %}</code>
+                                {% endif %}
+                            </small>
+                            <small class="text-muted">
+                                * Aceita separadores: TAB, ponto e vírgula (;), vírgula (,) ou pipe (|)
+                            </small>
+                        </div>
+                        <textarea id="excel-data" class="form-control mb-2" rows="10" 
+                                  placeholder="Cole os dados do Excel aqui... &#10;Exemplo:&#10;Capacete&#9;24&#9;150&#9;5&#9;3&#10;Luvas&#9;12&#9;45&#9;8&#9;8"></textarea>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary" id="processar-excel">
+                                <i class="fas fa-cogs"></i> Processar Dados
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelar-excel">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de equipamentos -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="equipamentos-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 30%">Descrição</th>
+                                    {% if tipo_equipamento == 'vida_util' %}
+                                        <th style="width: 15%">Vida Útil (meses)</th>
+                                        <th style="width: 15%">Valor Unitário (R$)</th>
+                                    {% else %}
+                                        <th style="width: 20%">Valor Mensal (R$)</th>
+                                    {% endif %}
+                                    {% for equipe in equipes %}
+                                        <th style="width: {% if equipes|length <= 3 %}15{% elif equipes|length <= 5 %}12{% else %}10{% endif %}%">{{ equipe.nome }}</th>
+                                    {% endfor %}
+                                    <th style="width: 8%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipamentos-tbody">
+                                {% for equipamento in equipamentos %}
+                                <tr data-id="{{ equipamento.id }}">
+                                    <td>
+                                        <input type="text" class="form-control equipamento-descricao" 
+                                               value="{{ equipamento.descricao }}" placeholder="Descrição do equipamento">
+                                    </td>
+                                    {% if tipo_equipamento == 'vida_util' %}
+                                        <td>
+                                            <input type="number" class="form-control equipamento-vida-util" 
+                                                   value="{{ equipamento.vida_util_meses }}" min="1" placeholder="Meses">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control equipamento-valor-unitario" 
+                                                   value="{{ equipamento.valor_unitario|floatformat:2 }}" step="0.01" min="0" placeholder="0,00">
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <input type="number" class="form-control equipamento-valor-mensal" 
+                                                   value="{{ equipamento.valor_mensal|floatformat:2 }}" step="0.01" min="0" placeholder="0,00">
+                                        </td>
+                                    {% endif %}
+                                    {% for equipe in equipes %}
+                                        <td>
+                                            <input type="number" class="form-control equipe-quantidade" 
+                                                   data-equipe-id="{{ equipe.id }}" 
+                                                   value="{% for vinculo in equipamento.vinculacoes_equipe.all %}{% if vinculo.equipe.id == equipe.id %}{{ vinculo.quantidade_por_equipe }}{% endif %}{% endfor %}" 
+                                                   min="0" placeholder="0">
+                                        </td>
+                                    {% endfor %}
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm remover-linha" title="Remover">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                <!-- Linha para adicionar novo equipamento -->
+                                <tr id="nova-linha">
+                                    <td>
+                                        <input type="text" class="form-control equipamento-descricao" 
+                                               placeholder="Clique para adicionar novo equipamento...">
+                                    </td>
+                                    {% if tipo_equipamento == 'vida_util' %}
+                                        <td>
+                                            <input type="number" class="form-control equipamento-vida-util" 
+                                                   value="12" min="1" placeholder="Meses">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control equipamento-valor-unitario" 
+                                                   value="0" step="0.01" min="0" placeholder="0,00">
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <input type="number" class="form-control equipamento-valor-mensal" 
+                                                   value="0" step="0.01" min="0" placeholder="0,00">
+                                        </td>
+                                    {% endif %}
+                                    {% for equipe in equipes %}
+                                        <td>
+                                            <input type="number" class="form-control equipe-quantidade" 
+                                                   data-equipe-id="{{ equipe.id }}" 
+                                                   value="0" min="0" placeholder="0">
+                                        </td>
+                                    {% endfor %}
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-sm adicionar-linha" title="Adicionar">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- JavaScript específico para equipamentos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoria = '{{ categoria }}';
+    const tipoEquipamento = '{{ tipo_equipamento }}';
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                     '{{ csrf_token }}';
+
+    // Função para formatar moeda
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
+    }
+
+    // Função para coletar dados das equipes de uma linha
+    function coletarDadosEquipes(row) {
+        const equipesData = {};
+        const equipesInputs = row.querySelectorAll('.equipe-quantidade');
+        equipesInputs.forEach(input => {
+            const equipeId = input.getAttribute('data-equipe-id');
+            const quantidade = parseInt(input.value || 0);
+            if (quantidade > 0) {
+                equipesData[equipeId] = quantidade;
+            }
+        });
+        return equipesData;
+    }
+
+    // Adicionar nova linha
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.adicionar-linha, .adicionar-linha *')) {
+            const novaLinha = document.getElementById('nova-linha');
+            const descricao = novaLinha.querySelector('.equipamento-descricao').value.trim();
+            
+            if (!descricao) {
+                alert('Por favor, informe a descrição do equipamento.');
+                return;
+            }
+
+            // Clona a linha
+            const novaLinhaClone = novaLinha.cloneNode(true);
+            novaLinhaClone.removeAttribute('id');
+            
+            // Substitui o botão de adicionar por remover
+            const btnContainer = novaLinhaClone.querySelector('td:last-child');
+            btnContainer.innerHTML = `
+                <button type="button" class="btn btn-danger btn-sm remover-linha" title="Remover">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            
+            // Insere antes da linha de nova entrada
+            novaLinha.parentNode.insertBefore(novaLinhaClone, novaLinha);
+            
+            // Limpa a linha de nova entrada
+            novaLinha.querySelector('.equipamento-descricao').value = '';
+            if (tipoEquipamento === 'vida_util') {
+                novaLinha.querySelector('.equipamento-vida-util').value = '12';
+                novaLinha.querySelector('.equipamento-valor-unitario').value = '0';
+            } else {
+                novaLinha.querySelector('.equipamento-valor-mensal').value = '0';
+            }
+            
+            // Limpa os campos das equipes
+            const equipesInputs = novaLinha.querySelectorAll('.equipe-quantidade');
+            equipesInputs.forEach(input => input.value = '0');
+        }
+    });
+
+    // Remover linha
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.remover-linha, .remover-linha *')) {
+            if (confirm('Deseja remover este equipamento?')) {
+                e.target.closest('tr').remove();
+            }
+        }
+    });
+
+    // Mostrar/ocultar área de importação do Excel
+    document.getElementById('importar-excel').addEventListener('click', function() {
+        const importArea = document.getElementById('excel-import-area');
+        importArea.style.display = importArea.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Cancelar importação do Excel
+    document.getElementById('cancelar-excel').addEventListener('click', function() {
+        document.getElementById('excel-import-area').style.display = 'none';
+        document.getElementById('excel-data').value = '';
+    });
+
+    // Processar dados do Excel
+    document.getElementById('processar-excel').addEventListener('click', function() {
+        const data = document.getElementById('excel-data').value.trim();
+        if (!data) {
+            alert('Por favor, cole os dados do Excel na área de texto.');
+            return;
+        }
+
+        const lines = data.split(/\r?\n/);
+        const tbody = document.getElementById('equipamentos-tbody');
+        
+        // Remove linhas existentes (exceto a nova linha)
+        const existingRows = tbody.querySelectorAll('tr:not(#nova-linha)');
+        existingRows.forEach(row => row.remove());
+
+        let processedLines = 0;
+        
+        lines.forEach((line, lineIndex) => {
+            if (!line.trim()) return; // Pula linhas vazias
+            
+            // Tenta diferentes separadores: TAB primeiro, depois outros
+            let cols = line.split('\t');
+            
+            // Se não encontrou TABs, tenta outros separadores
+            if (cols.length === 1) {
+                cols = line.split(';'); // Ponto e vírgula
+            }
+            if (cols.length === 1) {
+                cols = line.split(','); // Vírgula
+            }
+            if (cols.length === 1) {
+                cols = line.split('|'); // Pipe
+            }
+            
+            // Remove espaços em branco
+            cols = cols.map(col => col.trim());
+            
+            console.log(`Linha ${lineIndex + 1}:`, cols); // Debug
+            
+            if (cols.length >= 1 && cols[0]) { // Pelo menos descrição
+                const novaLinha = document.getElementById('nova-linha');
+                const clone = novaLinha.cloneNode(true);
+                clone.removeAttribute('id');
+                
+                // Preenche os dados
+                clone.querySelector('.equipamento-descricao').value = cols[0] || '';
+                
+                if (tipoEquipamento === 'vida_util') {
+                    if (cols[1]) clone.querySelector('.equipamento-vida-util').value = cols[1];
+                    if (cols[2]) clone.querySelector('.equipamento-valor-unitario').value = cols[2];
+                    
+                    // Preenche quantidades das equipes (cols[3] em diante)
+                    const equipesInputs = clone.querySelectorAll('.equipe-quantidade');
+                    equipesInputs.forEach((input, index) => {
+                        const colIndex = 3 + index;
+                        if (cols[colIndex]) {
+                            input.value = cols[colIndex];
+                            console.log(`Equipe ${index}: ${cols[colIndex]}`); // Debug
+                        }
+                    });
+                } else {
+                    if (cols[1]) clone.querySelector('.equipamento-valor-mensal').value = cols[1];
+                    
+                    // Preenche quantidades das equipes (cols[2] em diante)
+                    const equipesInputs = clone.querySelectorAll('.equipe-quantidade');
+                    equipesInputs.forEach((input, index) => {
+                        const colIndex = 2 + index;
+                        if (cols[colIndex]) {
+                            input.value = cols[colIndex];
+                            console.log(`Equipe ${index}: ${cols[colIndex]}`); // Debug
+                        }
+                    });
+                }
+                
+                // Substitui o botão
+                const btnContainer = clone.querySelector('td:last-child');
+                btnContainer.innerHTML = `
+                    <button type="button" class="btn btn-danger btn-sm remover-linha" title="Remover">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                tbody.insertBefore(clone, novaLinha);
+                processedLines++;
+            }
+        });
+
+        // Oculta a área de importação e limpa
+        document.getElementById('excel-import-area').style.display = 'none';
+        document.getElementById('excel-data').value = '';
+        
+        showAlert(`${processedLines} linhas importadas com sucesso!`, 'success');
+        console.log(`Total de linhas processadas: ${processedLines}`); // Debug
+    });
+
+    // Salvar equipamentos
+    document.getElementById('salvar-equipamentos').addEventListener('click', function() {
+        const equipamentos = [];
+        const rows = document.querySelectorAll('#equipamentos-tbody tr:not(#nova-linha)');
+        
+        rows.forEach(row => {
+            const descricao = row.querySelector('.equipamento-descricao')?.value?.trim();
+            if (descricao) {
+                const equipamento = {
+                    descricao: descricao
+                };
+
+                if (tipoEquipamento === 'vida_util') {
+                    equipamento.vida_util_meses = parseInt(row.querySelector('.equipamento-vida-util')?.value || 12);
+                    equipamento.valor_unitario = parseFloat(row.querySelector('.equipamento-valor-unitario')?.value || 0);
+                } else {
+                    equipamento.valor_mensal = parseFloat(row.querySelector('.equipamento-valor-mensal')?.value || 0);
+                }
+
+                // Adiciona dados das equipes
+                equipamento.equipes = coletarDadosEquipes(row);
+
+                equipamentos.push(equipamento);
+            }
+        });
+
+        // Enviar para o servidor
+        fetch('/equipamentos/salvar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                categoria: categoria,
+                tipo_equipamento: tipoEquipamento,
+                equipamentos: equipamentos
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            showAlert('Erro ao salvar equipamentos.', 'danger');
+        });
+    });
+
+    // Função para mostrar alertas
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+<!-- Componente: Card de Formulário -->
+{% load static %}
+
+<div class="form-card form-card--{{ form_status.status.value }} {% if form.required %}form-card--required{% endif %}">
+    <a href="{% if form.url_params.contrato_id %}{% url form.url_name contrato_id=form.url_params.contrato_id %}{% else %}{% url form.url_name %}{% endif %}" 
+       class="form-card-link text-decoration-none">
+        
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <i class="{{ form.icon }}"></i>
+            </div>
+            
+            {% if show_status_indicators %}
+                <div class="form-card-status">
+                    {% include 'components/status_indicator.html' with status=form_status %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-card-body">
+            <h6 class="form-card-title">
+                {{ form.title }}
+                {% if form.required %}
+                    <span class="required-badge">*</span>
+                {% endif %}
+            </h6>
+            
+            <p class="form-card-description">
+                {{ form.description }}
+            </p>
+            
+            {% if form_status.count > 0 %}
+                <div class="form-card-count">
+                    <small class="text-muted">
+                        <i class="fas fa-list-ul me-1"></i>
+                        {{ form_status.count }} item(s) cadastrado(s)
+                    </small>
+                </div>
+            {% endif %}
+            
+            <div class="form-card-message">
+                <small class="status-message">
+                    {{ form_status.message }}
+                </small>
+            </div>
+        </div>
+        
+        <div class="form-card-footer">
+            <div class="form-card-action">
+                {% if form_status.status.value == 'completo' %}
+                    <span class="action-text">Gerenciar</span>
+                    <i class="fas fa-cog"></i>
+                {% elif form_status.status.value == 'parcial' %}
+                    <span class="action-text">Completar</span>
+                    <i class="fas fa-edit"></i>
+                {% else %}
+                    <span class="action-text">Configurar</span>
+                    <i class="fas fa-plus"></i>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+</div>

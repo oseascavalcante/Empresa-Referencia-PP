@@ -71,7 +71,7 @@ class Regional(models.Model):
     municipio = models.CharField(max_length=100, verbose_name='Município')
 
     class Meta:
-        unique_together = ('contrato', 'nome')
+        unique_together = ('contrato', 'nome', 'municipio')
         verbose_name = 'Regional'
         verbose_name_plural = 'Regionais'
         ordering = ['nome']

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py runserver:*)",
+      "Bash(python manage.py:*)",
+      "Bash(mkdir:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(curl:*)",
+      "Bash(sed:*)",
+      "Bash(find:*)",
+      "Bash(true)",
+      "Bash(python test:*)",
+      "Bash(git add:*)",
+      "Bash(timeout 10 python manage.py runserver:*)",
+      "Bash(python:*)",
+      "Bash(set DJANGO_SETTINGS_MODULE=app.settings)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "mcp__ide__getDiagnostics"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

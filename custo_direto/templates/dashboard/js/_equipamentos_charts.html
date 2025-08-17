@@ -1,0 +1,230 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Módulo de Gráficos de Equipamentos
+const EquipamentosCharts = {
+    init: function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Módulo Equipamentos Charts iniciado');
+            
+            // Verifica se os elementos existem
+            const graficoRosca = document.getElementById('graficoRoscaEquipamentos');
+            const graficoBarras = document.getElementById('graficoBarrasEmpilhadasEquipamentos');
+            
+            console.log('📊 Elemento rosca existe:', !!graficoRosca);
+            console.log('📊 Elemento barras existe:', !!graficoBarras);
+            
+            {% if tem_dados_equipamentos %}
+            console.log('✅ Dados de equipamentos disponíveis');
+            
+            try {
+                // Dados passados via JSON seguro do backend
+                const dadosEquipamentos = {
+                    totais_categoria: {{ totais_equipamentos_categoria_js|safe }},
+                    custos_equipamentos: {{ custos_equipamentos_js|safe }}
+                };
+                
+                console.log('📈 Dados carregados:', dadosEquipamentos);
+                
+                // Inicializar gráficos
+                EquipamentosCharts.criarGraficoRosca(graficoRosca, dadosEquipamentos);
+                EquipamentosCharts.criarGraficoBarras(graficoBarras, dadosEquipamentos);
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados equipamentos:', error);
+            }
+            {% else %}
+            console.log('⚠️ Nenhum dado de equipamentos disponível');
+            {% endif %}
+        });
+    },
+
+    criarGraficoRosca: function(elemento, dados) {
+        if (!elemento || !dados.totais_categoria) return;
+        
+        console.log('🍩 Criando gráfico de rosca...');
+        
+        const dadosRosca = [];
+        const mapeamentoLabels = {
+            'EPI': 'EPI',
+            'EPC': 'EPC', 
+            'FERRAMENTAS': 'Ferramentas',
+            'EQUIPAMENTOS_TI': 'Equipamentos TI',
+            'DESPESAS_TI': 'Despesas TI',
+            'MATERIAIS_CONSUMO': 'Materiais',
+            'DESPESAS_DIVERSAS': 'Diversas'
+        };
+        
+        for (const categoria in dados.totais_categoria) {
+            const valor = dados.totais_categoria[categoria];
+            if (valor > 0) {
+                dadosRosca.push({
+                    label: mapeamentoLabels[categoria] || categoria,
+                    valor: valor
+                });
+            }
+        }
+        
+        if (dadosRosca.length === 0) {
+            console.log('⚠️ Nenhum dado para gráfico de rosca');
+            return;
+        }
+        
+        dadosRosca.sort((a, b) => b.valor - a.valor);
+        
+        const labels = dadosRosca.map(d => d.label);
+        const valores = dadosRosca.map(d => d.valor);
+        
+        try {
+            new Chart(elemento, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', 
+                            '#4BC0C0', '#9966FF', '#FF9F40', '#FF6B6B'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: R$ ${context.parsed.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+            console.log('✅ Gráfico de rosca criado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de rosca:', error);
+        }
+    },
+
+    criarGraficoBarras: function(elemento, dados) {
+        if (!elemento || !dados.custos_equipamentos || dados.custos_equipamentos.length === 0) return;
+        
+        console.log('📊 Criando gráfico de barras empilhadas...');
+        
+        const dadosBarras = dados.custos_equipamentos.map(function(item) {
+            return {
+                equipe: item.equipe_nome,
+                total: item.custo_mensal_por_equipe,
+                qtd: item.quantidade_equipes,
+                epi: item.custos_categorias.EPI / item.quantidade_equipes,
+                epc: item.custos_categorias.EPC / item.quantidade_equipes,
+                ferramentas: item.custos_categorias.FERRAMENTAS / item.quantidade_equipes,
+                equipTI: item.custos_categorias.EQUIPAMENTOS_TI / item.quantidade_equipes,
+                despTI: item.custos_categorias.DESPESAS_TI / item.quantidade_equipes,
+                materiais: item.custos_categorias.MATERIAIS_CONSUMO / item.quantidade_equipes,
+                diversas: item.custos_categorias.DESPESAS_DIVERSAS / item.quantidade_equipes
+            };
+        });
+        
+        dadosBarras.sort((a, b) => b.total - a.total);
+        
+        const labels = dadosBarras.map(d => d.equipe);
+        const cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6B6B'];
+        
+        const categorias = [
+            {nome: 'EPI', dados: dadosBarras.map(d => d.epi), cor: cores[0]},
+            {nome: 'EPC', dados: dadosBarras.map(d => d.epc), cor: cores[1]},
+            {nome: 'Ferramentas', dados: dadosBarras.map(d => d.ferramentas), cor: cores[2]},
+            {nome: 'Equipamentos TI', dados: dadosBarras.map(d => d.equipTI), cor: cores[3]},
+            {nome: 'Despesas TI', dados: dadosBarras.map(d => d.despTI), cor: cores[4]},
+            {nome: 'Materiais', dados: dadosBarras.map(d => d.materiais), cor: cores[5]},
+            {nome: 'Diversas', dados: dadosBarras.map(d => d.diversas), cor: cores[6]}
+        ];
+        
+        const datasets = [];
+        categorias.forEach(function(cat) {
+            if (cat.dados.some(v => v > 0)) {
+                datasets.push({
+                    label: cat.nome,
+                    data: cat.dados,
+                    backgroundColor: cat.cor,
+                    borderColor: cat.cor,
+                    borderWidth: 1
+                });
+            }
+        });
+        
+        try {
+            new Chart(elemento, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: R$ ${context.parsed.y.toFixed(2)}`;
+                                },
+                                footer: function(tooltipItems) {
+                                    if (tooltipItems.length > 0) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        return `Total da Equipe: R$ ${dadosBarras[index].total.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('✅ Gráfico de barras criado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de barras:', error);
+        }
+    }
+};
+
+// Inicializar o módulo
+EquipamentosCharts.init();
+</script>

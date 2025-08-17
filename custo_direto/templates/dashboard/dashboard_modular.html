@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<!-- Estilos Específicos do Dashboard -->
+<style>
+    .titulo-grupo {
+        color: #483D8B;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .linha-abaixo-titulo {
+        border-bottom: 2px solid #483D8B;
+        margin-bottom: 0.5rem;
+    }
+    .linha-subgrupo {
+        border-bottom: 1px solid #b0b0b0;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Melhorias visuais */
+    .dashboard-header {
+        background: linear-gradient(135deg, #483D8B 0%, #6A5ACD 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .metric-card {
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        border-left: 4px solid #007bff;
+        transition: transform 0.2s;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+</style>
+
+<!-- Container Principal -->
+<div class="container-fluid mt-4">
+    <!-- Cabeçalho do Dashboard -->
+    <div class="dashboard-header text-center">
+        <h2 class="mb-1">
+            <i class="fas fa-chart-line me-2"></i>
+            Dashboard de Custos Diretos
+        </h2>
+        <p class="mb-0 opacity-75">
+            Análise completa e detalhada dos custos de contratos
+        </p>
+    </div>
+
+    <!-- Filtros Globais -->
+    {% include 'dashboard/_filtros.html' %}
+
+    <!-- Resumo Executivo Rápido -->
+    {% if custos_funcoes or tem_dados_equipamentos %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-users text-primary fs-1 mb-2"></i>
+                    <h4 class="text-primary">{{ custos_funcoes|length|default:"0" }}</h4>
+                    <small class="text-muted">Funções Ativas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-tools text-warning fs-1 mb-2"></i>
+                    <h4 class="text-warning">{{ custos_equipamentos|length|default:"0" }}</h4>
+                    <small class="text-muted">Equipamentos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-money-bill-wave text-success fs-1 mb-2"></i>
+                    <h4 class="text-success">R$ {{ custo_total_equipamentos|floatformat:2|default:"0,00" }}</h4>
+                    <small class="text-muted">Total Equipamentos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-pie text-info fs-1 mb-2"></i>
+                    <h4 class="text-info">100%</h4>
+                    <small class="text-muted">Cobertura</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Módulo de Mão de Obra -->
+    {% include 'dashboard/_mao_obra.html' %}
+
+    <!-- Módulo de Equipamentos -->
+    {% include 'dashboard/_equipamentos.html' %}
+
+    <!-- Espaço para Futuros Módulos -->
+    {# 
+    TODO: Implementar módulos futuros:
+    {% comment %}
+    {% include 'dashboard/_custos_indiretos.html' %}
+    {% include 'dashboard/_margem_lucro.html' %}
+    {% include 'dashboard/_proposta_comercial.html' %}
+    {% endcomment %}
+    #}
+
+    <!-- Botões de Ação Global -->
+    <div class="row mt-4">
+        <div class="col-md-12 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <button type="button" class="btn btn-outline-primary" onclick="window.print();">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="exportarDados();">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts Modulares -->
+{% include 'dashboard/js/_dashboard_base.html' %}
+
+<!-- Rodapé Informativo -->
+<div class="text-center mt-5 py-3 border-top">
+    <small class="text-muted">
+        <i class="fas fa-info-circle"></i>
+        Dashboard gerado em {{ "now"|date:"d/m/Y H:i" }} | 
+        <strong>Sistema de Precificação v2.0</strong>
+    </small>
+</div>
+
+{% endblock %}

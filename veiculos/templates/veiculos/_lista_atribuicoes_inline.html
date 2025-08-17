@@ -1,0 +1,171 @@
+{% if atribuicoes %}
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" id="atribuicoes-cadastradas-table">
+            <thead class="table-light">
+                <tr style="background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%) !important;">
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Regional</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Escopo</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Veículo</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Combustível</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Quantidade</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Custo Total/Mês</th>
+                    <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Observação</th>
+                    <th style="width: 120px; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for atribuicao in atribuicoes %}
+                    <tr>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ atribuicao.regional.nome }}</span>
+                                <small class="text-muted">{{ atribuicao.regional.municipio }}</small>
+                            </div>
+                        </td>
+                        <td>{{ atribuicao.escopo.nome }}</td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ atribuicao.veiculo.tipo_veiculo.nome }}</span>
+                                <small class="text-muted">
+                                    <span class="categoria-badge categoria-{{ atribuicao.veiculo.tipo_veiculo.categoria }}">
+                                        {{ atribuicao.veiculo.tipo_veiculo.get_categoria_display }}
+                                    </span>
+                                </small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="combustivel-badge combustivel-{{ atribuicao.veiculo.tipo_combustivel }}">
+                                <i class="fas fa-{% if atribuicao.veiculo.tipo_combustivel == 'gasolina' %}gas-pump{% elif atribuicao.veiculo.tipo_combustivel == 'etanol' %}leaf{% elif atribuicao.veiculo.tipo_combustivel == 'diesel' %}truck{% elif atribuicao.veiculo.tipo_combustivel == 'flex' %}exchange-alt{% elif atribuicao.veiculo.tipo_combustivel == 'gnv' %}fire{% else %}bolt{% endif %} me-1"></i>
+                                {{ atribuicao.veiculo.get_tipo_combustivel_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-primary">{{ atribuicao.quantidade }}</span>
+                            <small class="text-muted d-block">unidade(s)</small>
+                        </td>
+                        <td>
+                            <span class="custo-destaque">
+                                R$ {{ atribuicao.veiculo.custo_total_mensal|floatformat:2 }}
+                            </span>
+                            <small class="text-muted d-block">por unidade</small>
+                            {% if atribuicao.quantidade > 1 %}
+                                <strong class="text-success d-block">
+                                    Total: R$ {{ atribuicao.custo_total_mensal_atribuicao|floatformat:2 }}
+                                </strong>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if atribuicao.observacoes %}
+                                <span class="text-truncate" title="{{ atribuicao.observacoes }}">{{ atribuicao.observacoes|truncatechars:30 }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-warning editar-atribuicao" 
+                                        data-id="{{ atribuicao.pk }}" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger excluir-atribuicao" 
+                                        data-id="{{ atribuicao.pk }}" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-car-side text-muted"></i>
+        </div>
+        <h6 class="text-muted">Nenhuma atribuição cadastrada</h6>
+        <p class="text-muted small">Configure uma atribuição acima para começar</p>
+    </div>
+{% endif %}
+
+<style>
+.combustivel-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.combustivel-gasolina {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.combustivel-etanol {
+    background-color: #4ecdc4;
+    color: white;
+}
+
+.combustivel-diesel {
+    background-color: #45b7d1;
+    color: white;
+}
+
+.combustivel-flex {
+    background-color: #96ceb4;
+    color: white;
+}
+
+.combustivel-gnv {
+    background-color: #ffeaa7;
+    color: #2d3436;
+}
+
+.combustivel-eletrico {
+    background-color: #6c5ce7;
+    color: white;
+}
+
+.categoria-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.categoria-veiculo_leve {
+    background-color: #4FCADB;
+    color: white;
+}
+
+.categoria-veiculo_pesado {
+    background-color: #FFD93D;
+    color: #2c3e50;
+}
+
+.categoria-implemento {
+    background-color: #52C585;
+    color: white;
+}
+
+.categoria-equipamento {
+    background-color: #8B7ED8;
+    color: white;
+}
+
+.custo-destaque {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+</style>

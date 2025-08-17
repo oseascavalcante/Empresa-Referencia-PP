@@ -1,43 +1,343 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="container-fluid mt-4">
-    <div class="header text-center">
-        Encargos Sociais da Mão de Obra
-    </div>
-    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
-    <p class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;">Contrato: {{ contrato.contrato }} - {{ contrato.escopo_contrato }}</p>
-    <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
 
-    <div class="row d-flex justify-content-center align-items-stretch mt-3">
+{% block content %}
+<!-- CSS Moderno baseado na referência da página de encargos sociais -->
+<style>
+    /* Variáveis CSS para consistência */
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --primary-soft: #6B5ACF;
+        --secondary-soft: #8B7ED8;
+        --success-soft: #52C585;
+        --info-soft: #4FCADB;
+        --warning-soft: #FFD93D;
+        --background-soft: #FAFBFF;
+        
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        --box-shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
+
+    /* Hero section para resultados dos encargos sociais */
+    .resultados-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .resultados-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .resultados-title {
+        font-size: 1.6rem;
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 2;
+    }
+
+    .resultados-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Cards modernos para resultados */
+    .modern-result-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .modern-result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+    }
+
+    .modern-result-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        border-bottom: none;
+        text-align: center;
+    }
+
+    /* Headers específicos para cada grupo */
+    .grupo-a-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+
+    .grupo-b-header {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+    }
+
+    .grupo-c-header {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+    }
+
+    .grupo-d-header {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+        color: #212529 !important;
+    }
+
+    .grupo-e-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+
+    .modern-result-card .card-body {
+        padding: 1.5rem 1.25rem;
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Linhas de dados */
+    .data-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(72, 61, 139, 0.1);
+        font-size: 0.9rem;
+    }
+
+    .data-row:last-child {
+        border-bottom: none;
+    }
+
+    .data-row .label {
+        color: var(--dark-color);
+        font-weight: 500;
+    }
+
+    .data-row .value {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Total destacado */
+    .total-row {
+        background: linear-gradient(135deg, rgba(72, 61, 139, 0.1) 0%, rgba(106, 90, 205, 0.1) 100%);
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-top: 1rem;
+        border: 2px solid rgba(72, 61, 139, 0.2);
+    }
+
+    .total-row .label {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .total-row .value {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    /* Container da informação complementar */
+    .info-container {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-top: 2rem;
+        backdrop-filter: blur(5px);
+        box-shadow: var(--box-shadow);
+    }
+
+    /* Tabela moderna */
+    .modern-table {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+    }
+
+    .modern-table thead th {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 1rem 0.75rem;
+    }
+
+    .modern-table tbody td {
+        padding: 0.75rem;
+        border-color: rgba(72, 61, 139, 0.1);
+        vertical-align: middle;
+    }
+
+    .modern-table tbody tr:nth-child(even) {
+        background-color: rgba(72, 61, 139, 0.03);
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: rgba(72, 61, 139, 0.08);
+        transition: var(--transition);
+    }
+
+    /* Botões modernos */
+    .action-button {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        transition: var(--transition);
+        box-shadow: var(--box-shadow);
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    }
+
+    .secondary-button {
+        background: #6c757d;
+        border: none;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        transition: var(--transition);
+    }
+
+    .secondary-button:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+    }
+
+    /* Seção de dicas */
+    .tip-section {
+        background: linear-gradient(135deg, rgba(72, 61, 139, 0.05) 0%, rgba(106, 90, 205, 0.05) 100%);
+        border-left: 4px solid var(--primary-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .tip-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .resultados-hero {
+            padding: 1.25rem 1rem;
+        }
+        
+        .resultados-title {
+            font-size: 1.4rem;
+        }
+        
+        .modern-result-card .card-body {
+            padding: 1rem;
+        }
+        
+        .info-container {
+            padding: 1rem;
+        }
+
+        .modern-table {
+            font-size: 0.85rem;
+        }
+        
+        .modern-table thead th,
+        .modern-table tbody td {
+            padding: 0.5rem 0.25rem;
+        }
+    }
+
+    /* Animação */
+    @keyframes float {
+        0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+        50% { transform: translate(-50%, -50%) rotate(180deg); }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Hero Section Moderno -->
+    <section class="resultados-hero">
+        <h1 class="resultados-title">
+            <i class="fas fa-chart-bar me-3"></i>
+            Resultados dos Encargos Sociais
+        </h1>
+        <p class="resultados-subtitle">Contrato {{ contrato.contrato }} - {{ contrato.escopo_contrato }}</p>
+    </section>
+
+    <!-- Resultados dos Grupos A, B e C -->
+    <div class="row d-flex justify-content-center align-items-stretch">
         <!-- GRUPO A -->
         <div class="col-lg-4 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-header bg-primary text-white">Grupo A – Encargos Sociais Básicos</div>
+            <div class="modern-result-card w-100 h-100">
+                <div class="card-header grupo-a-header">Grupo A – Encargos Sociais Básicos</div>
                 <div class="card-body">
                     {% if calc_grupo_a or grupo_a %}
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>CPP (Contribuição Previdenciária Patronal):</span>
-                            <strong>{{ calc_grupo_a.cpp|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">CPP (Contribuição Previdenciária Patronal):</span>
+                            <span class="value">{{ calc_grupo_a.cpp|floatformat:2|add:"%" }}</span>
                         </div>                    
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>FGTS:</span>
-                            <strong>{{ grupo_a.fgts|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">FGTS:</span>
+                            <span class="value">{{ grupo_a.fgts|floatformat:2|add:"%" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Décimo terceiro salário:</span>
-                            <strong>{{ grupo_a.dec_salario|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">Décimo terceiro salário:</span>
+                            <span class="value">{{ grupo_a.dec_salario|floatformat:2|add:"%" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Abono de férias:</span>
-                            <strong>{{ grupo_a.abono_ferias|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">Abono de férias:</span>
+                            <span class="value">{{ grupo_a.abono_ferias|floatformat:2|add:"%" }}</span>
                         </div>  
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>(CPP + FGTS) x (13º salário + abono de férias):</span>
-                            <strong>{{ calc_grupo_a.cpp_fgts_sal_abono|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">(CPP + FGTS) x (13º + abono):</span>
+                            <span class="value">{{ calc_grupo_a.cpp_fgts_sal_abono|floatformat:2|add:"%" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
-                            <span><strong>Total Grupo A:</strong></span>
-                            <strong class="text-primary">{{ calc_grupo_a.total_grupo_a|floatformat:2|add:"%" }}</strong>
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span class="label">Total Grupo A:</span>
+                                <span class="value">{{ calc_grupo_a.total_grupo_a|floatformat:2|add:"%" }}</span>
+                            </div>
                         </div>
                     {% else %}
                         <p class="text-danger">Dados indisponíveis.</p>
@@ -48,26 +348,28 @@
 
         <!-- GRUPO B -->
         <div class="col-lg-4 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-header bg-secondary text-white">Grupo B – Indenizações nas demissões sem justa causa</div>
+            <div class="modern-result-card w-100 h-100">
+                <div class="card-header grupo-b-header">Grupo B – Indenizações nas demissões sem justa causa</div>
                 <div class="card-body">
                     {% if calc_grupo_b %}
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Aviso prévio indenizado:</span>
-                            <strong>{{ calc_grupo_b.aviso_previo_indenizado|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">Aviso prévio indenizado:</span>
+                            <span class="value">{{ calc_grupo_b.aviso_previo_indenizado|floatformat:2|add:"%" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Multa do FGTS:</span>
-                            <strong>{{ calc_grupo_b.multa_fgts|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">Multa do FGTS:</span>
+                            <span class="value">{{ calc_grupo_b.multa_fgts|floatformat:2|add:"%" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>FGTS sobre aviso prévio indenizado:</span>
-                            <strong>{{ calc_grupo_b.fgts_sobre_aviso_previo|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row">
+                            <span class="label">FGTS sobre aviso prévio:</span>
+                            <span class="value">{{ calc_grupo_b.fgts_sobre_aviso_previo|floatformat:2|add:"%" }}</span>
                         </div>
 
-                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
-                            <span><strong>Total Grupo B:</strong></span>
-                            <strong class="text-primary">{{ calc_grupo_b.total_grupo_b|floatformat:2|add:"%" }}</strong>
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span class="label">Total Grupo B:</span>
+                                <span class="value">{{ calc_grupo_b.total_grupo_b|floatformat:2|add:"%" }}</span>
+                            </div>
                         </div>
                     {% else %}
                         <p class="text-danger">Dados indisponíveis.</p>
@@ -78,33 +380,35 @@
 
         <!-- GRUPO C -->
         <div class="col-lg-4 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-header bg-success text-white">Grupo C – Substituições nas férias e faltas justificadas (Reserva técnica)</div>
+            <div class="modern-result-card w-100 h-100">
+                <div class="card-header grupo-c-header">Grupo C – Substituições nas férias e faltas justificadas</div>
                 <div class="card-body">
                     {% if calc_grupo_c %}
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Horas trabalhadas no ano:</span>
-                            <strong>{{ calc_grupo_c.horas_trab_ano }}</strong>
+                        <div class="data-row">
+                            <span class="label">Horas trabalhadas no ano:</span>
+                            <span class="value">{{ calc_grupo_c.horas_trab_ano }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Dias de faltas no ano:</span>
-                            <strong>{{ calc_grupo_c.dias_faltas_ano }}</strong>
+                        <div class="data-row">
+                            <span class="label">Dias de faltas no ano:</span>
+                            <span class="value">{{ calc_grupo_c.dias_faltas_ano }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Horas trabalhadas/semana:</span>
-                            <strong>{{ calc_grupo_c.horas_trab_semana }}</strong>
+                        <div class="data-row">
+                            <span class="label">Horas trabalhadas/semana:</span>
+                            <span class="value">{{ calc_grupo_c.horas_trab_semana }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Horas trabalhadas/dia:</span>
-                            <strong>{{ calc_grupo_c.horas_trab_dia }}</strong>
+                        <div class="data-row">
+                            <span class="label">Horas trabalhadas/dia:</span>
+                            <span class="value">{{ calc_grupo_c.horas_trab_dia }}</span>
                         </div>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
-                            <span>Horas de faltas justificadas:</span>
-                            <strong>{{ calc_grupo_c.horas_faltas_justificadas_ano }}</strong>
+                        <div class="data-row">
+                            <span class="label">Horas de faltas justificadas:</span>
+                            <span class="value">{{ calc_grupo_c.horas_faltas_justificadas_ano }}</span>
                         </div>
-                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
-                            <span><strong>Total Grupo C:</strong></span>
-                            <strong class="text-primary">{{ calc_grupo_c.total_grupo_c|floatformat:2|add:"%" }}</strong>
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span class="label">Total Grupo C:</span>
+                                <span class="value">{{ calc_grupo_c.total_grupo_c|floatformat:2|add:"%" }}</span>
+                            </div>
                         </div>
                     {% else %}
                         <p class="text-danger">Dados indisponíveis.</p>
@@ -118,13 +422,18 @@
     <div class="row d-flex justify-content-center align-items-stretch mt-3">
         <!-- GRUPO D -->
         <div class="col-lg-6 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-header bg-warning text-dark">Grupo D - Colaboradores substitutos -- Incidência do Grupo C sobre os Grupos A e B</div>
+            <div class="modern-result-card w-100 h-100">
+                <div class="card-header grupo-d-header">Grupo D - Colaboradores substitutos</div>
                 <div class="card-body">
                     {% if calc_grupo_d %}
-                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
-                            <span><strong>Total:</strong></span>
-                            <strong class="text-dark">{{ calc_grupo_d.total_grupo_d|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row mb-3">
+                            <span class="label">Incidência do Grupo C sobre os Grupos A e B</span>
+                        </div>
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span class="label">Total Grupo D:</span>
+                                <span class="value">{{ calc_grupo_d.total_grupo_d|floatformat:2|add:"%" }}</span>
+                            </div>
                         </div>
                     {% else %}
                         <p class="text-danger">Dados indisponíveis.</p>
@@ -135,13 +444,18 @@
 
         <!-- GRUPO E -->
         <div class="col-lg-6 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-header bg-danger text-white">Grupo E - Total Encargos Sociais Mensalista ( soma dos Grupos A, B, C e D )</div>
+            <div class="modern-result-card w-100 h-100">
+                <div class="card-header grupo-e-header">Grupo E - Total Encargos Sociais Mensalista</div>
                 <div class="card-body">
                     {% if calc_grupo_e %}
-                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
-                            <span><strong>Total:</strong></span>
-                            <strong class="text-dark">{{ calc_grupo_e.total_grupo_e|floatformat:2|add:"%" }}</strong>
+                        <div class="data-row mb-3">
+                            <span class="label">Soma dos Grupos A, B, C e D</span>
+                        </div>
+                        <div class="total-row">
+                            <div class="d-flex justify-content-between">
+                                <span class="label">Total Geral:</span>
+                                <span class="value">{{ calc_grupo_e.total_grupo_e|floatformat:2|add:"%" }}</span>
+                            </div>
                         </div>
                     {% else %}
                         <p class="text-danger">Dados indisponíveis.</p>
@@ -152,27 +466,28 @@
     </div>
 </div>
 
-<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
-
-
-<div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
-    <h5 class="fw-bold mb-3" style="color: #483D8B;">
-        💡 Dica
-    </h5>
-    <p>
-         Estimativa de tributação sem desoneração da folha de pagamento.<br>
-    </p>
-  
-    <table class="table table-bordered table-sm mt-3 bg-white">
-        <thead class="table-light text-center">
-            <tr>
-                <th>Grupo</th>
-                <th>Descrição</th>
-                <th>Mínimo</th>
-                <th>Médio</th>
-                <th>Máximo</th>
-            </tr>
-        </thead>
+    <!-- Seção de Informações Complementares Modernizada -->
+    <div class="info-container">
+        <div class="tip-section">
+            <h5 class="tip-title">
+                <i class="fas fa-lightbulb"></i>
+                Referências de Mercado
+            </h5>
+            <p>
+                Estimativa de tributação sem desoneração da folha de pagamento.
+            </p>
+        </div>
+      
+        <table class="table modern-table">
+            <thead class="text-center">
+                <tr>
+                    <th>Grupo</th>
+                    <th>Descrição</th>
+                    <th>Mínimo</th>
+                    <th>Médio</th>
+                    <th>Máximo</th>
+                </tr>
+            </thead>
         <tbody>
             <tr>
                 <td><strong>A</strong></td>
@@ -202,7 +517,7 @@
                 <td>4%</td>
                 <td>6%</td>
             </tr>
-            <tr class="table-light text-left">
+            <tr style="background-color: rgba(72, 61, 139, 0.1); font-weight: 600;">
                 <td><strong>E</strong></td>
                 <td><strong>Total estimado (A + B + C + D)</strong></td>
                 <td><strong>55%</strong></td>
@@ -212,23 +527,25 @@
         </tbody>
     </table>
 
-    <p class="mt-3 text-muted" style="font-size: 0.85rem;">
-        
-        🔹 Valores abaixo do mínimo podem indicar omissões nos encargos.<br>
-        ⚖️ Faixa média representa a prática de mercado em contratos estruturados.<br>
-        🔺 Valores acima do máximo são comuns em empresas com alta rotatividade ou operação ininterrupta.
-    </p>
-</div>
-<div class="container-fluid mt-5">
-    <div class="d-flex justify-content-end gap-2">
-        <button class="btn btn-secondary" onclick="window.history.back();">
-            ← Voltar
+        <div class="mt-3" style="font-size: 0.9rem; color: #6c757d;">
+            <p class="mb-2"><i class="fas fa-info-circle text-info me-2"></i><strong>Interpretação dos resultados:</strong></p>
+            <ul class="list-unstyled ps-4">
+                <li class="mb-1">🔹 Valores abaixo do mínimo podem indicar omissões nos encargos</li>
+                <li class="mb-1">⚖️ Faixa média representa a prática de mercado em contratos estruturados</li>
+                <li class="mb-1">🔺 Valores acima do máximo são comuns em empresas com alta rotatividade</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="d-flex justify-content-end gap-3 mt-4">
+        <button class="secondary-button" onclick="window.history.back();">
+            <i class="fas fa-arrow-left me-2"></i>Voltar
         </button>
-        <a href="{% url 'menu_despesas' contrato.contrato %}" class="btn btn-primary">
-            Avançar →
+        <a href="{% url 'menu_despesas' contrato.contrato %}" class="action-button text-decoration-none">
+            Avançar<i class="fas fa-arrow-right ms-2"></i>
         </a>
     </div>
 </div>
-
 
 {% endblock %}

@@ -2,39 +2,271 @@
 {% load form_tags %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <!-- Título principal -->
-    <div class="header">
-        Demonstrativo de Encargos Sociais - Mensalista 
-    </div>
-    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
-    <div>
-        <small class="text-muted">
-            <form method="get" class="form-inline">
-                <label for="contratoSelect" class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;"> Contrato:</label>                
-                <select id="contratoSelect" class="form-select d-inline w-auto mx-2" onchange="if(this.value) window.location.href=this.value">
-                    <option value="#">-- Escolha --</option>
-                    {% for c in contratos %}
-                        <option value="{% url 'grupo_abc_form' contrato_id=c.contrato %}" {% if contrato and contrato.contrato == c.contrato %}selected{% endif %}>
-                            Contrato {{ c.contrato }} - {{ c.escopo_contrato }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </small>
+<!-- CSS Moderno baseado na referência da home -->
+<style>
+    /* Variáveis CSS para consistência */
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --primary-soft: #6B5ACF;
+        --secondary-soft: #8B7ED8;
+        --success-soft: #52C585;
+        --info-soft: #4FCADB;
+        --warning-soft: #FFD93D;
+        --background-soft: #FAFBFF;
+        
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        --box-shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
 
+    /* Hero section para encargos sociais */
+    .encargos-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .encargos-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .encargos-title {
+        font-size: 1.6rem;
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 2;
+    }
+
+    .encargos-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Container para seleção de contrato */
+    .contract-selector {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .contract-selector label {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .contract-selector select {
+        border: 2px solid rgba(72, 61, 139, 0.2);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        font-size: 0.95rem;
+        padding: 0.75rem;
+    }
+
+    .contract-selector select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(72, 61, 139, 0.25);
+    }
+
+    /* Cards modernos para grupos */
+    .modern-form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .modern-form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+    }
+
+    .modern-form-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        border-bottom: none;
+        text-align: center;
+    }
+
+    .modern-form-card .card-body {
+        padding: 1.5rem 1.25rem;
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Estilização dos inputs */
+    .modern-form-card .form-control,
+    .modern-form-card .form-select {
+        border: 2px solid rgba(72, 61, 139, 0.15);
+        border-radius: 6px;
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+
+    .modern-form-card .form-control:focus,
+    .modern-form-card .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.15rem rgba(72, 61, 139, 0.25);
+    }
+
+    /* Labels melhorados */
+    .modern-form-card .col-form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        font-size: 0.85rem;
+    }
+
+    /* Subtítulos dos grupos */
+    .group-subtitle {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(72, 61, 139, 0.1);
+    }
+
+    /* Botão de salvar moderno */
+    .save-button {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-soft) 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        transition: var(--transition);
+        box-shadow: var(--box-shadow);
+    }
+
+    .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+        background: linear-gradient(135deg, var(--success-soft) 0%, var(--success-color) 100%);
+    }
+
+    /* Container do formulário */
+    .form-container {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(5px);
+        box-shadow: var(--box-shadow);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .encargos-hero {
+            padding: 1.25rem 1rem;
+        }
+        
+        .encargos-title {
+            font-size: 1.4rem;
+        }
+        
+        .contract-selector {
+            padding: 1rem;
+        }
+        
+        .contract-selector .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 1rem !important;
+        }
+        
+        .modern-form-card .card-body {
+            padding: 1rem;
+        }
+        
+        .form-container {
+            padding: 1rem;
+        }
+    }
+
+    /* Animação */
+    @keyframes float {
+        0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+        50% { transform: translate(-50%, -50%) rotate(180deg); }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Hero Section Moderno -->
+    <section class="encargos-hero">
+        <h1 class="encargos-title">
+            <i class="fas fa-percentage me-3"></i>
+            Demonstrativo de Encargos Sociais
+        </h1>
+        <p class="encargos-subtitle">Configure os encargos sociais e tributos do contrato</p>
+    </section>
+
+    <!-- Seleção de Contrato Modernizada -->
+    <div class="contract-selector">
+        <form method="get" class="d-flex align-items-center gap-3">
+            <label for="contratoSelect" class="mb-0">Contrato:</label>                
+            <select id="contratoSelect" class="form-select flex-grow-1" onchange="if(this.value) window.location.href=this.value">
+                <option value="#">-- Selecione um contrato --</option>
+                {% for c in contratos %}
+                    <option value="{% url 'grupo_abc_form' contrato_id=c.contrato %}" {% if contrato and contrato.contrato == c.contrato %}selected{% endif %}>
+                        Contrato {{ c.contrato }} - {{ c.escopo_contrato }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
     </div>
 
-    <form method="post" onsubmit="return confirm('Deseja salvar Encargos Sociais?');">
-        {% csrf_token %}
-        <div class="row d-flex justify-content-center align-items-stretch mt-3">
-            <!-- GRUPO A -->
-            <div class="col-lg-4 d-flex">
-                <div class="card w-100 h-100">
-                    <div class="card-header bg-primary text-white">Grupo A - Despesas sobre a folha de pagamento</div>
-                    <div class="card-body">
-                        <!-- Subgrupo A0 - Forma de Tributação -->
-                        <h6 class="fw-bold" style="color: #483D8B">A0 - Forma de Tributação</h6>
+    <!-- Container do Formulário Moderno -->
+    <div class="form-container">
+        <form method="post" onsubmit="return confirm('Deseja salvar Encargos Sociais?');">
+            {% csrf_token %}
+            <div class="row d-flex justify-content-center align-items-stretch">
+                
+                <!-- GRUPO A -->
+                <div class="col-lg-4 d-flex">
+                    <div class="modern-form-card w-100 h-100">
+                        <div class="card-header">Grupo A - Despesas sobre a folha de pagamento</div>
+                        <div class="card-body">
+                            <!-- Subgrupo A0 - Forma de Tributação -->
+                            <h6 class="group-subtitle">A0 - Forma de Tributação</h6>
                         <div class="mb-2 row">
                             <label class="col-6 col-form-label">{{ form_a.forma_tributacao.label }}</label>
                             <div class="col-6">
@@ -101,11 +333,10 @@
                 </div>
             </div>
 
-            <!-- GRUPO B -->
-            <div class="col-lg-4 d-flex">
-
-                <div class="card w-100 h-100 d-flex flex-column justify-content-start">
-                    <div class="card-header bg-secondary text-white">Grupo B - Indenizações por demissões sem justa causa</div>
+                <!-- GRUPO B -->
+                <div class="col-lg-4 d-flex">
+                    <div class="modern-form-card w-100 h-100">
+                        <div class="card-header">Grupo B - Indenizações por demissões sem justa causa</div>
                     <div class="card-body">
                         {% for field in form_b.visible_fields %}
                         <div class="mb-2 row">
@@ -119,11 +350,10 @@
                 </div>
             </div>
 
-            <!-- GRUPO C -->
-            <div class="col-lg-4 d-flex">
-
-                <div class="card w-100 h-100 d-flex flex-column justify-content-start">
-                    <div class="card-header bg-success text-white">Grupo C - Horas não trabalhadas no ano (faltas justificadas)</div>
+                <!-- GRUPO C -->
+                <div class="col-lg-4 d-flex">
+                    <div class="modern-form-card w-100 h-100">
+                        <div class="card-header">Grupo C - Horas não trabalhadas no ano (faltas justificadas)</div>
                     <div class="card-body">
                         {% for field in form_c.visible_fields %}
                         <div class="mb-2 row">
@@ -145,25 +375,27 @@
               <button type="button" class="btn btn-secondary" onclick="window.history.back();">
                   ← Voltar
               </button>
-              <button type="submit" class="btn btn-save">
-                  <i class="fas fa-save"></i> Salvar
+              <button type="submit" class="save-button">
+                  <i class="fas fa-save me-2"></i> Salvar Encargos Sociais
               </button>
-          </div>
-      </div>
-      
-    </form>
-</div>
+            </div>
+        </form>
+    </div>
 
 <hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
 
 
-  <div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
-    <h5 class="fw-bold mb-3" style="color: #483D8B;">Informações complementares</h5>
+    <!-- Seção de Informações Complementares Modernizada -->
+    <div class="form-container">
+        <h5 class="group-subtitle" style="font-size: 1.1rem; margin-bottom: 1.5rem;">
+            <i class="fas fa-info-circle me-2"></i>
+            Informações Complementares
+        </h5>
 
     <div class="container mt-4">
         <!-- Grupo A -->
         <div class="mb-4">
-          <h6 class="fw-bold text-decoration-underline">Grupo A – Encargos sobre a folha de pagamento</h6>
+          <h6 class="group-subtitle">Grupo A – Encargos sobre a folha de pagamento</h6>
           <p>
             Refere-se aos encargos legais pagos mensalmente pela empresa com base nos salários dos colaboradores.
             Inclui contribuições como INSS, FGTS, SEBRAE, SESI, SENAI, salário educação, RAT e FAP.
@@ -176,7 +408,7 @@
       
         <!-- Grupo B -->
         <div class="mb-4">
-          <h6 class="fw-bold text-decoration-underline">Grupo B – Indenizações por demissões sem justa causa</h6>
+          <h6 class="group-subtitle">Grupo B – Indenizações por demissões sem justa causa</h6>
           <p>
             Refere-se aos custos com colaboradores desligados ao final do contrato. Calcula-se com base no percentual de empregados demitidos (ED) 
             e no tempo médio de permanência na empresa (ME).
@@ -188,7 +420,7 @@
       
         <!-- Grupo C -->
         <div class="mb-4">
-          <h6 class="fw-bold text-decoration-underline">Grupo C – Faltas justificadas e férias</h6>
+          <h6 class="group-subtitle">Grupo C – Faltas justificadas e férias</h6>
           <p>
             Considera o custo de substituição dos empregados ausentes por motivos legais (férias, doenças, luto, casamento, maternidade, etc.).
             O cálculo baseia-se na média de horas não trabalhadas ao longo do ano.
@@ -200,7 +432,7 @@
       
         <!-- Grupo D -->
         <div class="mb-4">
-          <h6 class="fw-bold text-decoration-underline">Grupo D – Custos com substituição de ausentes</h6>
+          <h6 class="group-subtitle">Grupo D – Custos com substituição de ausentes</h6>
           <p>
             Representa os encargos dos Grupos A e B que incidem sobre os funcionários que substituem colaboradores ausentes do Grupo C.
           </p>
@@ -211,15 +443,16 @@
       
         <!-- Fatores que impactam os encargos -->
         <div class="mb-4">
-          <h6 class="fw-bold text-decoration-underline">Observações relevantes</h6>
+          <h6 class="group-subtitle">Observações relevantes</h6>
           <ul>
             <li>Regiões com alto índice de chuvas tendem a aumentar o número de faltas (Grupo C).</li>
             <li>Serviços de curta duração e pequeno porte aumentam a chance de demissões (Grupo B).</li>
             <li>Mercados aquecidos tendem a ter menos demissões, reduzindo os encargos de B.</li>
           </ul>
         </div>
-      </div>
-      
+    </div>
+</div>
+
 </div>
 
 <script>

@@ -1,0 +1,79 @@
+<!-- Filtros Globais do Dashboard -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>Filtros de Análise
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="get">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Contrato</label>
+                    <select class="form-select" name="contrato" onchange="atualizarFiltro()">
+                        <option value="">Todos os Contratos</option>
+                        {% for contrato in contratos %}
+                            <option value="{{ contrato.contrato }}" {% if contrato.contrato|stringformat:"s" == contrato_selecionado %}selected{% endif %}>
+                                {{ contrato.contrato }} - {{ contrato.escopo_contrato }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tipo de Equipe</label>
+                    <select class="form-select" name="equipe" onchange="atualizarFiltro()">
+                        <option value="">Todas as Equipes</option>
+                        {% for equipe in equipes %}
+                            <option value="{{ equipe.id }}" {% if equipe.id == equipe_selecionada %}selected{% endif %}>
+                                {{ equipe.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Regional</label>
+                    <select class="form-select" name="regional" onchange="atualizarFiltro()">
+                        <option value="">Todas as Regionais</option>
+                        {% for regional in regionais %}
+                            <option value="{{ regional.id }}" {% if regional.id == regional_selecionada %}selected{% endif %}>
+                                {{ regional.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Escopo</label>
+                    <select class="form-select" name="escopo" onchange="atualizarFiltro()">
+                        <option value="">Todos os Escopos</option>
+                        {% for escopo in escopos %}
+                            <option value="{{ escopo.id }}" {% if escopo.id == escopo_selecionado %}selected{% endif %}>
+                                {{ escopo.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm" id="recalcularBtn" 
+                            onclick="recalcularCustos()" title="Recalcular custos diretos">
+                        <i class="fas fa-calculator"></i> Recalcular
+                    </button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="exportarDados()" title="Exportar dados">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Área para mensagens globais -->
+<div id="mensagens" class="mb-3"></div>

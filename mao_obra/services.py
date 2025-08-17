@@ -17,7 +17,7 @@ class GrupoCalculationsService:
 
             grupo_a = GrupoAEncargos.objects.filter(contrato=contrato).first()
             if not grupo_a:
-                print(f"⚠️ GA -- Instância de Grupo A não encontrada para o contrato {contrato.pk}.")
+                print(f"[AVISO] GA -- Instância de Grupo A não encontrada para o contrato {contrato.pk}.")
                 return
 
             calc_grupo_a, _ = CalcGrupoAEncargos.objects.update_or_create(
@@ -68,7 +68,7 @@ class GrupoCalculationsService:
             calc_grupo_a.save()
 
         except Exception as e:
-            print(f"❌ GA -- Erro inesperado ao calcular CalcGrupoAEncargos: {e}")
+            print(f"[ERRO] GA -- Erro inesperado ao calcular CalcGrupoAEncargos: {e}")
 
 
     @staticmethod
@@ -82,7 +82,7 @@ class GrupoCalculationsService:
             grupo_b = GrupoBIndenizacoes.objects.filter(contrato=contrato).first()
 
             if not grupo_a or not grupo_b:
-                print(f"⚠️ GB -- Instância de Grupo A ou Grupo B não encontrada para contrato {contrato.pk}.")
+                print(f"[AVISO] GB -- Instância de Grupo A ou Grupo B não encontrada para contrato {contrato.pk}.")
                 return
 
             calc_grupo_b, _ = CalcGrupoBIndenizacoes.objects.update_or_create(
@@ -109,7 +109,7 @@ class GrupoCalculationsService:
             me = grupo_b.meses_emprego or 1  # Garante que não é zero
 
             if me <= 0:
-                print(f"⚠️ GB -- Valor inválido para ME (meses_emprego): {me}")
+                print(f"[AVISO] GB -- Valor inválido para ME (meses_emprego): {me}")
                 return
 
             # Cálculo da multa FGTS
@@ -137,9 +137,9 @@ class GrupoCalculationsService:
             calc_grupo_b.save()
 
         except decimal.InvalidOperation as e:
-            print(f"❌ GB -- Erro de operação inválida ao calcular CalcGrupoBIndenizacoes: {e}")
+            print(f"[ERRO] GB -- Erro de operação inválida ao calcular CalcGrupoBIndenizacoes: {e}")
         except Exception as e:
-            print(f"❌ GB -- Erro inesperado ao calcular CalcGrupoBIndenizacoes: {e}")
+            print(f"[ERRO] GB -- Erro inesperado ao calcular CalcGrupoBIndenizacoes: {e}")
 
 
     @staticmethod
@@ -151,7 +151,7 @@ class GrupoCalculationsService:
 
             grupo_c = GrupoCSubstituicoes.objects.filter(contrato=contrato).first()
             if not grupo_c:
-                print(f"⚠️ GC -- Instância de Grupo C não encontrada para o contrato {contrato.pk}.")
+                print(f"[AVISO] GC -- Instância de Grupo C não encontrada para o contrato {contrato.pk}.")
                 return
 
             calc_grupo_c, _ = CalcGrupoCSubstituicoes.objects.update_or_create(
@@ -175,7 +175,7 @@ class GrupoCalculationsService:
             feriados_moveis = safe_decimal(grupo_c.feriados_moveis, "feriados_moveis")
 
             if dias_trabalho_semana == 0:
-                print(f"⚠️ GC -- Valor inválido para dias_trabalho_semana: {dias_trabalho_semana}")
+                print(f"[AVISO] GC -- Valor inválido para dias_trabalho_semana: {dias_trabalho_semana}")
                 return
 
             # Calculando Horas Trabalhadas no Ano (HTA)
@@ -205,13 +205,13 @@ class GrupoCalculationsService:
             if (HTA - HFJA) > 0:
                 calc_grupo_c.total_grupo_c = (HFJA / (HTA - HFJA)) * Decimal('100')
             else:
-                print(f"⚠️ GC -- HTA - HFJA inválido para o contrato {contrato.pk}.")
+                print(f"[AVISO] GC -- HTA - HFJA inválido para o contrato {contrato.pk}.")
                 calc_grupo_c.total_grupo_c = Decimal('0.00')
 
             calc_grupo_c.save()
 
         except Exception as e:
-            print(f"❌ GC -- Erro ao calcular CalcGrupoCSubstituicoes: {e}")
+            print(f"[ERRO] GC -- Erro ao calcular CalcGrupoCSubstituicoes: {e}")
 
 
     @staticmethod
@@ -226,7 +226,7 @@ class GrupoCalculationsService:
             calc_grupo_c = CalcGrupoCSubstituicoes.objects.filter(contrato=contrato).first()
 
             if not calc_grupo_a or not calc_grupo_b or not calc_grupo_c:
-                print(f"⚠️ GD -- Faltam cálculos A, B ou C para o contrato {contrato.pk}.")
+                print(f"[AVISO] GD -- Faltam cálculos A, B ou C para o contrato {contrato.pk}.")
                 return
 
             calc_grupo_d, _ = CalcGrupoD.objects.update_or_create(
@@ -254,7 +254,7 @@ class GrupoCalculationsService:
             calc_grupo_d.save()
 
         except Exception as e:
-            print(f"❌ GD -- Erro ao calcular CalcGrupoD: {e}")
+            print(f"[ERRO] GD -- Erro ao calcular CalcGrupoD: {e}")
 
 
     @staticmethod
@@ -270,7 +270,7 @@ class GrupoCalculationsService:
             calc_d = CalcGrupoD.objects.filter(contrato=contrato).first()
 
             if not calc_a or not calc_b or not calc_c or not calc_d:
-                print(f"⚠️ GE -- Faltam dados dos grupos A, B, C ou D para contrato {contrato.pk}.")
+                print(f"[AVISO] GE -- Faltam dados dos grupos A, B, C ou D para contrato {contrato.pk}.")
                 return
 
             calc_grupo_e, _ = CalcGrupoE.objects.update_or_create(
@@ -302,7 +302,7 @@ class GrupoCalculationsService:
             calc_grupo_e.save()
 
         except Exception as e:
-            print(f"❌ GE -- Erro ao calcular CalcGrupoE: {e}")
+            print(f"[ERRO] GE -- Erro ao calcular CalcGrupoE: {e}")
 
 
 
@@ -327,10 +327,10 @@ class GrupoCalculationsService:
             GrupoCalculationsService.calcular_grupo_e(contrato)
 
         except CadastroContrato.DoesNotExist:
-            print(f"❌ Contrato com ID {contrato_id} não encontrado. Não foi possível calcular os grupos.")
+            print(f"[ERRO] Contrato com ID {contrato_id} não encontrado. Não foi possível calcular os grupos.")
 
         except Exception as e:
-            print(f"❌ Erro inesperado ao calcular todos os grupos: {e}")
+            print(f"[ERRO] Erro inesperado ao calcular todos os grupos: {e}")
 
 # mao_obra/services.py
 class BeneficioCustoDiretoService:

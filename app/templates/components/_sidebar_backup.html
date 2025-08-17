@@ -1,0 +1,106 @@
+{% load static %}
+   <div> 
+    <nav class="sidebar d-flex flex-column">
+        <ul class="nav flex-column">
+
+            <!-- Logotipo como botão centralizado -->
+            <li class="nav-item text-center mb-3">
+                <a href="{% url 'home' %}" class="nav-link p-0 d-flex justify-content-center align-items-center" style="height: 50px;">
+                    <img src="{% static 'img/logotipo.png' %}" alt="Logotipo" class="img-fluid" style="max-height: 40px; width: auto;">               
+                </a>
+                <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+
+            </li>
+            
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link"><i class="fa-solid fa-house-user"></i> Início</a>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fa-solid fa-file-contract"></i> Contratos</a>
+                <ul class="submenu">
+                    <li><a href="{% url 'abrir_contratos' %}" class="nav-link">Abrir</a></li>
+                    <li><a href="{% url 'cadastro_contrato' %}" class="nav-link">Cadastrar</a></li>
+                </ul>
+            </li>
+
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Painel de Controle</a>
+                <ul class="submenu">
+                    <li>
+                        {% if contrato and contrato.pk %}
+                            <a href="{% url 'adicionar_regional' contrato_id=contrato.pk %}" class="nav-link">Cadastrar Regional</a>
+                        {% else %}
+                            <a href="{% url 'selecionar_contrato' %}?next=/cad_contrato/adicionar-regional/">Selecionar Contrato</a> 
+                        {% endif %}
+
+                    </li>                   
+                    <li><a href="{% url 'adicionar_escopo' %}"class="nav-link">Escopos de Atividade</a></li>       
+                    <li><a href="{% url 'adicionar_equipe' %}" class="nav-link">Cadastrar Equipes</a></li>
+                    <li><a href="{% url 'adicionar_funcao' %}" class="nav-link">Cadastrar Funções</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fa-solid fa-person-digging"></i> Mão de Obra</a>
+                <ul class="submenu">
+                    <li>
+                        {% if contrato and contrato.contrato %}
+                          <a href="{% url 'grupo_abc_form' contrato_id=contrato.contrato %}" class="nav-link">
+                            Encargos Sociais
+                          </a>
+                        {% else %}
+                          <a href="{% url 'selecionar_contrato' %}">Encargos Sociais</a>
+                        {% endif %}
+                    </li>
+                      
+                    <li><a href="#" class="nav-link">Salários</a></li>
+                    <li><a href="#" class="nav-link">Adicionais</a></li>
+                    <li><a href="#" class="nav-link">Benefícios</a></li>
+                    <li><a href="#" class="nav-link">Fardamentos e EPI's</a></li>
+                </ul>
+            </li>
+            
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-database"></i> Banco de Preços</a>
+                <ul class="submenu">
+                    <li><a href="{% url 'lista_formularios' %}" class="nav-link">Atualizar Formulários</a></li>
+                    <li><a href="#" class="nav-link">? Volumetria</a></li>
+                    <li><a href="#" class="nav-link">? Custo Mão de Obra</a></li>
+                    <li><a href="#" class="nav-link">? Custo Veículos</a></li>
+                    <li><a href="#" class="nav-link">? Custo Equipamentos</a></li>
+                    <li><a href="#" class="nav-link">? Custo de Supervisão e Administração</a></li>
+                    <li><a href="#" class="nav-link">? Impostos</a></li>
+                    <li><a href="#" class="nav-link">? Cálculo Custo de Contrato</a></li>
+                    <li><a href="#" class="nav-link">? Caderno de Serviços</a></li>
+                </ul>
+            </li>
+
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-chart-bar"></i> Sensibilidades</a>
+                <ul class="submenu">
+                    <li><a href="#" class="nav-link">? Analise de Sensibilidades</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Projeções Orçamento</a>
+                <ul class="submenu">
+                    <li><a href="#" class="nav-link">? Painel de Controle</a></li>
+                    <li><a href="#" class="nav-link">? Projeções Preços Orçamento</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-file-alt"></i> Relatórios de Análise</a>
+                <ul class="submenu">
+                    <li><a href="#" class="nav-link">? Painel de Controle</a></li>
+                    <li><a href="#" class="nav-link">? Relatórios Pluviométricos</a></li>
+                    <li><a href="#" class="nav-link">? Relatórios Abastecimento</a></li>
+                    <li><a href="#" class="nav-link">? Relatórios Equilíbrio Contractual</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>

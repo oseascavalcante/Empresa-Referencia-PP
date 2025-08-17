@@ -1,0 +1,223 @@
+<script>
+// Módulo de Gráficos de Mão de Obra
+const MaoObraCharts = {
+    init: function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Módulo Mão de Obra Charts iniciado');
+            
+            // Verifica se os elementos existem
+            const graficoRosca = document.getElementById('graficoRoscaMaoObra');
+            const graficoBarras = document.getElementById('graficoBarrasEmpilhadasMaoObra');
+            
+            console.log('📊 Elemento rosca existe:', !!graficoRosca);
+            console.log('📊 Elemento barras existe:', !!graficoBarras);
+            
+            {% if tem_dados_mao_obra %}
+            console.log('✅ Dados de mão de obra disponíveis');
+            
+            try {
+                // Dados passados via JSON seguro do backend
+                const dadosMaoObra = {
+                    totais_categoria: {{ totais_mao_obra_categoria_js|safe }},
+                    custos_mao_obra: {{ custos_mao_obra_js|safe }}
+                };
+                
+                console.log('📈 Dados carregados:', dadosMaoObra);
+                
+                // Inicializar gráficos
+                MaoObraCharts.criarGraficoRosca(graficoRosca, dadosMaoObra);
+                MaoObraCharts.criarGraficoBarras(graficoBarras, dadosMaoObra);
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados mão de obra:', error);
+            }
+            {% else %}
+            console.log('⚠️ Nenhum dado de mão de obra disponível');
+            {% endif %}
+        });
+    },
+
+    criarGraficoRosca: function(elemento, dados) {
+        if (!elemento || !dados.totais_categoria) return;
+        
+        console.log('🍩 Criando gráfico de rosca mão de obra...');
+        
+        const dadosRosca = [];
+        // Cores definidas na mesma ordem das categorias do gráfico de barras
+        const cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+        
+        const categoriasOrdenadas = [
+            {chave: 'SALARIO_PERICULOSIDADE', label: 'Salário + Periculosidade', cor: cores[0]},
+            {chave: 'BENEFICIOS', label: 'Benefícios', cor: cores[1]},
+            {chave: 'ENCARGOS_SOCIAIS', label: 'Encargos Sociais', cor: cores[2]},
+            {chave: 'HE_ADICIONAIS', label: 'HE + Adicionais', cor: cores[3]},
+            {chave: 'OUTROS_CUSTOS', label: 'Outros Custos', cor: cores[4]}
+        ];
+        
+        const coresRosca = [];
+        for (const categoria of categoriasOrdenadas) {
+            const valor = dados.totais_categoria[categoria.chave];
+            if (valor > 0) {
+                dadosRosca.push({
+                    label: categoria.label,
+                    valor: valor
+                });
+                coresRosca.push(categoria.cor);
+            }
+        }
+        
+        if (dadosRosca.length === 0) {
+            console.log('⚠️ Nenhum dado para gráfico de rosca');
+            return;
+        }
+        
+        const labels = dadosRosca.map(d => d.label);
+        const valores = dadosRosca.map(d => d.valor);
+        
+        try {
+            new Chart(elemento, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: coresRosca,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: R$ ${context.parsed.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+            console.log('✅ Gráfico de rosca mão de obra criado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de rosca mão de obra:', error);
+        }
+    },
+
+    criarGraficoBarras: function(elemento, dados) {
+        if (!elemento || !dados.custos_mao_obra || dados.custos_mao_obra.length === 0) return;
+        
+        console.log('📊 Criando gráfico de barras empilhadas mão de obra...');
+        
+        const dadosBarras = dados.custos_mao_obra.map(function(item) {
+            return {
+                equipe: item.equipe_nome,
+                total: item.custo_total,
+                qtd_funcionarios: item.quantidade_funcionarios,
+                salario_periculosidade: item.custos_categorias.SALARIO_PERICULOSIDADE,
+                beneficios: item.custos_categorias.BENEFICIOS,
+                encargos_sociais: item.custos_categorias.ENCARGOS_SOCIAIS,
+                he_adicionais: item.custos_categorias.HE_ADICIONAIS,
+                outros_custos: item.custos_categorias.OUTROS_CUSTOS
+            };
+        });
+        
+        dadosBarras.sort((a, b) => b.total - a.total);
+        
+        const labels = dadosBarras.map(d => d.equipe);
+        const cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+        
+        const categorias = [
+            {nome: 'Salário + Periculosidade', dados: dadosBarras.map(d => d.salario_periculosidade), cor: cores[0]},
+            {nome: 'Benefícios', dados: dadosBarras.map(d => d.beneficios), cor: cores[1]},
+            {nome: 'Encargos Sociais', dados: dadosBarras.map(d => d.encargos_sociais), cor: cores[2]},
+            {nome: 'HE + Adicionais', dados: dadosBarras.map(d => d.he_adicionais), cor: cores[3]},
+            {nome: 'Outros Custos', dados: dadosBarras.map(d => d.outros_custos), cor: cores[4]}
+        ];
+        
+        const datasets = [];
+        categorias.forEach(function(cat) {
+            if (cat.dados.some(v => v > 0)) {
+                datasets.push({
+                    label: cat.nome,
+                    data: cat.dados,
+                    backgroundColor: cat.cor,
+                    borderColor: cat.cor,
+                    borderWidth: 1
+                });
+            }
+        });
+        
+        try {
+            new Chart(elemento, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: R$ ${context.parsed.y.toFixed(2)}`;
+                                },
+                                footer: function(tooltipItems) {
+                                    if (tooltipItems.length > 0) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        return `Total da Equipe: R$ ${dadosBarras[index].total.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('✅ Gráfico de barras mão de obra criado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro ao criar gráfico de barras mão de obra:', error);
+        }
+    }
+};
+
+// Inicializar o módulo
+MaoObraCharts.init();
+</script>

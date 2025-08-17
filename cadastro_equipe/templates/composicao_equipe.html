@@ -12,6 +12,7 @@
             </h1>
             <p class="hero-subtitle">Configure a composição das equipes de trabalho</p>
         </div>
+    </div>
         <div class="hero-info">
             <div class="info-grid">
                 <div class="info-item">
@@ -32,7 +33,7 @@
                 </div>
             </div>
         </div>
-    </div>
+
     <!-- Formulário Principal -->
     <div class="row mt-4">
         <div class="col-12">
@@ -110,19 +111,18 @@
                     <!-- Tabela de composição customizada -->
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" id="composicao-table">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th style="width: 18%">Função</th>
-                                    <th style="width: 8%">Qtd.</th>
-                                    <th style="width: 10%">Salário (R$)</th>
-                                    <th style="width: 8%">Peric.</th>
-                                    <th style="width: 9%">H.E. 50%</th>
-                                    <th style="width: 9%">H. Pront.</th>
-                                    <th style="width: 9%">H.E. 100%</th>
-                                    <th style="width: 9%">H. Sobr.</th>
-                                    <th style="width: 9%">H. Not.</th>
-                                    <th style="width: 9%">Outros</th>
-                                    <th style="width: 6%">Ações</th>
+                            <thead class="table-light">
+                                <tr style="background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%) !important;">
+                                    <th style="width: 18%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Função</th>
+                                    <th style="width: 12%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Periculosidade</th>
+                                    <th style="width: 8%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Qtd.</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">H.E. 50%</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">H. Pront.</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">H.E. 100%</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">H. Sobr.</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">H. Not.</th>
+                                    <th style="width: 10%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Outros</th>
+                                    <th style="width: 6%; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="composicao-tbody">
@@ -133,17 +133,13 @@
                                                value="{{ funcao.nome }}" readonly>
                                     </td>
                                     <td>
-                                        <input type="number" class="form-control funcao-quantidade" 
-                                               value="0" min="0" placeholder="0">
-                                    </td>
-                                    <td>
-                                        <input type="number" class="form-control funcao-salario" 
-                                               value="{{ funcao.salario }}" step="0.01" readonly>
-                                    </td>
-                                    <td>
                                         <div class="form-check d-flex justify-content-center">
                                             <input type="checkbox" class="form-check-input funcao-periculosidade">
                                         </div>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control funcao-quantidade" 
+                                               value="0" min="0" placeholder="0">
                                     </td>
                                     <td>
                                         <input type="number" class="form-control funcao-he50" 
@@ -180,7 +176,7 @@
                         </table>
                     </div>
                     
-                    <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-3">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back();">
                             <i class="fas fa-arrow-left"></i> Voltar
                         </button>
@@ -215,11 +211,11 @@
                 <div class="card-body">
                     <div class="excel-format-info">
                         <strong>Formato esperado:</strong>
-                        <code>Função | Quantidade | Salário | Periculosidade | Horas Extras 50% | Horas Prontidão | Horas Extras 100% | Horas Sobreaviso | Horas Adicional Noturno | Outros Custos</code>
+                        <code>Função | Periculosidade | Quantidade | Horas Extras 50% | Horas Prontidão | Horas Extras 100% | Horas Sobreaviso | Horas Adicional Noturno | Outros Custos</code>
                         <br><small class="text-muted">Aceita separadores: TAB, ponto e vírgula (;), vírgula (,) ou pipe (|)</small>
                     </div>
                     <textarea id="excel-data-external" class="form-control mt-3" rows="8" 
-                              placeholder="Cole os dados do Excel aqui...&#10;Exemplo:&#10;Técnico&#9;2&#9;3500&#9;true&#9;10&#9;5&#9;2&#9;8&#9;4&#9;100"></textarea>
+                              placeholder="Cole os dados do Excel aqui...&#10;Exemplo:&#10;Técnico&#9;true&#9;2&#9;10&#9;5&#9;2&#9;8&#9;4&#9;100"></textarea>
                     <div class="d-flex gap-2 mt-3">
                         <button type="button" class="btn btn-primary" id="processar-excel-external">
                             <i class="fas fa-cogs"></i> Processar Dados
@@ -251,16 +247,16 @@
                     {% if composicoes %}
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="equipes-cadastradas-table">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Contrato</th>
-                                        <th>Regional</th>
-                                        <th>Escopo</th>
-                                        <th>Equipe</th>
-                                        <th>Quantidade</th>
-                                        <th>Pessoas/Equipe</th>
-                                        <th>Observação</th>
-                                        <th style="width: 120px;">Ações</th>
+                                <thead class="table-light">
+                                    <tr style="background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%) !important;">
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Contrato</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Regional</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Escopo</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Equipe</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Quantidade</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Pessoas/Equipe</th>
+                                        <th style="background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Observação</th>
+                                        <th style="width: 120px; background: #B8B8FF !important; color: #2C2C54 !important; border-color: rgba(44, 44, 84, 0.2) !important;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -325,6 +321,8 @@
 /* CSS Moderno para Cadastro de Equipes */
 :root {
     --primary-color: #483D8B;
+    --primary-light: #7B68EE;
+    --primary-lighter: #9B8BFF;
     --secondary-color: #6A5ACD;
     --success-color: #28a745;
     --info-color: #17a2b8;
@@ -449,14 +447,42 @@
     overflow: hidden;
 }
 
-#composicao-table .table-dark {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    color: white;
+#composicao-table thead.table-dark {
+    background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%) !important;
+    color: #2C2C54 !important;
+    border: none !important;
+    font-weight: 600 !important;
 }
 
 .table-dark {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--primary-light) 100%) !important;
     color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(6, 128, 209, 0.66);
+}
+
+#composicao-table thead.table-dark th {
+    background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%) !important;
+    background-color: #B8B8FF !important;
+    border-bottom: 2px solid rgba(44, 44, 84, 0.2) !important;
+    padding: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #2C2C54 !important;
+    text-shadow: none !important;
+    border-color: rgba(44, 44, 84, 0.2) !important;
+}
+
+/* Forçar estilo específico para sobrescrever Bootstrap */
+table#composicao-table thead.table-dark th {
+    background: #B8B8FF !important;
+    color: #2C2C54 !important;
+}
+
+.table-dark th {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.44) !important;
+    padding: 0.75rem !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(6, 128, 209, 0.66);
 }
 
 #composicao-table input {
@@ -613,8 +639,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Elementos DOM
     const alertContainer = document.getElementById('alert-container');
-    const excelImportArea = document.getElementById('excel-import-area');
-    const excelDataTextarea = document.getElementById('excel-data');
     const excelImportContainer = document.getElementById('excel-import-container');
     const excelDataExternal = document.getElementById('excel-data-external');
     const composicaoTable = document.getElementById('composicao-table');
@@ -622,9 +646,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para calcular e atualizar contador de equipes
     function atualizarContadorEquipes() {
-        // Calcular total de equipes dinamicamente da página atual
+        // Calcular total de equipes somando a coluna "Quantidade"
         const linhasTabela = document.querySelectorAll('#equipes-cadastradas-table tbody tr');
-        let totalEquipes = linhasTabela.length;
+        let totalEquipes = 0;
+        
+        linhasTabela.forEach(linha => {
+            // A coluna "Quantidade" é a 5ª coluna (índice 4)
+            const quantidadeCell = linha.children[4];
+            if (quantidadeCell) {
+                const quantidade = parseFloat(quantidadeCell.textContent.trim()) || 0;
+                totalEquipes += quantidade;
+            }
+        });
         
         const contadorElement = document.getElementById('total-equipes');
         if (contadorElement) {
@@ -660,7 +693,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 dados.push({
                     funcao: funcao,
                     quantidade: quantidade,
-                    salario: parseFloat(row.querySelector('.funcao-salario').value) || 0,
                     periculosidade: row.querySelector('.funcao-periculosidade').checked,
                     horas_extras_50: parseInt(row.querySelector('.funcao-he50').value) || 0,
                     horas_prontidao: parseInt(row.querySelector('.funcao-prontidao').value) || 0,
@@ -701,22 +733,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle área de importação Excel externa
     document.getElementById('cole-excel-btn').addEventListener('click', function() {
         excelImportContainer.style.display = excelImportContainer.style.display === 'none' ? 'block' : 'none';
-        // Esconder a área interna se estiver visível
-        if (excelImportArea) {
-            excelImportArea.style.display = 'none';
-        }
     });
     
     // Fechar área Excel externa
     document.getElementById('fechar-excel').addEventListener('click', function() {
         excelImportContainer.style.display = 'none';
         excelDataExternal.value = '';
-    });
-    
-    // Cancelar importação Excel
-    document.getElementById('cancelar-excel').addEventListener('click', function() {
-        excelImportArea.style.display = 'none';
-        excelDataTextarea.value = '';
     });
     
     // Cancelar importação Excel externa
@@ -726,69 +748,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Processar dados do Excel
-    document.getElementById('processar-excel').addEventListener('click', function() {
-        const data = excelDataTextarea.value.trim();
-        if (!data) {
-            showAlert('Por favor, cole os dados do Excel na área de texto.', 'warning');
-            return;
-        }
-        
-        const lines = data.split(/\r?\n/);
-        let processedLines = 0;
-        
-        // Limpar dados atuais da tabela
-        const rows = composicaoTbody.querySelectorAll('tr');
-        rows.forEach(row => {
-            row.querySelector('.funcao-quantidade').value = '0';
-            row.querySelector('.funcao-periculosidade').checked = false;
-            row.querySelector('.funcao-he50').value = '0';
-            row.querySelector('.funcao-prontidao').value = '0';
-            row.querySelector('.funcao-he100').value = '0';
-            row.querySelector('.funcao-sobreaviso').value = '0';
-            row.querySelector('.funcao-noturno').value = '0';
-            row.querySelector('.funcao-outros').value = '0';
-        });
-        
-        lines.forEach((line, lineIndex) => {
-            if (!line.trim()) return;
-            
-            // Detectar separador
-            let cols = line.split('\t');
-            if (cols.length === 1) cols = line.split(';');
-            if (cols.length === 1) cols = line.split(',');
-            if (cols.length === 1) cols = line.split('|');
-            
-            cols = cols.map(col => col.trim());
-            
-            if (cols.length >= 2 && cols[0]) {
-                // Procurar linha correspondente na tabela
-                const funcaoNome = cols[0];
-                const targetRow = Array.from(rows).find(row => 
-                    row.querySelector('.funcao-nome').value.toLowerCase().includes(funcaoNome.toLowerCase())
-                );
-                
-                if (targetRow) {
-                    if (cols[1]) targetRow.querySelector('.funcao-quantidade').value = cols[1];
-                    if (cols[3]) targetRow.querySelector('.funcao-periculosidade').checked = 
-                        cols[3].toLowerCase() === 'true' || cols[3] === '1';
-                    if (cols[4]) targetRow.querySelector('.funcao-he50').value = cols[4];
-                    if (cols[5]) targetRow.querySelector('.funcao-prontidao').value = cols[5];
-                    if (cols[6]) targetRow.querySelector('.funcao-he100').value = cols[6];
-                    if (cols[7]) targetRow.querySelector('.funcao-sobreaviso').value = cols[7];
-                    if (cols[8]) targetRow.querySelector('.funcao-noturno').value = cols[8];
-                    if (cols[9]) targetRow.querySelector('.funcao-outros').value = cols[9];
-                    
-                    processedLines++;
-                }
-            }
-        });
-        
-        excelImportArea.style.display = 'none';
-        excelDataTextarea.value = '';
-        showAlert(`${processedLines} linha(s) processada(s) com sucesso!`, 'success');
-    });
-    
-    // Processar dados do Excel (área externa)
     document.getElementById('processar-excel-external').addEventListener('click', function() {
         const data = excelDataExternal.value.trim();
         if (!data) {
@@ -831,15 +790,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
                 
                 if (targetRow) {
-                    if (cols[1]) targetRow.querySelector('.funcao-quantidade').value = cols[1];
-                    if (cols[3]) targetRow.querySelector('.funcao-periculosidade').checked = 
-                        cols[3].toLowerCase() === 'true' || cols[3] === '1';
-                    if (cols[4]) targetRow.querySelector('.funcao-he50').value = cols[4];
-                    if (cols[5]) targetRow.querySelector('.funcao-prontidao').value = cols[5];
-                    if (cols[6]) targetRow.querySelector('.funcao-he100').value = cols[6];
-                    if (cols[7]) targetRow.querySelector('.funcao-sobreaviso').value = cols[7];
-                    if (cols[8]) targetRow.querySelector('.funcao-noturno').value = cols[8];
-                    if (cols[9]) targetRow.querySelector('.funcao-outros').value = cols[9];
+                    // Nova ordem: Função | Peric. | Qtd. | H.E. 50% | H. Pront. | H.E. 100% | H. Sobr. | H. Not. | Outros
+                    if (cols[1]) targetRow.querySelector('.funcao-periculosidade').checked = 
+                        cols[1].toLowerCase() === 'true' || cols[1] === '1';
+                    if (cols[2]) targetRow.querySelector('.funcao-quantidade').value = cols[2];
+                    if (cols[3]) targetRow.querySelector('.funcao-he50').value = cols[3];
+                    if (cols[4]) targetRow.querySelector('.funcao-prontidao').value = cols[4];
+                    if (cols[5]) targetRow.querySelector('.funcao-he100').value = cols[5];
+                    if (cols[6]) targetRow.querySelector('.funcao-sobreaviso').value = cols[6];
+                    if (cols[7]) targetRow.querySelector('.funcao-noturno').value = cols[7];
+                    if (cols[8]) targetRow.querySelector('.funcao-outros').value = cols[8];
                     
                     processedLines++;
                 }
@@ -903,9 +863,8 @@ document.addEventListener('DOMContentLoaded', function() {
             dados: dados
         };
         
-        const url = isEditing ? `/cadastro_equipe/composicao/${editingId}/editar/` : 
-                                `{% url 'composicao_equipe' contrato_id %}`;
-        const method = isEditing ? 'PUT' : 'POST';
+        const url = `{% url 'composicao_equipe' contrato_id %}`;
+        const method = 'POST';
         
         fetch(url, {
             method: method,
@@ -987,18 +946,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para carregar dados de edição
     function carregarDadosEdicao(composicaoId) {
         fetch(`/cadastro_equipe/composicao/${composicaoId}/json/`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Dados recebidos para edição:', data);
             isEditing = true;
             editingId = composicaoId;
             
-            // Preencher formulário
-            document.getElementById('regional').value = data.regional_id || '';
-            document.getElementById('id_escopo').value = data.escopo_id || '';
-            document.getElementById('equipe').value = data.equipe_id;
-            document.getElementById('quantidade_equipes').value = data.quantidade_equipes;
-            document.getElementById('data_mobilizacao').value = data.data_mobilizacao;
-            document.getElementById('data_desmobilizacao').value = data.data_desmobilizacao;
+            // Preencher formulário com verificação de campos
+            if (data.regional_id) {
+                document.getElementById('regional').value = data.regional_id;
+            }
+            if (data.escopo_id) {
+                document.getElementById('id_escopo').value = data.escopo_id;
+            }
+            if (data.equipe_id) {
+                document.getElementById('equipe').value = data.equipe_id;
+            }
+            document.getElementById('quantidade_equipes').value = data.quantidade_equipes || 1;
+            document.getElementById('data_mobilizacao').value = data.data_mobilizacao || '';
+            document.getElementById('data_desmobilizacao').value = data.data_desmobilizacao || '';
             document.getElementById('observacao').value = data.observacao || '';
             
             // Limpar tabela
@@ -1015,29 +986,32 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Preencher dados da tabela
-            data.dados.forEach(funcaoData => {
-                const targetRow = Array.from(rows).find(row => 
-                    row.querySelector('.funcao-nome').value === funcaoData.funcao
-                );
-                
-                if (targetRow) {
-                    targetRow.querySelector('.funcao-quantidade').value = funcaoData.quantidade;
-                    targetRow.querySelector('.funcao-periculosidade').checked = funcaoData.periculosidade;
-                    targetRow.querySelector('.funcao-he50').value = funcaoData.horas_extras_50;
-                    targetRow.querySelector('.funcao-prontidao').value = funcaoData.horas_prontidao;
-                    targetRow.querySelector('.funcao-he100').value = funcaoData.horas_extras_100;
-                    targetRow.querySelector('.funcao-sobreaviso').value = funcaoData.horas_sobreaviso;
-                    targetRow.querySelector('.funcao-noturno').value = funcaoData.horas_adicional_noturno;
-                    targetRow.querySelector('.funcao-outros').value = funcaoData.outros_custos;
-                }
-            });
+            if (data.dados && Array.isArray(data.dados)) {
+                data.dados.forEach(funcaoData => {
+                    const targetRow = Array.from(rows).find(row => 
+                        row.querySelector('.funcao-nome').value === funcaoData.funcao
+                    );
+                    
+                    if (targetRow) {
+                        targetRow.querySelector('.funcao-quantidade').value = funcaoData.quantidade || 0;
+                        targetRow.querySelector('.funcao-periculosidade').checked = funcaoData.periculosidade || false;
+                        targetRow.querySelector('.funcao-he50').value = funcaoData.horas_extras_50 || 0;
+                        targetRow.querySelector('.funcao-prontidao').value = funcaoData.horas_prontidao || 0;
+                        targetRow.querySelector('.funcao-he100').value = funcaoData.horas_extras_100 || 0;
+                        targetRow.querySelector('.funcao-sobreaviso').value = funcaoData.horas_sobreaviso || 0;
+                        targetRow.querySelector('.funcao-noturno').value = funcaoData.horas_adicional_noturno || 0;
+                        targetRow.querySelector('.funcao-outros').value = funcaoData.outros_custos || 0;
+                    }
+                });
+            }
             
             // Scroll para o topo
             window.scrollTo({ top: 0, behavior: 'smooth' });
             showAlert('Dados carregados para edição. Modifique os campos necessários e clique em Salvar.', 'info');
         })
         .catch(error => {
-            showAlert('Erro ao carregar dados da equipe.', 'danger');
+            console.error('Erro detalhado ao carregar dados:', error);
+            showAlert(`Erro ao carregar dados da equipe: ${error.message}`, 'danger');
         });
     }
 });

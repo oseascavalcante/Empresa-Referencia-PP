@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="fas fa-car-side me-3"></i>
+                Atribuição de Veículos
+            </h1>
+            <p class="hero-subtitle">Configure a atribuição de veículos às regionais e escopos de atividade</p>
+        </div>
+    </div>
+        <div class="hero-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Contrato:</span>
+                    <span class="info-value">{{ contrato.contrato }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Concessionária:</span>
+                    <span class="info-value">{{ contrato.concessionaria }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Lote:</span>
+                    <span class="info-value">{{ contrato.municipio }} - {{ contrato.estado }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Vigência:</span>
+                    <span class="info-value">{{ contrato.inicio_vigencia_contrato|date:"d/m/Y" }} a {{ contrato.fim_vigencia_contrato|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+    <!-- Formulário Principal -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="main-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Atribuição de Veículo
+                    </h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Alert container -->
+                    <div id="alert-container" class="mb-3"></div>
+                    
+                    <!-- Formulário de atribuição -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label for="regional" class="form-label">Regional *</label>
+                            <select id="regional" class="form-select" required>
+                                <option value="">Selecione</option>
+                                {% for regional in regionais %}
+                                    <option value="{{ regional.id }}">{{ regional.nome }} - {{ regional.municipio }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="id_escopo" class="form-label">Escopo da Atividade *</label>
+                            <select id="id_escopo" name="escopo" class="form-select" required>
+                                <option value="">Selecione</option>
+                                {% for escopo in escopos %}
+                                <option value="{{ escopo.id }}">{{ escopo.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="veiculo" class="form-label">Tipo de Veículo *</label>
+                            <select id="veiculo" class="form-select" required>
+                                <option value="">Selecione</option>
+                                {% for veiculo in veiculos %}
+                                    <option value="{{ veiculo.id }}">{{ veiculo.tipo_veiculo.nome }} ({{ veiculo.get_tipo_combustivel_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="quantidade" class="form-label">Quantidade *</label>
+                            <input type="number" id="quantidade" class="form-control" min="0.01" step="0.01" value="1.00" required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="observacao" class="form-label">Observações</label>
+                            <input type="text" id="observacao" class="form-control" 
+                                   placeholder="Informações adicionais sobre a atribuição...">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-3">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-warning" id="limpar-form">
+                            <i class="fas fa-broom"></i> Limpar
+                        </button>
+                        <button type="button" class="btn btn-success" id="salvar-btn">
+                            <i class="fas fa-save"></i> Salvar Atribuição
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Atribuições Cadastradas -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="main-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Atribuições Cadastradas
+                    </h5>
+                    <div class="badge bg-primary" id="contador-atribuicoes" style="font-size: 1.1rem; font-weight: 600;">
+                        <span id="total-atribuicoes">{{ atribuicoes|length }}</span> atribuição(ões)
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div id="lista-atribuicoes" class="table-responsive">
+                        {% include 'veiculos/_lista_atribuicoes_inline.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+/* CSS Moderno para Atribuição de Veículos - Similar ao composicao_equipe */
+:root {
+    --primary-color: #483D8B;
+    --primary-light: #7B68EE;
+    --primary-lighter: #9B8BFF;
+    --secondary-color: #6A5ACD;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background-color: rgba(72, 61, 139, 0.9);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.info-value {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Cards Modernos */
+.main-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(72, 61, 139, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.main-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Formulário */
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(72, 61, 139, 0.25);
+}
+
+/* Botões */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Alertas customizados */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<script>
+// JavaScript para Atribuição de Veículos
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = '{{ csrf_token }}';
+    const contratoId = '{{ contrato.pk }}';
+    let isEditing = false;
+    let editingId = null;
+    
+    // Elementos DOM
+    const alertContainer = document.getElementById('alert-container');
+    
+    // Função para calcular e atualizar contador de atribuições
+    function atualizarContadorAtribuicoes() {
+        const linhasTabela = document.querySelectorAll('#lista-atribuicoes tbody tr');
+        const contadorElement = document.getElementById('total-atribuicoes');
+        if (contadorElement) {
+            contadorElement.textContent = linhasTabela.length;
+        }
+    }
+    
+    // Inicializar contador
+    atualizarContadorAtribuicoes();
+    
+    // Função para mostrar alertas
+    function showAlert(message, type = 'info') {
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+    
+    // Função para validar formulário
+    function validarFormulario() {
+        const regional = document.getElementById('regional').value;
+        const escopo = document.getElementById('id_escopo').value;
+        const veiculo = document.getElementById('veiculo').value;
+        const quantidade = document.getElementById('quantidade').value;
+        
+        if (!regional || !escopo || !veiculo || !quantidade || quantidade <= 0) {
+            showAlert('Por favor, preencha todos os campos obrigatórios.', 'warning');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Limpar formulário
+    document.getElementById('limpar-form').addEventListener('click', function() {
+        if (confirm('Deseja limpar todos os dados do formulário?')) {
+            document.getElementById('regional').value = '';
+            document.getElementById('id_escopo').value = '';
+            document.getElementById('veiculo').value = '';
+            document.getElementById('quantidade').value = '1.00';
+            document.getElementById('observacao').value = '';
+            isEditing = false;
+            editingId = null;
+            showAlert('Formulário limpo com sucesso!', 'info');
+        }
+    });
+    
+    // Salvar atribuição
+    document.getElementById('salvar-btn').addEventListener('click', function() {
+        if (!validarFormulario()) return;
+        
+        if (!confirm('Deseja salvar a atribuição de veículo?')) return;
+        
+        const formData = {
+            contrato_id: contratoId,
+            regional_id: document.getElementById('regional').value,
+            escopo_id: document.getElementById('id_escopo').value,
+            veiculo_id: document.getElementById('veiculo').value,
+            quantidade: parseFloat(document.getElementById('quantidade').value),
+            observacoes: document.getElementById('observacao').value
+        };
+        
+        const url = isEditing ? 
+            `/veiculos/atribuir/${contratoId}/editar/${editingId}/` : 
+            `/veiculos/atribuir/${contratoId}/`;
+        const method = 'POST';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Erro desconhecido');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showAlert('Atribuição salva com sucesso!', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            showAlert(`Erro ao salvar: ${error.message}`, 'danger');
+        });
+    });
+    
+    // Excluir atribuição
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.excluir-atribuicao, .excluir-atribuicao *')) {
+            const atribuicaoId = e.target.closest('button').getAttribute('data-id');
+            if (confirm('Tem certeza que deseja excluir esta atribuição?')) {
+                fetch(`/veiculos/atribuir/${contratoId}/excluir/${atribuicaoId}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': csrfToken }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Atribuição excluída com sucesso!', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('Erro ao excluir atribuição.', 'danger');
+                    }
+                })
+                .catch(error => {
+                    showAlert('Erro ao excluir atribuição.', 'danger');
+                });
+            }
+        }
+    });
+    
+    // Editar atribuição
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.editar-atribuicao, .editar-atribuicao *')) {
+            const atribuicaoId = e.target.closest('button').getAttribute('data-id');
+            if (confirm('Deseja editar esta atribuição? Os dados atuais serão substituídos.')) {
+                carregarDadosEdicao(atribuicaoId);
+            }
+        }
+    });
+    
+    // Função para carregar dados de edição
+    function carregarDadosEdicao(atribuicaoId) {
+        fetch(`/veiculos/atribuir/${contratoId}/json/${atribuicaoId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            isEditing = true;
+            editingId = atribuicaoId;
+            
+            // Preencher formulário
+            document.getElementById('regional').value = data.regional_id || '';
+            document.getElementById('id_escopo').value = data.escopo_id || '';
+            document.getElementById('veiculo').value = data.veiculo_id || '';
+            document.getElementById('quantidade').value = data.quantidade || '1.00';
+            document.getElementById('observacao').value = data.observacoes || '';
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showAlert('Dados carregados para edição. Modifique os campos necessários e clique em Salvar.', 'info');
+        })
+        .catch(error => {
+            showAlert(`Erro ao carregar dados da atribuição: ${error.message}`, 'danger');
+        });
+    }
+});
+</script>
+
+{% endblock %}

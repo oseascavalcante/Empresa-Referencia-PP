@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Título principal -->
+    <div class="header">
+        Editar Benefícios
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+    <p class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;">
+        Contrato: {{ contrato.contrato }} - {{ contrato.escopo_contrato }}
+    </p>
+    <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row d-flex justify-content-center align-items-stretch mt-3">
+            <div class="col-lg-8">
+                <div class="card w-100 h-100">
+                    <div class="card-header bg-primary text-white">
+                        Benefícios Contratuais
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Transporte -->
+                        <h6 class="fw-bold">Vale Transporte</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.transporte.label_tag }} {{ form.transporte }}
+                                {% if form.transporte.errors %}
+                                    <div class="text-danger small">{{ form.transporte.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.percentual_participacao_transporte.label_tag }} {{ form.percentual_participacao_transporte }}
+                                {% if form.percentual_participacao_transporte.errors %}
+                                    <div class="text-danger small">{{ form.percentual_participacao_transporte.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <!-- Cesta e Refeição -->
+                        <h6 class="fw-bold">Alimentação</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.cesta_basica.label_tag }} {{ form.cesta_basica }}
+                                {% if form.cesta_basica.errors %}
+                                    <div class="text-danger small">{{ form.cesta_basica.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.refeicao.label_tag }} {{ form.refeicao }}
+                                {% if form.refeicao.errors %}
+                                    <div class="text-danger small">{{ form.refeicao.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <!-- Saúde e Assistência -->
+                        <h6 class="fw-bold">Saúde e Assistência</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.exames_periodicos.label_tag }} {{ form.exames_periodicos }}
+                                {% if form.exames_periodicos.errors %}
+                                    <div class="text-danger small">{{ form.exames_periodicos.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.assistencia_medica_odonto.label_tag }} {{ form.assistencia_medica_odonto }}
+                                {% if form.assistencia_medica_odonto.errors %}
+                                    <div class="text-danger small">{{ form.assistencia_medica_odonto.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <!-- Seguro e Previdência -->
+                        <h6 class="fw-bold">Seguro e Previdência</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.seguro_vida.label_tag }} {{ form.seguro_vida }}
+                                {% if form.seguro_vida.errors %}
+                                    <div class="text-danger small">{{ form.seguro_vida.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.previdencia_privada.label_tag }} {{ form.previdencia_privada }}
+                                {% if form.previdencia_privada.errors %}
+                                    <div class="text-danger small">{{ form.previdencia_privada.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <!-- Alojamento e Outros -->
+                        <h6 class="fw-bold">Alojamento e Outros Custos</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.alojamento.label_tag }} {{ form.alojamento }}
+                                {% if form.alojamento.errors %}
+                                    <div class="text-danger small">{{ form.alojamento.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.outros_custos.label_tag }} {{ form.outros_custos }}
+                                {% if form.outros_custos.errors %}
+                                    <div class="text-danger small">{{ form.outros_custos.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <!-- Dias e Total -->
+                        <h6 class="fw-bold">Informações Finais</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.dias_trabalhados_mes.label_tag }} {{ form.dias_trabalhados_mes }}
+                                {% if form.dias_trabalhados_mes.errors %}
+                                    <div class="text-danger small">{{ form.dias_trabalhados_mes.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="total" class="form-label">{{ form.total.label }}</label>
+                                <p id="total" class="fw-bold">R$ {{ form.instance.total|floatformat:2 }}</p>
+                            </div>
+                        </div>
+
+                    </div> <!-- card-body -->
+                </div> <!-- card -->
+            </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="row mt-3">
+            <div class="col-md-12 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                    ← Voltar
+                </button>
+                <button type="submit" id="salvar" class="btn btn-save">
+                    <i class="fas fa-save"></i> Salvar
+                </button>                
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            const confirmado = confirm('Deseja salvar as alterações?');
+            if (!confirmado) {
+                e.preventDefault(); // cancela o envio do formulário
+            }
+        });
+    });
+</script>
+
+
+<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
+
+<!-- Instruções -->
+<div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
+    <h5 class="fw-bold mb-3" style="color: #483D8B;">Dicas e Orientações</h5>
+    <p>
+        A participação do trabalhador no vale transporte é limitada a <strong>6% do salário básico</strong>, conforme prevê o artigo 4º da Lei nº 7.418/85.
+        Valores que excedam essa porcentagem são de responsabilidade da empresa contratante.
+    </p>
+    <p>
+        Certifique-se de informar corretamente a média de dias trabalhados por mês. O valor padrão é <strong>21 dias</strong>, considerando uma jornada de segunda a sexta-feira.
+    </p>
+    <p>
+        <strong>Encargos sociais</strong> NÃO incidem sobre benefícios de natureza indenizatória ou não salarial, como vale-transporte, alimentação, plano de saúde, entre outros, desde que observadas as condições legais.
+    </p>
+    <p class="text-danger">
+        ⚠ Consulte o <strong>Acordo Coletivo de Trabalho</strong> da categoria para validar os valores praticados em cada item de benefício.
+    </p>
+</div>
+{% endblock %}

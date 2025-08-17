@@ -1,0 +1,109 @@
+{% if veiculos %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Tipo</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Combustível</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Valor Aquisição</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Valor Locação</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Vida Útil</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Eficiência</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Seguro</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;">Manutenção</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;" width="80">Detalhes</th>
+            <th style="background: #B8B8FF !important; color: #2C2C54 !important;" width="120">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for veiculo in veiculos %}
+        <tr>
+            <td>
+                <div>
+                    <strong>{{ veiculo.tipo_veiculo.nome }}</strong>
+                    <br>
+                    <span class="categoria-badge categoria-{{ veiculo.tipo_veiculo.categoria }}">
+                        {{ veiculo.tipo_veiculo.get_categoria_display }}
+                    </span>
+                </div>
+            </td>
+            <td>
+                <span class="combustivel-badge combustivel-{{ veiculo.tipo_combustivel }}">
+                    <i class="fas fa-{% if veiculo.tipo_combustivel == 'gasolina' %}gas-pump{% elif veiculo.tipo_combustivel == 'etanol' %}leaf{% elif veiculo.tipo_combustivel == 'diesel' %}truck{% elif veiculo.tipo_combustivel == 'flex' %}exchange-alt{% elif veiculo.tipo_combustivel == 'gnv' %}fire{% else %}bolt{% endif %} me-1"></i>
+                    {{ veiculo.get_tipo_combustivel_display }}
+                </span>
+            </td>
+            <td>
+                <span class="custo-destaque">R$ {{ veiculo.valor_aquisicao|floatformat:2 }}</span>
+            </td>
+            <td>
+                {% if veiculo.valor_locacao > 0 %}
+                    <span class="fw-bold text-success">R$ {{ veiculo.valor_locacao|floatformat:2 }}</span>
+                {% else %}
+                    <span class="text-muted">-</span>
+                {% endif %}
+            </td>
+            <td>
+                <span class="fw-bold">{{ veiculo.vida_util_meses }}</span>
+                <small class="text-muted d-block">meses</small>
+            </td>
+            <td>
+                <span class="fw-bold">{{ veiculo.eficiencia_km_litro }}</span>
+                <small class="text-muted d-block">km/L</small>
+            </td>
+            <td>
+                <span class="custo-destaque">R$ {{ veiculo.custo_mensal_seguro|floatformat:2 }}</span>
+            </td>
+            <td>
+                <span class="custo-destaque">R$ {{ veiculo.custo_mensal_manutencao|floatformat:2 }}</span>
+            </td>
+            <td class="text-center">
+                {% if veiculo.observacoes %}
+                    <i class="fas fa-info-circle text-primary" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       data-bs-title="{{ veiculo.observacoes }}"
+                       style="cursor: pointer;"></i>
+                {% else %}
+                    <span class="text-muted">-</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-primary btn-sm-custom"
+                            hx-get="{% url 'editar_veiculo' veiculo.pk %}?partial=true"
+                            hx-target="#veiculo-form"
+                            hx-swap="innerHTML"
+                            title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <form style="display:inline;" 
+                          hx-post="{% url 'excluir_veiculo' veiculo.pk %}"
+                          hx-target="#lista-veiculos"
+                          hx-swap="innerHTML"
+                          hx-confirm="Tem certeza que deseja excluir o veículo {{ veiculo.tipo_veiculo.nome }}?">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm-custom" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-car fa-3x text-muted mb-3"></i>
+    <p class="text-muted">Nenhum veículo cadastrado ainda.</p>
+    <p class="text-muted small">Configure primeiro os preços de combustível e depois cadastre os veículos do contrato.</p>
+    <button class="btn btn-primary-custom btn-custom"
+            hx-get="?fragment=form"
+            hx-target="#veiculo-form"
+            hx-swap="innerHTML">
+        <i class="fas fa-plus me-2"></i>
+        Cadastrar Primeiro Veículo
+    </button>
+</div>
+{% endif %}

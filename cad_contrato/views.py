@@ -84,6 +84,11 @@ class SelecionarContratoView(View):
         next_url = request.GET.get("next") or reverse_lazy("menu_cadastro_estrutura")
         if contrato_id:
             request.session["contrato_id"] = contrato_id
+            
+            # Se a URL precisa do contrato_id, adiciona automaticamente
+            if "/cadastro_equipe/composicao/" in next_url:
+                next_url = f"/cadastro_equipe/composicao/{contrato_id}/"
+            
             return redirect(next_url)
         contratos = CadastroContrato.objects.all()
         return render(request, "selecionar_contrato.html", {
@@ -153,6 +158,19 @@ class RegionalCreateView(CreateView):
         if self.request.headers.get("HX-Request"):
             return _render_tabela_regionais(self.request, self.contrato)
         return response
+
+    def form_invalid(self, form):
+        if self.request.headers.get("HX-Request"):
+            # Retorna o formulário com erros para HTMX
+            html = render_to_string("_form_adicionar_regional_inline.html", 
+                                    {"form": form, "contrato": self.contrato}, 
+                                    request=self.request)
+            
+            resp = HttpResponse(html)
+            resp['HX-Retarget'] = '#regional-form'
+            resp['HX-Reswap'] = 'innerHTML'
+            return resp
+        return super().form_invalid(form)
 
     def get_initial(self):
         return {'contrato': self.contrato}

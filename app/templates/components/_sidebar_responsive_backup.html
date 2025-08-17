@@ -1,0 +1,90 @@
+{% load static %}
+<div> 
+    <nav class="sidebar d-flex flex-column">
+        <ul class="nav flex-column">
+
+            <!-- Logo SINC Moderna -->
+            <li class="nav-item text-center">
+                <a href="{% url 'home' %}" class="nav-link d-flex justify-content-center align-items-center" style="height: 60px;">
+                    <img src="{% static 'img/logo_sinc_branca.png' %}" alt="SINC" class="img-fluid" style="max-height: 35px; width: auto; filter: none;">               
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> Início</a>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-file-contract"></i> Contratos</a>
+                <ul class="submenu">
+                    <li><a href="{% url 'abrir_contratos' %}" class="nav-link"><i class="fas fa-folder-open"></i> Abrir</a></li>
+                    <li><a href="{% url 'cadastro_contrato' %}" class="nav-link"><i class="fas fa-plus"></i> Cadastrar</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'selecionar_contrato' %}?next={% url 'menu_cadastro_estrutura' %}" class="nav-link"><i class="fas fa-users-cog"></i> Cadastro de Estrutura</a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-cogs"></i> Configuração Avançada</a>
+                <ul class="submenu">
+                    <li>
+                        {% if contrato and contrato.pk %}
+                            <a href="{% url 'adicionar_regional' contrato_id=contrato.pk %}" class="nav-link"><i class="fas fa-map-marker-alt"></i> Cadastrar Regional</a>
+                        {% else %}
+                            <a href="{% url 'selecionar_contrato' %}?next=/cad_contrato/adicionar-regional/" class="nav-link"><i class="fas fa-map-marker-alt"></i> Cadastrar Regional</a> 
+                        {% endif %}
+                    </li>                   
+                    <li><a href="{% url 'adicionar_escopo' %}" class="nav-link"><i class="fas fa-tasks"></i> Escopos de Atividade</a></li>       
+                    <li><a href="{% url 'adicionar_equipe' %}" class="nav-link"><i class="fas fa-users"></i> Cadastrar Equipes</a></li>
+                    <li><a href="{% url 'adicionar_funcao' %}" class="nav-link"><i class="fas fa-user-tag"></i> Cadastrar Funções</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-hard-hat"></i> Mão de Obra</a>
+                <ul class="submenu">
+                    <li>
+                        {% if contrato and contrato.contrato %}
+                          <a href="{% url 'grupo_abc_form' contrato_id=contrato.contrato %}" class="nav-link">
+                            <i class="fas fa-percentage"></i> Encargos Sociais
+                          </a>
+                        {% else %}
+                          <a href="{% url 'selecionar_contrato' %}" class="nav-link"><i class="fas fa-percentage"></i> Encargos Sociais</a>
+                        {% endif %}
+                    </li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-dollar-sign"></i> Salários</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-plus-circle"></i> Adicionais</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-gift"></i> Benefícios</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-tshirt"></i> Fardamentos e EPI's</a></li>
+                </ul>
+            </li>
+            
+
+            <li class="nav-item">
+                <a href="{% url 'dashboard_custo_direto' %}" class="nav-link"><i class="fas fa-chart-line"></i> Análise de Custos</a>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-database"></i> Banco de Preços</a>
+                <ul class="submenu">
+                    <li><a href="{% url 'lista_formularios' %}" class="nav-link"><i class="fas fa-edit"></i> Atualizar Formulários</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-cube"></i> Volumetria</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-hard-hat"></i> Custo Mão de Obra</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-truck"></i> Custo Veículos</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-tools"></i> Custo Equipamentos</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-chart-bar"></i> Análises Avançadas</a>
+                <ul class="submenu">
+                    <li><a href="#" class="nav-link"><i class="fas fa-balance-scale"></i> Sensibilidades</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-chart-area"></i> Projeções Orçamento</a></li>
+                    <li><a href="#" class="nav-link"><i class="fas fa-file-chart"></i> Relatórios de Análise</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>

@@ -1,0 +1,70 @@
+<!-- Componente: Barra de Progresso -->
+{% if show_progress_bar and progresso %}
+<div class="progress-container mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="progress-title mb-0">
+            <i class="fas fa-chart-pie me-2"></i>
+            Progresso Geral
+        </h6>
+        <div class="progress-stats">
+            <span class="badge bg-primary me-2">
+                {{ progresso.formularios_completos }}/{{ progresso.total_formularios }} formulários
+            </span>
+            <span class="badge bg-secondary">
+                {{ progresso.obrigatorios_completos }}/{{ progresso.total_obrigatorios }} obrigatórios
+            </span>
+        </div>
+    </div>
+    
+    <!-- Barra de progresso principal -->
+    <div class="progress progress-main mb-2" style="height: 12px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+             role="progressbar" 
+             style="width: {{ progresso.percentual_geral }}%"
+             aria-valuenow="{{ progresso.percentual_geral }}" 
+             aria-valuemin="0" 
+             aria-valuemax="100">
+        </div>
+    </div>
+    
+    <!-- Barra de progresso obrigatórios -->
+    <div class="progress progress-required" style="height: 6px;">
+        <div class="progress-bar bg-warning" 
+             role="progressbar" 
+             style="width: {{ progresso.percentual_obrigatorios }}%"
+             aria-valuenow="{{ progresso.percentual_obrigatorios }}" 
+             aria-valuemin="0" 
+             aria-valuemax="100">
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mt-2">
+        <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            {{ progresso.percentual_geral }}% de todos os formulários
+        </small>
+        <small class="text-muted">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            {{ progresso.percentual_obrigatorios }}% dos obrigatórios
+        </small>
+    </div>
+    
+    <!-- Mensagem motivacional -->
+    {% if progresso.percentual_obrigatorios == 100 %}
+        <div class="alert alert-success mt-3 mb-0">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Parabéns!</strong> Todos os formulários obrigatórios foram preenchidos.
+        </div>
+    {% elif progresso.percentual_geral > 50 %}
+        <div class="alert alert-info mt-3 mb-0">
+            <i class="fas fa-rocket me-2"></i>
+            <strong>Ótimo progresso!</strong> Você está no caminho certo.
+        </div>
+    {% elif progresso.percentual_geral > 0 %}
+        <div class="alert alert-warning mt-3 mb-0">
+            <i class="fas fa-clock me-2"></i>
+            <strong>Continue assim!</strong> Alguns formulários ainda precisam ser preenchidos.
+        </div>
+    {% endif %}
+</div>
+{% endif %}

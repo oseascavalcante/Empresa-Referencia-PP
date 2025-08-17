@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preços de Combustível - {{ contrato }} - SINC{% endblock %}
+
+{% block content %}
+<!-- CSS específico para preços de combustível -->
+<style>
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --primary-soft: #6B5ACF;
+        --secondary-soft: #8B7ED8;
+        --success-soft: #52C585;
+        --info-soft: #4FCADB;
+        --warning-soft: #FFD93D;
+        --background-soft: #FAFBFF;
+        
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        --box-shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-custom {
+        border-radius: 6px;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        transition: var(--transition);
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(72, 61, 139, 0.3);
+    }
+
+    .combustivel-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .combustivel-gasolina {
+        background-color: #ff6b6b;
+        color: white;
+    }
+
+    .combustivel-etanol {
+        background-color: #4ecdc4;
+        color: white;
+    }
+
+    .combustivel-diesel {
+        background-color: #45b7d1;
+        color: white;
+    }
+
+    .combustivel-flex {
+        background-color: #96ceb4;
+        color: white;
+    }
+
+    .combustivel-gnv {
+        background-color: #ffeaa7;
+        color: #2d3436;
+    }
+
+    .combustivel-eletrico {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+    .table th {
+        background: linear-gradient(135deg, #B8B8FF 0%, #D8D8FF 100%);
+        color: #2C2C54;
+        border: none;
+        font-weight: 600;
+    }
+
+    .contrato-info {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .preco-destaque {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--success-color);
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header da página -->
+    <div class="page-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-gas-pump me-3"></i>
+                    Preços de Combustível
+                </h1>
+                <p class="mb-0 opacity-90">
+                    Configure os preços por litro para cada tipo de combustível utilizado no contrato
+                </p>
+                
+
+            </div>
+
+            <div>
+                <a href="{% url 'menu_cadastro_estrutura' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <strong>Contrato:</strong> {{ contrato.contrato }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Concessionária:</strong> {{ contrato.concessionaria }}
+                        </div>
+                    </div>
+               
+    <!-- Formulário de configuração -->
+    <div class="form-card">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">
+                <i class="fas fa-plus-circle me-2 text-primary"></i>
+                Configurar Preço
+            </h4>
+            <button class="btn btn-primary-custom btn-custom" 
+                    hx-get="?fragment=form" 
+                    hx-target="#preco-form"
+                    hx-swap="innerHTML">
+                <i class="fas fa-plus me-2"></i>
+                Adicionar Preço
+            </button>
+        </div>
+
+        <!-- Container do formulário -->
+        <div id="preco-form">
+            <!-- Formulário será carregado aqui via HTMX -->
+        </div>
+    </div>
+
+    <!-- Lista de preços configurados -->
+    <div class="form-card">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="mb-0">
+                <i class="fas fa-list me-2 text-success"></i>
+                Preços Configurados
+                <span class="badge bg-primary ms-2">{{ precos.count }}</span>
+            </h4>
+        </div>
+
+        <!-- Tabela de preços -->
+        <div id="lista-precos" class="table-responsive">
+            {% include 'veiculos/_lista_precos_combustivel_inline.html' %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Intercepta eventos HTMX para mostrar feedback
+    document.addEventListener('htmx:beforeRequest', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.tagName === 'BUTTON') {
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+            btn.dataset.originalText = originalText;
+        }
+    });
+
+    document.addEventListener('htmx:afterRequest', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.tagName === 'BUTTON' && btn.dataset.originalText) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+            delete btn.dataset.originalText;
+        }
+        
+        // Se houve erro, mostra mensagem
+        if (evt.detail.xhr.status >= 400) {
+            try {
+                const response = JSON.parse(evt.detail.xhr.responseText);
+                if (response.error) {
+                    showAlert('danger', response.error);
+                }
+            } catch(e) {
+                showAlert('danger', 'Erro ao processar solicitação');
+            }
+        }
+    });
+
+    // Função para mostrar alertas
+    function showAlert(type, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        const container = document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Remove automaticamente após 5 segundos
+        setTimeout(() => {
+            const alert = container.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    // Confirmação de exclusão
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-delete')) {
+            e.preventDefault();
+            const btn = e.target.closest('.btn-delete');
+            const tipo = btn.dataset.tipo;
+            
+            if (confirm(`Tem certeza que deseja excluir o preço do combustível "${tipo}"?`)) {
+                const url = btn.getAttribute('hx-post') || btn.href;
+                htmx.ajax('POST', url, {
+                    target: '#lista-precos',
+                    swap: 'innerHTML'
+                });
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

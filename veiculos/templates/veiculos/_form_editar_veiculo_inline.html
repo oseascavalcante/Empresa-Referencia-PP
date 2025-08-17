@@ -1,0 +1,182 @@
+<div class="border rounded p-4 bg-light">
+    <form hx-post="{% url 'editar_veiculo' obj.pk %}"
+          hx-target="#lista-veiculos"
+          hx-swap="innerHTML">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.tipo_veiculo.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-car me-1"></i>
+                        {{ form.tipo_veiculo.label }}
+                    </label>
+                    {{ form.tipo_veiculo }}
+                    {% if form.tipo_veiculo.help_text %}
+                        <div class="form-text">{{ form.tipo_veiculo.help_text }}</div>
+                    {% endif %}
+                    {% if form.tipo_veiculo.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.tipo_veiculo.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.tipo_combustivel.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-gas-pump me-1"></i>
+                        {{ form.tipo_combustivel.label }}
+                    </label>
+                    {{ form.tipo_combustivel }}
+                    {% if form.tipo_combustivel.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.tipo_combustivel.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label for="{{ form.valor_aquisicao.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        {{ form.valor_aquisicao.label }}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        {{ form.valor_aquisicao }}
+                    </div>
+                    {% if form.valor_aquisicao.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.valor_aquisicao.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label for="{{ form.valor_locacao.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-handshake me-1"></i>
+                        {{ form.valor_locacao.label }}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        {{ form.valor_locacao }}
+                    </div>
+                    {% if form.valor_locacao.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.valor_locacao.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label for="{{ form.vida_util_meses.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {{ form.vida_util_meses.label }}
+                    </label>
+                    <div class="input-group">
+                        {{ form.vida_util_meses }}
+                        <span class="input-group-text">meses</span>
+                    </div>
+                    {% if form.vida_util_meses.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.vida_util_meses.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="{{ form.eficiencia_km_litro.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-tachometer-alt me-1"></i>
+                        {{ form.eficiencia_km_litro.label }}
+                    </label>
+                    <div class="input-group">
+                        {{ form.eficiencia_km_litro }}
+                        <span class="input-group-text">km/L</span>
+                    </div>
+                    {% if form.eficiencia_km_litro.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.eficiencia_km_litro.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="{{ form.custo_mensal_seguro.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        {{ form.custo_mensal_seguro.label }}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        {{ form.custo_mensal_seguro }}
+                    </div>
+                    {% if form.custo_mensal_seguro.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.custo_mensal_seguro.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="{{ form.custo_mensal_manutencao.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-wrench me-1"></i>
+                        {{ form.custo_mensal_manutencao.label }}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        {{ form.custo_mensal_manutencao }}
+                    </div>
+                    {% if form.custo_mensal_manutencao.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.custo_mensal_manutencao.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="{{ form.observacoes.id_for_label }}" class="form-label fw-bold">
+                        <i class="fas fa-comment me-1"></i>
+                        {{ form.observacoes.label }}
+                    </label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.observacoes.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-custom">
+                <i class="fas fa-save me-2"></i>
+                Salvar Alterações
+            </button>
+            <button type="button" 
+                    class="btn btn-secondary btn-custom"
+                    onclick="document.getElementById('veiculo-form').innerHTML = ''">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </button>
+        </div>
+    </form>
+</div>

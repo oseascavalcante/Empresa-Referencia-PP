@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load form_tags %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    
+    <div class="header">Cadastrar Contratos</div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
+    
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        .datepicker {
+            font-size: 1rem;
+        }
+        .datepicker-dropdown {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+        }
+        .datepicker table {
+            width: 100%;
+        }
+        .datepicker td, .datepicker th {
+            padding: 8px;
+            text-align: center;
+        }
+        .datepicker td.today {
+            background-color: #007bff !important;
+            color: white !important;
+            border-radius: 50%;
+        }
+        .datepicker td.active {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-radius: 50%;
+        }
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+        .header {
+            background-color: rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .small-header {
+            background-color: rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .card {
+            padding: 5px;
+        }
+        .card-header {
+            background-color: #483D8B;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        .card-body {
+            padding: 5px;
+        }
+        .form-control {
+            height: 30px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+        .btn-save {
+            padding: 5px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            float: right;
+        }
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+        input[name="escopo_contrato"], input[name="cidade"] {
+            autocomplete: off;
+        }
+        .table tbody tr {
+            line-height: 1;
+        }
+        .table td, .table th {
+            padding: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <form method="post" onsubmit="return confirm('Deseja salvar este contrato?');">
+            {% csrf_token %}
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Concessionária</div>
+                        <div class="card-body">{{ form.concessionaria }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Estado</div>
+                        <div class="card-body">{{ form.estado }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Município</div>
+                        <div class="card-body">{{ form.municipio }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Escopo do Contrato</div>
+                        <div class="card-body">{{ form.escopo_contrato }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Início da Vigência do Contrato</div>
+                        <div class="card-body">{{ form.inicio_vigencia_contrato }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Fim da Vigência do Contrato</div>
+                        <div class="card-body">{{ form.fim_vigencia_contrato }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Status do Contrato</div>
+                        <div class="card-body">{{ form.status_contrato }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Valor Inicial do Contrato R$</div>
+                        <div class="card-body">{{ form.valor_inicial }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Versão de Referência</div>
+                        <div class="card-body">{{ form.versao_base }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">Número Nova Versão</div>
+                        <div class="card-body">{{ form.numero_versao }}</div>
+                    </div>
+                </div>
+
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">Detalhe das Alterações Realizadas</div>
+                            <div class="card-body">
+                                {{ form.descricao_alteracao }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>   
+            
+            <div class="row mt-3">
+                <div class="col-md-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                        ← Voltar
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                autoclose: true,
+                language: "pt-BR"
+            });
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

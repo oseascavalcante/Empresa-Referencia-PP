@@ -3,233 +3,491 @@
 {% block content %}
 {% load form_tags %}
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    
-    <div class="header">Cadastrar Contratos</div>
-    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 2px solid #483D8B;"> </p>
-    
-    <!-- Bootstrap & Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <style>
-        .datepicker {
-            font-size: 1rem;
+<!-- CSS Moderno seguindo padrões estabelecidos -->
+<style>
+    /* Variáveis CSS para consistência */
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --primary-soft: #6B5ACF;
+        --secondary-soft: #8B7ED8;
+        --success-soft: #52C585;
+        --info-soft: #4FCADB;
+        --warning-soft: #FFD93D;
+        --background-soft: #FAFBFF;
+        
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        --box-shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
+
+    /* Hero section para cadastro de contrato - com transparência para mostrar logo */
+    .contract-hero {
+        background: linear-gradient(135deg, rgba(72, 61, 139, 0.85) 0%, rgba(106, 90, 205, 0.85) 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--box-shadow);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(2px);
+    }
+
+    .contract-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .contract-title {
+        font-size: 1.4rem;
+        font-weight: 400;
+        margin-bottom: 0.3rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+        line-height: 1.2;
+    }
+
+    .contract-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+        line-height: 1.3;
+    }
+
+    /* Card único para todos os campos */
+    .modern-contract-card {
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+    }
+
+    .modern-contract-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+    }
+
+    .modern-contract-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.75rem 1.25rem;
+        border-bottom: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modern-contract-card .card-body {
+        padding: 1.25rem;
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Seções dentro do card - ainda mais compacto */
+    .contract-section {
+        margin-bottom: 0.9rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(72, 61, 139, 0.1);
+    }
+
+    .contract-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        line-height: 1.2;
+    }
+
+    /* Estilização dos inputs - mais compacto */
+    .modern-contract-card input[type="text"],
+    .modern-contract-card input[type="number"],
+    .modern-contract-card input[type="email"],
+    .modern-contract-card input[type="password"],
+    .modern-contract-card input[type="date"],
+    .modern-contract-card textarea,
+    .modern-contract-card select {
+        border: 2px solid rgba(72, 61, 139, 0.15) !important;
+        border-radius: 6px !important;
+        transition: var(--transition) !important;
+        font-size: 0.85rem !important;
+        padding: 0.6rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        height: auto !important;
+        line-height: 1.3 !important;
+    }
+
+    .modern-contract-card input:focus,
+    .modern-contract-card textarea:focus,
+    .modern-contract-card select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.15rem rgba(72, 61, 139, 0.25) !important;
+        outline: none !important;
+    }
+
+    /* Labels melhorados - mais compacto */
+    .form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        font-size: 0.8rem;
+        margin-bottom: 0.35rem;
+        line-height: 1.2;
+    }
+
+    /* Botões modernos */
+    .save-button {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-soft) 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        transition: var(--transition);
+        box-shadow: var(--box-shadow);
+    }
+
+    .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-hover);
+        background: linear-gradient(135deg, var(--success-soft) 0%, var(--success-color) 100%);
+    }
+
+    .secondary-button {
+        background: #6c757d;
+        border: none;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        transition: var(--transition);
+    }
+
+    .secondary-button:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+    }
+
+    /* Container do formulário - mais compacto */
+    .form-container {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        backdrop-filter: blur(5px);
+        box-shadow: var(--box-shadow);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .contract-hero {
+            padding: 1.25rem 1rem;
         }
-        .datepicker-dropdown {
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 8px;
+        
+        .contract-title {
+            font-size: 1.4rem;
         }
-        .datepicker table {
-            width: 100%;
+        
+        .modern-contract-card .card-body {
+            padding: 1rem;
         }
-        .datepicker td, .datepicker th {
-            padding: 8px;
-            text-align: center;
+        
+        .form-container {
+            padding: 1rem;
         }
-        .datepicker td.today {
-            background-color: #007bff !important;
-            color: white !important;
-            border-radius: 50%;
-        }
-        .datepicker td.active {
-            background-color: #28a745 !important;
-            color: white !important;
-            border-radius: 50%;
-        }
-        body {
-            background-color: #f4f6f9;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 1400px;
-            margin: auto;
-        }
-        .header {
-            background-color: rgb(231, 229, 247);
-            color: #483D8B;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        .small-header {
-            background-color: rgb(231, 229, 247);
-            color: #483D8B;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        .card {
-            padding: 5px;
-        }
-        .card-header {
-            background-color: #483D8B;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            padding: 5px 10px;
-        }
-        .card-body {
-            padding: 5px;
-        }
-        .form-control {
-            height: 30px;
-            font-size: 14px;
-            border-radius: 3px;
-        }
-        .btn-save {
-            padding: 5px 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
-            float: right;
-        }
-        .btn-save:hover {
-            background-color: #0056b3;
-        }
-        input[name="escopo_contrato"], input[name="cidade"] {
-            autocomplete: off;
-        }
-        .table tbody tr {
-            line-height: 1;
-        }
-        .table td, .table th {
-            padding: 0.25rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-4">
-        <form method="post" onsubmit="return confirm('Deseja salvar este contrato?');">
+    }
+
+    /* Animação */
+    @keyframes float {
+        0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+        50% { transform: translate(-50%, -50%) rotate(180deg); }
+    }
+
+    /* Estilização específica para datepicker */
+    .datepicker {
+        font-size: 1rem;
+    }
+    .datepicker-dropdown {
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 8px;
+    }
+    .datepicker table {
+        width: 100%;
+    }
+    .datepicker td, .datepicker th {
+        padding: 8px;
+        text-align: center;
+    }
+    .datepicker td.today {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+        border-radius: 50%;
+    }
+    .datepicker td.active {
+        background-color: var(--success-color) !important;
+        color: white !important;
+        border-radius: 50%;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Hero Section Moderno -->
+    <section class="contract-hero">
+        <h1 class="contract-title">
+            <i class="fas fa-file-contract me-3"></i>
+            Cadastro de Contrato
+        </h1>
+        <p class="contract-subtitle">Configure as informações básicas do novo contrato</p>
+    </section>
+
+    <!-- Container do Formulário Moderno -->
+    <div class="form-container">
+        <form method="post" onsubmit="return confirm('Deseja salvar este contrato?');" id="contractForm">
             {% csrf_token %}
-            <div class="row mt-2">
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Concessionária</div>
-                        <div class="card-body">{{ form.concessionaria }}</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Estado</div>
-                        <div class="card-body">{{ form.estado }}</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Município</div>
-                        <div class="card-body">{{ form.municipio }}</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Escopo do Contrato</div>
-                        <div class="card-body">{{ form.escopo_contrato }}</div>
-                    </div>
-                </div>
-            </div>
             
-            <div class="row mt-2">
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Início da Vigência do Contrato</div>
-                        <div class="card-body">{{ form.inicio_vigencia_contrato }}</div>
-                    </div>
+            <!-- Card único para todos os campos -->
+            <div class="modern-contract-card">
+                <div class="card-header">
+                    <i class="fas fa-file-contract"></i>
+                    Informações do Contrato
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Fim da Vigência do Contrato</div>
-                        <div class="card-body">{{ form.fim_vigencia_contrato }}</div>
+                <div class="card-body">
+                    
+                    <!-- Seção Localização -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Localização e Concessionária
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-1">
+                                <label for="{{ form.concessionaria.id_for_label }}" class="form-label">{{ form.concessionaria.label }}</label>
+                                {{ form.concessionaria }}
+                                {% if form.concessionaria.errors %}
+                                    <div class="text-danger small mt-1">{{ form.concessionaria.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-1">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger small mt-1">{{ form.estado.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-1">
+                                <label for="{{ form.municipio.id_for_label }}" class="form-label">{{ form.municipio.label }}</label>
+                                {{ form.municipio }}
+                                {% if form.municipio.errors %}
+                                    <div class="text-danger small mt-1">{{ form.municipio.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Status do Contrato</div>
-                        <div class="card-body">{{ form.status_contrato }}</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Valor Inicial do Contrato R$</div>
-                        <div class="card-body">{{ form.valor_inicial }}</div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="row mt-2">
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Versão de Referência</div>
-                        <div class="card-body">{{ form.versao_base }}</div>
+                    <!-- Seção Escopo -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-tasks"></i>
+                            Escopo do Contrato
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-1">
+                                <label for="{{ form.escopo_contrato.id_for_label }}" class="form-label">{{ form.escopo_contrato.label }}</label>
+                                {{ form.escopo_contrato }}
+                                {% if form.escopo_contrato.errors %}
+                                    <div class="text-danger small mt-1">{{ form.escopo_contrato.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-header">Número Nova Versão</div>
-                        <div class="card-body">{{ form.numero_versao }}</div>
+
+                    <!-- Seção Vigência -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Vigência do Contrato
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-1">
+                                <label for="{{ form.inicio_vigencia_contrato.id_for_label }}" class="form-label">{{ form.inicio_vigencia_contrato.label }}</label>
+                                {{ form.inicio_vigencia_contrato }}
+                                {% if form.inicio_vigencia_contrato.errors %}
+                                    <div class="text-danger small mt-1">{{ form.inicio_vigencia_contrato.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-1">
+                                <label for="{{ form.fim_vigencia_contrato.id_for_label }}" class="form-label">{{ form.fim_vigencia_contrato.label }}</label>
+                                {{ form.fim_vigencia_contrato }}
+                                {% if form.fim_vigencia_contrato.errors %}
+                                    <div class="text-danger small mt-1">{{ form.fim_vigencia_contrato.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-1">
+                                <label for="{{ form.status_contrato.id_for_label }}" class="form-label">{{ form.status_contrato.label }}</label>
+                                {{ form.status_contrato }}
+                                {% if form.status_contrato.errors %}
+                                    <div class="text-danger small mt-1">{{ form.status_contrato.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
 
+                    <!-- Seção Financeiro -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-dollar-sign"></i>
+                            Informações Financeiras
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-1">
+                                <label for="{{ form.valor_inicial.id_for_label }}" class="form-label">{{ form.valor_inicial.label }}</label>
+                                {{ form.valor_inicial }}
+                                {% if form.valor_inicial.errors %}
+                                    <div class="text-danger small mt-1">{{ form.valor_inicial.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">Detalhe das Alterações Realizadas</div>
-                            <div class="card-body">
+                    <!-- Seção Versionamento -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-code-branch"></i>
+                            Controle de Versão
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-1">
+                                <label for="{{ form.versao_base.id_for_label }}" class="form-label">{{ form.versao_base.label }}</label>
+                                {{ form.versao_base }}
+                                {% if form.versao_base.errors %}
+                                    <div class="text-danger small mt-1">{{ form.versao_base.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-1">
+                                <label for="{{ form.numero_versao.id_for_label }}" class="form-label">{{ form.numero_versao.label }}</label>
+                                {{ form.numero_versao }}
+                                {% if form.numero_versao.errors %}
+                                    <div class="text-danger small mt-1">{{ form.numero_versao.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção Alterações -->
+                    <div class="contract-section">
+                        <h6 class="section-title">
+                            <i class="fas fa-edit"></i>
+                            Detalhes das Alterações
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-1">
+                                <label for="{{ form.descricao_alteracao.id_for_label }}" class="form-label">{{ form.descricao_alteracao.label }}</label>
                                 {{ form.descricao_alteracao }}
+                                {% if form.descricao_alteracao.errors %}
+                                    <div class="text-danger small mt-1">{{ form.descricao_alteracao.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-
-
-            </div>   
-            
-            <div class="row mt-3">
-                <div class="col-md-12 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">
-                        ← Voltar
-                    </button>
-                    <button type="submit" class="btn btn-save">
-                        <i class="fas fa-save"></i> Salvar
-                    </button>
-                </div>
             </div>
-            
+
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <button type="button" class="secondary-button" onclick="window.history.back();">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </button>
+                <button type="submit" class="save-button">
+                    <i class="fas fa-save me-2"></i>Salvar Contrato
+                </button>
+            </div>
         </form>
     </div>
+</div>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Datepicker JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            $('.datepicker').datepicker({
-                format: 'dd/mm/yyyy',
-                todayHighlight: true,
-                autoclose: true,
-                language: "pt-BR"
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Datepicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicialização do datepicker
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            todayHighlight: true,
+            autoclose: true,
+            language: "pt-BR"
+        });
+
+        // Função de confirmação aprimorada
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                console.log('Formulário de contrato sendo enviado...');
+            });
+        }
+
+        // Efeito de focus nos inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
             });
         });
-    </script>
-</body>
-</html>
+
+        // Validação em tempo real
+        const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.style.borderColor = 'var(--danger-color)';
+                } else {
+                    this.style.borderColor = 'var(--success-color)';
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}

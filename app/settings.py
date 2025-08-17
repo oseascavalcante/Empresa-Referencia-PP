@@ -37,11 +37,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "app",  # App principal para template tags
     "cad_contrato",
     'cadastro_equipe',
     'mao_obra',
     'django_extensions',
     'custo_direto',
+    'equipamentos',
+    'veiculos',
 ]
 
 MIDDLEWARE = [

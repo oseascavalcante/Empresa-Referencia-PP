@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="header text-center">
+        Encargos Sociais da Mão de Obra
+    </div>
+    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
+    <p class="form-label fw-bold" style="color: #483D8B; font-size: 1.1rem;">Contrato: {{ contrato.contrato }} - {{ contrato.escopo_contrato }}</p>
+    <p class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"></p>
+
+    <div class="row d-flex justify-content-center align-items-stretch mt-3">
+        <!-- GRUPO A -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-primary text-white">Grupo A – Encargos Sociais Básicos</div>
+                <div class="card-body">
+                    {% if calc_grupo_a or grupo_a %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>CPP (Contribuição Previdenciária Patronal):</span>
+                            <strong>{{ calc_grupo_a.cpp|floatformat:2|add:"%" }}</strong>
+                        </div>                    
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>FGTS:</span>
+                            <strong>{{ grupo_a.fgts|floatformat:2|add:"%" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Décimo terceiro salário:</span>
+                            <strong>{{ grupo_a.dec_salario|floatformat:2|add:"%" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Abono de férias:</span>
+                            <strong>{{ grupo_a.abono_ferias|floatformat:2|add:"%" }}</strong>
+                        </div>  
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>(CPP + FGTS) x (13º salário + abono de férias):</span>
+                            <strong>{{ calc_grupo_a.cpp_fgts_sal_abono|floatformat:2|add:"%" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo A:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_a.total_grupo_a|floatformat:2|add:"%" }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- GRUPO B -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-secondary text-white">Grupo B – Indenizações nas demissões sem justa causa</div>
+                <div class="card-body">
+                    {% if calc_grupo_b %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Aviso prévio indenizado:</span>
+                            <strong>{{ calc_grupo_b.aviso_previo_indenizado|floatformat:2|add:"%" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Multa do FGTS:</span>
+                            <strong>{{ calc_grupo_b.multa_fgts|floatformat:2|add:"%" }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>FGTS sobre aviso prévio indenizado:</span>
+                            <strong>{{ calc_grupo_b.fgts_sobre_aviso_previo|floatformat:2|add:"%" }}</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo B:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_b.total_grupo_b|floatformat:2|add:"%" }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- GRUPO C -->
+        <div class="col-lg-4 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-success text-white">Grupo C – Substituições nas férias e faltas justificadas (Reserva técnica)</div>
+                <div class="card-body">
+                    {% if calc_grupo_c %}
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas no ano:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Dias de faltas no ano:</span>
+                            <strong>{{ calc_grupo_c.dias_faltas_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas/semana:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_semana }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas trabalhadas/dia:</span>
+                            <strong>{{ calc_grupo_c.horas_trab_dia }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1" style="border-color: #e0e0e0;">
+                            <span>Horas de faltas justificadas:</span>
+                            <strong>{{ calc_grupo_c.horas_faltas_justificadas_ano }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 px-2 mt-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total Grupo C:</strong></span>
+                            <strong class="text-primary">{{ calc_grupo_c.total_grupo_c|floatformat:2|add:"%" }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRUPOS D e E -->
+    <div class="row d-flex justify-content-center align-items-stretch mt-3">
+        <!-- GRUPO D -->
+        <div class="col-lg-6 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-warning text-dark">Grupo D - Colaboradores substitutos -- Incidência do Grupo C sobre os Grupos A e B</div>
+                <div class="card-body">
+                    {% if calc_grupo_d %}
+                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total:</strong></span>
+                            <strong class="text-dark">{{ calc_grupo_d.total_grupo_d|floatformat:2|add:"%" }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- GRUPO E -->
+        <div class="col-lg-6 d-flex">
+            <div class="card w-100 h-100">
+                <div class="card-header bg-danger text-white">Grupo E - Total Encargos Sociais Mensalista ( soma dos Grupos A, B, C e D )</div>
+                <div class="card-body">
+                    {% if calc_grupo_e %}
+                        <div class="d-flex justify-content-between py-1 px-2" style="background-color: #f8f9fa; border-top: 2px solid #ccc;">
+                            <span><strong>Total:</strong></span>
+                            <strong class="text-dark">{{ calc_grupo_e.total_grupo_e|floatformat:2|add:"%" }}</strong>
+                        </div>
+                    {% else %}
+                        <p class="text-danger">Dados indisponíveis.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="mt-5 mb-4" style="border: 1px solid #483D8B;">
+
+
+<div class="container mt-4 p-4 rounded" style="background-color: #f4f6fa; border-left: 6px solid #483D8B;">
+    <h5 class="fw-bold mb-3" style="color: #483D8B;">
+        💡 Dica
+    </h5>
+    <p>
+         Estimativa de tributação sem desoneração da folha de pagamento.<br>
+    </p>
+  
+    <table class="table table-bordered table-sm mt-3 bg-white">
+        <thead class="table-light text-center">
+            <tr>
+                <th>Grupo</th>
+                <th>Descrição</th>
+                <th>Mínimo</th>
+                <th>Médio</th>
+                <th>Máximo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>A</strong></td>
+                <td>Encargos sobre folha (INSS, FGTS, 13º, férias, etc.)</td>
+                <td>45%</td>
+                <td>50%</td>
+                <td>55%</td>
+            </tr>
+            <tr>
+                <td><strong>B</strong></td>
+                <td>Indenizações por demissão sem justa causa</td>
+                <td>2%</td>
+                <td>3,5%</td>
+                <td>5%</td>
+            </tr>
+            <tr>
+                <td><strong>C</strong></td>
+                <td>Ausências justificadas (feriados, licenças)</td>
+                <td>5%</td>
+                <td>7,5%</td>
+                <td>10%</td>
+            </tr>
+            <tr>
+                <td><strong>D</strong></td>
+                <td>Substituição de colaboradores ausentes</td>
+                <td>3%</td>
+                <td>4%</td>
+                <td>6%</td>
+            </tr>
+            <tr class="table-light text-left">
+                <td><strong>E</strong></td>
+                <td><strong>Total estimado (A + B + C + D)</strong></td>
+                <td><strong>55%</strong></td>
+                <td><strong>65%</strong></td>
+                <td><strong>76%</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="mt-3 text-muted" style="font-size: 0.85rem;">
+        
+        🔹 Valores abaixo do mínimo podem indicar omissões nos encargos.<br>
+        ⚖️ Faixa média representa a prática de mercado em contratos estruturados.<br>
+        🔺 Valores acima do máximo são comuns em empresas com alta rotatividade ou operação ininterrupta.
+    </p>
+</div>
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary" onclick="window.history.back();">
+            ← Voltar
+        </button>
+        <a href="{% url 'menu_despesas' contrato.contrato %}" class="btn btn-primary">
+            Avançar →
+        </a>
+    </div>
+</div>
+
+
+{% endblock %}

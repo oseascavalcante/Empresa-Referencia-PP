@@ -1,0 +1,273 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Menu Principal{% endblock %}</title>
+
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Estilo global do sistema -->
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Fundo com logotipo */
+        .background-logo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('{% static "img/logotipo2.png" %}') no-repeat center center;
+            background-size: contain;
+            opacity: 0.1;
+            z-index: -1; /* Envia para trás */
+        }
+
+        .wrapper {
+            display: flex;
+            position: relative; /* Garante que o conteúdo fique acima do fundo */
+        }
+
+        /* SIDEBAR MODERNO */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 1000;
+            border-right: 1px solid rgba(72, 61, 139, 0.1);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar .nav-link {
+            color: #483D8B;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #6A5ACD;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: #6A5ACD;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover {
+            background: linear-gradient(135deg, rgba(72, 61, 139, 0.1) 0%, rgba(106, 90, 205, 0.05) 100%);
+            color: #483D8B;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(72, 61, 139, 0.15);
+        }
+
+        .sidebar .nav-link:hover i {
+            color: #483D8B;
+            transform: scale(1.1);
+        }
+
+        .sidebar .submenu {
+            list-style: none;
+            padding-left: 32px;
+            padding-right: 8px;
+            display: none;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 6px;
+            margin: 4px 8px;
+            border-left: 2px solid rgba(106, 90, 205, 0.2);
+        }
+
+        .sidebar .submenu .nav-link {
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .sidebar .submenu .nav-link i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #adb5bd;
+        }
+
+        .sidebar .submenu .nav-link:hover {
+            background: rgba(106, 90, 205, 0.1);
+            color: #483D8B;
+            transform: translateX(2px);
+        }
+
+        .sidebar .submenu .nav-link:hover i {
+            color: #6A5ACD;
+        }
+
+        .sidebar .nav-item:hover .submenu {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo do sidebar */
+        .sidebar .nav-item.text-center {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(72, 61, 139, 0.15);
+        }
+
+        .sidebar .nav-item.text-center .nav-link {
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-item.text-center .nav-link:hover {
+            background: rgba(106, 90, 205, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* ÁREA DE CONTEÚDO */
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+            position: relative; /* Garante que o conteúdo fique acima do fundo */
+            z-index: 1; /* Conteúdo acima do fundo */
+        }
+
+        /* HEADER DE PÁGINAS */
+        .header {
+            background-color: rgb(231, 229, 247);
+            color: #483D8B;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        /* COMPONENTES VISUAIS */
+        .card-header {
+            background-color: #483D8B;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        .form-control {
+            height: 30px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        .btn-save {
+            padding: 5px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            float: right;
+        }
+
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Fundo com logotipo -->
+    <div class="background-logo"></div>
+
+    <div class="wrapper">
+        {% block sidebar %}
+            {% include 'components/_sidebar.html' %}
+        {% endblock %}
+        
+        <div class="content">
+            <main>
+                {% block content %}
+                <!-- Conteúdo específico da página será carregado aqui -->
+                {% endblock %}  
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+<script>
+document.body.addEventListener('htmx:responseError', function (e) {
+  try {
+    const data = JSON.parse(e.detail.xhr.responseText);
+    const msg = data?.error || 'Não foi possível processar a requisição.';
+    const el = document.getElementById('alert-container');
+    if (el) el.innerHTML = '<div class="alert alert-danger">'+msg+'</div>';
+    else alert(msg);
+  } catch(_) {}
+});
+</script>
+
+</html>

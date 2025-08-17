@@ -1,73 +1,349 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load dict_extras %}
 
-{% block title %}Novo Contrato - SINCOP{% endblock %}
+{% block title %}Cadastro de Estrutura - {{ contrato.contrato }} - SINCOP{% endblock %}
 
 {% block content %}
+<!-- CSS Moderno e Extensível -->
 <style>
-        .card {
-            
-            border-radius: 5px;
-        }
-        .small-header {
-            background-color:rgb(231, 229, 247);
-            color: #483D8B;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 5px;
-        }
+    /* Variáveis CSS para consistência */
+    :root {
+        --primary-color: #483D8B;
+        --secondary-color: #6A5ACD;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        
+        --border-radius: 8px;
+        --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        --transition: all 0.3s ease;
+    }
 
+    /* Layout principal */
+    .main-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+
+    .main-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .main-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    /* Componente: Barra de Progresso */
+    .progress-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .progress-title {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .progress-main {
+        background-color: #e9ecef;
+        border-radius: 6px;
+    }
+
+    .progress-required {
+        background-color: #e9ecef;
+        border-radius: 3px;
+    }
+
+    /* Componente: Categoria de Formulários */
+    .form-category {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid #e9ecef;
+    }
+
+    .category-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .forms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    /* Componente: Card de Formulário */
+    .form-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .form-card-link {
+        display: block;
+        height: 100%;
+        color: inherit;
+    }
+
+    .form-card-link:hover {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .form-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem 0;
+    }
+
+    .form-card-icon {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .form-card-body {
+        padding: 1rem 1.25rem;
+        flex-grow: 1;
+    }
+
+    .form-card-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .form-card-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-card-footer {
+        padding: 0 1.25rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #f8f9fa;
+        margin-top: auto;
+    }
+
+    .form-card-action {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .form-card-action i {
+        margin-left: 0.5rem;
+    }
+
+    .required-badge {
+        color: var(--danger-color);
+        font-weight: bold;
+        margin-left: 0.25rem;
+    }
+
+    /* Estados dos cards */
+    .form-card--completo {
+        border-color: var(--success-color);
+        background: linear-gradient(145deg, #ffffff 0%, #f8fff9 100%);
+    }
+
+    .form-card--completo .form-card-icon {
+        color: var(--success-color);
+    }
+
+    .form-card--parcial {
+        border-color: var(--warning-color);
+        background: linear-gradient(145deg, #ffffff 0%, #fffdf8 100%);
+    }
+
+    .form-card--parcial .form-card-icon {
+        color: var(--warning-color);
+    }
+
+    .form-card--vazio {
+        border-color: #dee2e6;
+        background: #ffffff;
+    }
+
+    .form-card--required {
+        border-left-width: 4px;
+        border-left-color: var(--danger-color);
+    }
+
+    /* Componente: Indicador de Status */
+    .status-indicator {
+        font-size: 1.25rem;
+    }
+
+    .status-counts {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .forms-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .main-header {
+            padding: 1.5rem;
+        }
+        
+        .form-category {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Próximos passos */
+    .next-steps {
+        background: linear-gradient(145deg, #fff3cd 0%, #ffffff 100%);
+        border: 1px solid #ffd60a;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+    }
+
+    .next-steps-title {
+        color: #856404;
+        font-weight: 600;
+    }
+
+    .next-step-item {
+        background: white;
+        border: 1px solid #ffd60a;
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .priority-alta {
+        border-left: 4px solid var(--danger-color);
+    }
+
+    .priority-media {
+        border-left: 4px solid var(--warning-color);
+    }
 </style>
 
-
-<div class="container py-4">
-
-    <div class="small-header">
-        <i class="fas fa-users-cog me-2 text-primary"></i>
-        Cadastro de Estrutura Organizacional e Operacional
+<div class="container-fluid py-4">
+    <!-- Cabeçalho Principal -->
+    <div class="main-header text-center">
+        <h1 class="main-title">
+            <i class="fas fa-users-cog me-3"></i>
+            Cadastro de Estrutura Organizacional
+        </h1>
+        <p class="main-subtitle">
+            Contrato: <strong>{{ contrato.contrato }}</strong> | 
+            Cliente: <strong>{{ contrato.nome_cliente }}</strong>
+        </p>
     </div>
-    <p class="text-center mt-0 font-weight-bold" style="font-size: 0.8rem; border-bottom: 1px solid #483D8B;"> </p>
 
     <div class="row justify-content-center">
-        <div class="col-md-10">
+        <div class="col-12">
+            <!-- Barra de Progresso -->
+            {% include 'components/progress_bar.html' %}
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-
-                    <p class="mb-4 text-muted">Siga a ordem abaixo para preencher todas as informações necessárias para um novo contrato:</p>
-
-                    <div class="d-grid gap-3">
-
-                        {% if contrato and contrato.pk %}
-                          <a href="{% url 'adicionar_regional' contrato_id=contrato.pk %}" class="btn btn-outline-primary btn-lg text-start">
-                              <i class="fas fa-map-marker-alt me-2"></i> 1. Regionais
-                          </a>
-                        {% else %}
-                          <a href="{% url 'selecionar_contrato' %}?next=/cad_contrato/adicionar-regional/" class="btn btn-outline-primary btn-lg text-start">
-                              <i class="fas fa-map-marker-alt me-2"></i> 1. Regionais
-                          </a>
-                        {% endif %}
-
-                        <a href="{% url 'adicionar_equipe' %}" class="btn btn-outline-secondary btn-lg text-start">
-                            <i class="fas fa-users me-2"></i> 2. Equipes
-                        </a>
-
-                        <a href="{% url 'adicionar_funcao' %}" class="btn btn-outline-success btn-lg text-start">
-                            <i class="fas fa-briefcase me-2"></i> 3. Funções/Salários
-                        </a>
-
-                        <a href="{% url 'adicionar_escopo' %}" class="btn btn-outline-warning btn-lg text-start">
-                            <i class="fas fa-tasks me-2"></i> 4. Escopo de Atividades
-                        </a>
-
-                    </div>
-
-                </div>
-            </div>
-
+            <!-- Renderização Dinâmica de Categorias -->
+            {% for categoria_id, categoria in categorias_formularios.items %}
+                {% with categoria_status=status_completo.categorias|get_item:categoria_id %}
+                    {% include 'components/form_category.html' with categoria=categoria categoria_status=categoria_status categoria_id=categoria_id %}
+                {% endwith %}
+            {% endfor %}
         </div>
     </div>
+
+    <!-- Ações Globais -->
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar ao Menu Principal
+        </a>
+        
+        {% if progresso.percentual_obrigatorios == 100 %}
+        <a href="{% url 'dashboard_custo_direto' %}" class="btn btn-success">
+            <i class="fas fa-chart-line me-2"></i>
+            Visualizar Dashboard
+        </a>
+        {% endif %}
+    </div>
 </div>
+
+<!-- JavaScript para Animações e Interatividade -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Anima a barra de progresso
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+
+    // Adiciona tooltips para status
+    const statusIndicators = document.querySelectorAll('.status-indicator');
+    statusIndicators.forEach(indicator => {
+        const status = indicator.className.includes('completo') ? 'Completo' :
+                      indicator.className.includes('parcial') ? 'Parcial' :
+                      indicator.className.includes('vazio') ? 'Não preenchido' : 'N/A';
+        indicator.setAttribute('title', status);
+    });
+
+    // Destaca cards obrigatórios não preenchidos
+    const requiredCards = document.querySelectorAll('.form-card--required.form-card--vazio');
+    requiredCards.forEach(card => {
+        card.style.animation = 'pulse 2s infinite';
+    });
+});
+</script>
+
+<style>
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+</style>
+
 {% endblock %}
