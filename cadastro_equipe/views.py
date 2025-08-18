@@ -579,6 +579,10 @@ class ComposicaoEquipeView(View):
         equipes = Equipe.objects.filter(contrato=contrato)
         funcoes = Funcao.objects.filter(contrato=contrato)
         regionais = contrato.regionais.all()
+        
+        # Buscar veículos do contrato
+        from veiculos.models import Veiculo
+        veiculos = Veiculo.objects.filter(contrato=contrato).select_related('tipo_veiculo')
 
         if regional_id and escopo_id:
             equipes_cadastradas = ComposicaoEquipe.objects.filter(
@@ -618,6 +622,7 @@ class ComposicaoEquipeView(View):
                 "inicio_vigencia_contrato": contrato.inicio_vigencia_contrato,
                 "fim_vigencia_contrato": contrato.fim_vigencia_contrato,
                 "regionais": regionais,
+                "veiculos": veiculos,
             },
         )
 
@@ -645,6 +650,18 @@ class ComposicaoEquipeView(View):
                     status=400,
                 )
 
+            # Buscar veículo se fornecido
+            veiculo = None
+            if data.get("veiculo_id"):
+                from veiculos.models import Veiculo
+                try:
+                    veiculo = Veiculo.objects.get(id=data.get("veiculo_id"), contrato=contrato)
+                except Veiculo.DoesNotExist:
+                    return JsonResponse(
+                        {"status": "error", "message": "Veículo não encontrado ou não pertence ao contrato"},
+                        status=400,
+                    )
+
             # Prepara dados para o form
             form_data = {
                 "contrato": contrato,
@@ -655,9 +672,14 @@ class ComposicaoEquipeView(View):
                 "observacao": data.get("observacao"),
                 "data_mobilizacao": data_mobilizacao,
                 "data_desmobilizacao": data_desmobilizacao,
+                # Dados de veículos
+                "veiculo": veiculo,
+                "modalidade_veiculo": data.get("modalidade_veiculo"),
+                "quantidade_veiculos": data.get("quantidade_veiculos", 0),
+                "km_rodado": data.get("km_rodado", 0),
             }
 
-            form = ComposicaoEquipeForm(form_data)
+            form = ComposicaoEquipeForm(form_data, contrato=contrato)
 
             if not form.is_valid():
                 print("ERROS DO FORMULÁRIO:", form.errors)
@@ -772,6 +794,11 @@ class ComposicaoEquipeJSONView(View):
             else "",
             "observacao": composicao.observacao,
             "dados": dados,
+            # Dados de veículos
+            "veiculo_id": composicao.veiculo.id if composicao.veiculo else None,
+            "modalidade_veiculo": composicao.modalidade_veiculo,
+            "quantidade_veiculos": float(composicao.quantidade_veiculos),
+            "km_rodado": float(composicao.km_rodado),
         }
 
         return JsonResponse(response_data)

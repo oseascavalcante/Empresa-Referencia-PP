@@ -158,7 +158,23 @@ class EscopoAtividadeForm(forms.ModelForm):
         return obj
 
 class ComposicaoEquipeForm(forms.ModelForm):
-    """Mantido como estava, com validação de duplicidade por (contrato, regional, escopo, equipe)."""
+    """Formulário para composição de equipe com integração de veículos."""
+
+    def __init__(self, *args, **kwargs):
+        # Remove o kwarg extra antes do super para evitar TypeError
+        self.contrato = kwargs.pop("contrato", None)
+        super().__init__(*args, **kwargs)
+        
+        # Filtrar veículos pelo contrato se fornecido
+        if self.contrato:
+            from veiculos.models import Veiculo
+            self.fields["veiculo"].queryset = Veiculo.objects.filter(contrato=self.contrato)
+        
+        # Configurar widgets com classes CSS
+        self.fields["veiculo"].widget.attrs.update({"class": "form-select"})
+        self.fields["modalidade_veiculo"].widget.attrs.update({"class": "form-select"})
+        self.fields["quantidade_veiculos"].widget.attrs.update({"class": "form-control", "step": "0.01", "min": "0"})
+        self.fields["km_rodado"].widget.attrs.update({"class": "form-control", "step": "0.01", "min": "0"})
 
     class Meta:
         model = ComposicaoEquipe
@@ -170,7 +186,8 @@ class ComposicaoEquipeForm(forms.ModelForm):
         regional = cleaned_data.get("regional")
         escopo = cleaned_data.get("escopo")
         equipe = cleaned_data.get("equipe")
-
+        
+        # Validação de duplicidade (mantida)
         if contrato and regional and escopo and equipe:
             existe = ComposicaoEquipe.objects.filter(
                 contrato=contrato,
@@ -184,4 +201,25 @@ class ComposicaoEquipeForm(forms.ModelForm):
                 raise forms.ValidationError(
                     "Essa equipe já foi cadastrada para esta combinação de contrato, regional e escopo de atividade."
                 )
+        
+        # Validações específicas de veículos
+        veiculo = cleaned_data.get("veiculo")
+        modalidade_veiculo = cleaned_data.get("modalidade_veiculo")
+        quantidade_veiculos = cleaned_data.get("quantidade_veiculos", 0)
+        
+        # Se veículo selecionado, modalidade é obrigatória
+        if veiculo and not modalidade_veiculo:
+            self.add_error("modalidade_veiculo", "Modalidade é obrigatória quando veículo for selecionado.")
+        
+        # Se modalidade definida, veículo é obrigatório
+        if modalidade_veiculo and not veiculo:
+            self.add_error("veiculo", "Tipo de veículo é obrigatório quando modalidade for definida.")
+        
+        # Se quantidade > 0, veículo e modalidade são obrigatórios
+        if quantidade_veiculos > 0:
+            if not veiculo:
+                self.add_error("veiculo", "Tipo de veículo é obrigatório quando quantidade for maior que zero.")
+            if not modalidade_veiculo:
+                self.add_error("modalidade_veiculo", "Modalidade é obrigatória quando quantidade for maior que zero.")
+        
         return cleaned_data

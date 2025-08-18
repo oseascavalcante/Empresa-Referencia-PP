@@ -101,6 +101,38 @@
                                    value="{{ contrato.fim_vigencia_contrato|date:'Y-m-d' }}">
                         </div>
                         
+                        <!-- Campos de Veículos -->
+                        <div class="col-md-3">
+                            <label for="veiculo" class="form-label">Tipo de Veículo</label>
+                            <select id="veiculo" class="form-select">
+                                <option value="">Sem veículo</option>
+                                {% for veiculo in veiculos %}
+                                    <option value="{{ veiculo.id }}">{{ veiculo.tipo_veiculo.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="modalidade_veiculo" class="form-label">Modalidade</label>
+                            <select id="modalidade_veiculo" class="form-select">
+                                <option value="">Selecione</option>
+                                <option value="LOCADO">Locado</option>
+                                <option value="PROPRIO">Próprio</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="quantidade_veiculos" class="form-label">Quantidade</label>
+                            <input type="number" id="quantidade_veiculos" class="form-control" 
+                                   min="0" step="0.01" value="0" placeholder="0">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="km_rodado" class="form-label">KM Rodados/Mês</label>
+                            <input type="number" id="km_rodado" class="form-control" 
+                                   min="0" step="0.01" value="0" placeholder="0">
+                        </div>
+                        
                         <div class="col-12">
                             <label for="observacao" class="form-label">Observações</label>
                             <input type="text" id="observacao" class="form-control" 
@@ -707,6 +739,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return dados;
     }
     
+    // Função para coletar dados de veículos
+    function coletarDadosVeiculos() {
+        return {
+            veiculo_id: document.getElementById('veiculo').value || null,
+            modalidade_veiculo: document.getElementById('modalidade_veiculo').value || null,
+            quantidade_veiculos: parseFloat(document.getElementById('quantidade_veiculos').value) || 0,
+            km_rodado: parseFloat(document.getElementById('km_rodado').value) || 0
+        };
+    }
+    
     // Função para validar formulário
     function validarFormulario() {
         const regional = document.getElementById('regional').value;
@@ -725,6 +767,36 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dados.length === 0) {
             showAlert('Configure pelo menos uma função com quantidade maior que zero.', 'warning');
             return false;
+        }
+        
+        // Validações específicas de veículos
+        const dadosVeiculos = coletarDadosVeiculos();
+        const veiculo = dadosVeiculos.veiculo_id;
+        const modalidade = dadosVeiculos.modalidade_veiculo;
+        const quantidadeVeiculos = dadosVeiculos.quantidade_veiculos;
+        
+        // Se veículo selecionado, modalidade é obrigatória
+        if (veiculo && !modalidade) {
+            showAlert('Modalidade é obrigatória quando veículo for selecionado.', 'warning');
+            return false;
+        }
+        
+        // Se modalidade definida, veículo é obrigatório
+        if (modalidade && !veiculo) {
+            showAlert('Tipo de veículo é obrigatório quando modalidade for definida.', 'warning');
+            return false;
+        }
+        
+        // Se quantidade > 0, veículo e modalidade são obrigatórios
+        if (quantidadeVeiculos > 0) {
+            if (!veiculo) {
+                showAlert('Tipo de veículo é obrigatório quando quantidade for maior que zero.', 'warning');
+                return false;
+            }
+            if (!modalidade) {
+                showAlert('Modalidade é obrigatória quando quantidade for maior que zero.', 'warning');
+                return false;
+            }
         }
         
         return true;
@@ -851,6 +923,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirm('Deseja salvar a configuração da equipe?')) return;
         
         const dados = coletarDadosTabela();
+        const dadosVeiculos = coletarDadosVeiculos();
         const formData = {
             contrato_id: contratoId,
             regional_id: document.getElementById('regional').value,
@@ -860,7 +933,12 @@ document.addEventListener('DOMContentLoaded', function() {
             data_mobilizacao: document.getElementById('data_mobilizacao').value,
             data_desmobilizacao: document.getElementById('data_desmobilizacao').value,
             observacao: document.getElementById('observacao').value,
-            dados: dados
+            dados: dados,
+            // Dados de veículos
+            veiculo_id: dadosVeiculos.veiculo_id,
+            modalidade_veiculo: dadosVeiculos.modalidade_veiculo,
+            quantidade_veiculos: dadosVeiculos.quantidade_veiculos,
+            km_rodado: dadosVeiculos.km_rodado
         };
         
         const url = `{% url 'composicao_equipe' contrato_id %}`;
@@ -971,6 +1049,12 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('data_mobilizacao').value = data.data_mobilizacao || '';
             document.getElementById('data_desmobilizacao').value = data.data_desmobilizacao || '';
             document.getElementById('observacao').value = data.observacao || '';
+            
+            // Preencher dados de veículos
+            document.getElementById('veiculo').value = data.veiculo_id || '';
+            document.getElementById('modalidade_veiculo').value = data.modalidade_veiculo || '';
+            document.getElementById('quantidade_veiculos').value = data.quantidade_veiculos || 0;
+            document.getElementById('km_rodado').value = data.km_rodado || 0;
             
             // Limpar tabela
             const rows = composicaoTbody.querySelectorAll('tr');

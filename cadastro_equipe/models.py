@@ -65,6 +65,11 @@ class Funcao(models.Model):
 
 #Cadastro das equipes
 class ComposicaoEquipe(models.Model):
+    MODALIDADE_VEICULO_CHOICES = [
+        ('LOCADO', 'Locado'),
+        ('PROPRIO', 'Próprio'),
+    ]
+    
     composicao_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contrato = models.ForeignKey(CadastroContrato, on_delete=models.PROTECT)
     regional = models.ForeignKey(Regional, on_delete=models.PROTECT, related_name="composicoes", verbose_name="Regional")
@@ -74,6 +79,35 @@ class ComposicaoEquipe(models.Model):
     data_mobilizacao = models.DateField(default='2025-01-01')
     data_desmobilizacao = models.DateField(default='2028-01-01')
     prefixo_equipe = models.TextField(blank=True, null=True)
+    
+    # Campos de veículos
+    veiculo = models.ForeignKey(
+        'veiculos.Veiculo',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name="Tipo de Veículo"
+    )
+    modalidade_veiculo = models.CharField(
+        max_length=10,
+        choices=MODALIDADE_VEICULO_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Modalidade do Veículo"
+    )
+    quantidade_veiculos = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Quantidade de Veículos"
+    )
+    km_rodado = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="KM Rodados por Mês"
+    )
+    
     observacao = models.TextField(blank=True, null=True)  # Agora salva uma única vez por composição
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,6 +121,30 @@ class ComposicaoEquipe(models.Model):
         ]
         verbose_name = "Composição de Equipe"
         verbose_name_plural = "Composições de Equipe"
+    
+    @property
+    def valor_veiculo(self):
+        """
+        Retorna valor do veículo baseado na modalidade:
+        - LOCADO: valor_locacao
+        - PROPRIO: valor_proprio (depreciação + seguro + manutenção)
+        """
+        from decimal import Decimal
+        
+        if not self.veiculo or not self.modalidade_veiculo:
+            return Decimal('0.00')
+            
+        if self.modalidade_veiculo == 'LOCADO':
+            return self.veiculo.valor_locacao
+        elif self.modalidade_veiculo == 'PROPRIO':
+            # Para veículo próprio, usar custo total mensal (depreciação + seguro + manutenção)
+            return (
+                self.veiculo.custo_depreciacao_mensal +
+                self.veiculo.custo_mensal_seguro +
+                self.veiculo.custo_mensal_manutencao
+            )
+        
+        return Decimal('0.00')
 
 #Cadastro das funções dentro da Equipe
 class FuncaoEquipe(models.Model):
