@@ -18,7 +18,9 @@
       "Bash(set DJANGO_SETTINGS_MODULE=app.settings)",
       "Bash(mv:*)",
       "Bash(touch:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

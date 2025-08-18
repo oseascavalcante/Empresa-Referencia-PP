@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Custos Consolidados{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>💰 Dashboard de Custos Consolidados</h1>
+                {% if timestamp_atualizacao %}
+                    <small class="text-muted">Última atualização: {{ timestamp_atualizacao }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="contrato-select" class="form-label">Contrato:</label>
+            <select id="contrato-select" class="form-select" onchange="carregarDadosContrato()">
+                <option value="">Selecione um contrato</option>
+                {% for contrato in contratos %}
+                    <option value="{{ contrato.contrato }}" 
+                            {% if contrato_selecionado and contrato.contrato == contrato_selecionado.contrato %}selected{% endif %}>
+                        {{ contrato.contrato }} - {{ contrato.escopo_contrato|truncatechars:50 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        {% if contrato_selecionado %}
+        <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-outline-primary me-2" onclick="recalcularConsolidacao(false)">
+                🔄 Recalcular Incremental
+            </button>
+            <button class="btn btn-outline-warning" onclick="recalcularConsolidacao(true)">
+                ⚡ Recálculo Completo
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if erro %}
+        <div class="alert alert-danger">
+            <h5>❌ Erro ao carregar dados:</h5>
+            <p>{{ erro }}</p>
+        </div>
+    {% endif %}
+    
+    {% if contrato_selecionado and consolidacao %}
+    <!-- Resumo Geral -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">💼 Custo Total</h5>
+                    <h3>R$ {{ consolidacao.custo_total|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">👥 Funcionários</h5>
+                    <h3>{{ consolidacao.total_funcionarios }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🏗️ Equipes</h5>
+                    <h3>{{ consolidacao.total_equipes|floatformat:1 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🚗 Veículos</h5>
+                    <h3>{{ consolidacao.total_veiculos|floatformat:1 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <!-- Custos por Categoria -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📊 Custos por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartCustosPorCategoria" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Equipamentos Detalhados -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🔧 Equipamentos Detalhados</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartEquipamentos" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabelas de Dados -->
+    <div class="row mb-4">
+        <!-- Custos por Regional -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🏢 Custos por Regional</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Regional</th>
+                                    <th>Custo Total</th>
+                                    <th>Funcionários</th>
+                                    <th>Equipes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for regional in dados_regionais %}
+                                <tr>
+                                    <td>{{ regional.nome }}</td>
+                                    <td>R$ {{ regional.custo_total|floatformat:2 }}</td>
+                                    <td>{{ regional.funcionarios }}</td>
+                                    <td>{{ regional.equipes|floatformat:1 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Funções -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🔝 Top 10 Funções por Custo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Função</th>
+                                    <th>Custo Total</th>
+                                    <th>Funcionários</th>
+                                    <th>Salário Base</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for funcao in top_funcoes %}
+                                <tr>
+                                    <td>{{ funcao.nome }}</td>
+                                    <td>R$ {{ funcao.custo_total|floatformat:2 }}</td>
+                                    <td>{{ funcao.funcionarios }}</td>
+                                    <td>R$ {{ funcao.salario_base|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detalhamento de Custos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💹 Detalhamento Completo de Custos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Mão de Obra:</strong><br>
+                            R$ {{ consolidacao.custo_mao_obra|floatformat:2 }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Veículos:</strong><br>
+                            R$ {{ consolidacao.custo_veiculos|floatformat:2 }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Combustível:</strong><br>
+                            R$ {{ consolidacao.custo_combustivel|floatformat:2 }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Equipamentos:</strong><br>
+                            R$ {{ consolidacao.custo_equipamentos|floatformat:2 }}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Detalhamento de Equipamentos:</h6>
+                            <div class="row">
+                                <div class="col-md-2">EPI: R$ {{ consolidacao.custo_epi|floatformat:2 }}</div>
+                                <div class="col-md-2">EPC: R$ {{ consolidacao.custo_epc|floatformat:2 }}</div>
+                                <div class="col-md-2">Ferramentas: R$ {{ consolidacao.custo_ferramentas|floatformat:2 }}</div>
+                                <div class="col-md-2">TI: R$ {{ consolidacao.custo_equipamentos_ti|floatformat:2 }}</div>
+                                <div class="col-md-2">Desp. TI: R$ {{ consolidacao.custo_despesas_ti|floatformat:2 }}</div>
+                                <div class="col-md-2">Materiais: R$ {{ consolidacao.custo_materiais_consumo|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dados para gráficos
+    {% if dados_custos_categoria %}
+    const dadosCustoCategoria = {{ dados_custos_categoria|safe }};
+    {% endif %}
+    
+    {% if dados_equipamentos %}
+    const dadosEquipamentos = {{ dados_equipamentos|safe }};
+    {% endif %}
+
+    function carregarDadosContrato() {
+        const contratoId = document.getElementById('contrato-select').value;
+        if (contratoId) {
+            window.location.href = `?contrato=${contratoId}`;
+        }
+    }
+    
+    function recalcularConsolidacao(forceRefresh = false) {
+        const contratoId = document.getElementById('contrato-select').value;
+        if (!contratoId) return;
+        
+        const formData = new FormData();
+        formData.append('contrato_id', contratoId);
+        formData.append('force_refresh', forceRefresh);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        fetch('{% url "recalcular_consolidacao" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                alert('✅ ' + data.mensagem);
+                location.reload();
+            } else {
+                alert('❌ Erro: ' + data.erro);
+            }
+        })
+        .catch(error => {
+            alert('❌ Erro na comunicação: ' + error);
+        });
+    }
+    
+    // Inicializar gráficos
+    {% if dados_custos_categoria %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gráfico de custos por categoria
+        const ctxCategoria = document.getElementById('chartCustosPorCategoria').getContext('2d');
+        new Chart(ctxCategoria, {
+            type: 'doughnut',
+            data: {
+                labels: dadosCustoCategoria.labels,
+                datasets: [{
+                    data: dadosCustoCategoria.valores,
+                    backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de equipamentos
+        {% if dados_equipamentos %}
+        const ctxEquipamentos = document.getElementById('chartEquipamentos').getContext('2d');
+        new Chart(ctxEquipamentos, {
+            type: 'bar',
+            data: {
+                labels: dadosEquipamentos.labels,
+                datasets: [{
+                    label: 'Custo (R$)',
+                    data: dadosEquipamentos.valores,
+                    backgroundColor: '#17a2b8'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+    {% endif %}
+</script>
+{% endblock %}

@@ -2,10 +2,11 @@ from decimal import Decimal
 from django.db.models import Sum, Q
 
 from cadastro_equipe.models import FuncaoEquipe, ComposicaoEquipe, Equipe
-from .models import CustoDiretoFuncao, CustoDireto
+from .models import CustoDiretoFuncao, CustoDireto, ConsolidacaoCustoContrato
 from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
 from cad_contrato.models import CadastroContrato
 from equipamentos.models import EquipamentoEquipe, EquipamentoVidaUtil, EquipamentoMensal
+from .services_consolidacao.consolidacao_service import ConsolidacaoService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -74,6 +75,7 @@ def recalcular_custo_contrato(contrato):
     """
     Recalcula os custos diretos por função vinculados ao contrato.
     Atualiza os registros de CustoDiretoFuncao com novos valores de benefícios.
+    Também executa consolidação automática.
     """
     # Verifica se há benefícios cadastrados para o contrato
     beneficios = BeneficiosColaborador.objects.filter(contrato=contrato).first()
@@ -93,6 +95,13 @@ def recalcular_custo_contrato(contrato):
 
         funcao.calcular_custo_total()
         funcao.save()
+    
+    # Executar consolidação automática após recálculo
+    try:
+        ConsolidacaoService.consolidar_contrato(contrato.contrato, force_refresh=True)
+        logger.info(f"Consolidação automática executada para contrato {contrato.contrato}")
+    except Exception as e:
+        logger.error(f"Erro na consolidação automática do contrato {contrato.contrato}: {e}")
 
 
 class EquipamentoCustoService:

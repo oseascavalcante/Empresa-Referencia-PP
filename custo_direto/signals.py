@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from cadastro_equipe.models import FuncaoEquipe
 from mao_obra.models import EncargosSociaisCentralizados, BeneficiosColaborador
-from custo_direto.services import calcular_custo_funcao, recalcular_custo_contrato
+from .services import calcular_custo_funcao, recalcular_custo_contrato
 
 @receiver(post_save, sender=FuncaoEquipe)
 def criar_custo_direto_funcao(sender, instance, created, **kwargs):

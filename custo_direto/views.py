@@ -6,6 +6,7 @@ from .models import CustoDiretoFuncao, CustoDireto
 from cad_contrato.models import CadastroContrato, Regional
 from cadastro_equipe.models import Equipe, EscopoAtividade, FuncaoEquipe
 from .services import EquipamentoCustoService
+from .services_consolidacao.consolidacao_service import ConsolidacaoService
 import json
 import logging
 
